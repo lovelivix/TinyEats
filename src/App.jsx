@@ -2,8 +2,6 @@
 // Data split into src/data/ files for easier maintenance
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import logoFull from './assets/logo-full.png';
-import logoPear from './assets/logo-pear.png';
 import { GLOBAL_CSS, fe, cap, fmtDate, monthsOld, daysSince, REACTIONS, getStatus } from './data/theme.js';
 import { BADGES, WEEKS, READINESS_SIGNS } from './data/weeks.js';
 import { ALL_FOODS, FOOD_DB, STAGE_LABEL, STAGE_COLOR, ALLERGENS, daysUntilSafe, MEAL_DB } from './data/foods.js';
@@ -117,20 +115,9 @@ function SpoonLogo({size=48}) {
   const s = size;
   return (
     <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Pear body */}
-      <path d="M24 43C15.2 43 9 36.2 9 28C9 20.5 13.5 16.5 17.5 15C17.5 15 16.5 9.5 19.5 7.5C21 6.5 22.5 7.5 22.5 9C22.5 9 23.2 7.5 24.8 7C27 6.5 28 8.5 27.5 10.5C31 12.5 39 17.5 39 28C39 36.2 32.8 43 24 43Z" fill="#F2B705"/>
-      {/* Stem */}
-      <path d="M24 7.5C24 7.5 24.8 4 26.5 2.8" stroke="#6B4E1A" strokeWidth="2" strokeLinecap="round"/>
-      {/* Leaf */}
-      <path d="M25.5 5.5C25.5 5.5 29 2.8 32 4.5C32 4.5 29.5 7.5 26.2 6.8C25.6 6.5 25.5 5.5 25.5 5.5Z" fill="#7FB069"/>
-      {/* Eyes */}
-      <circle cx="20.5" cy="26" r="1.5" fill="#1A1A2E"/>
-      <circle cx="27.5" cy="26" r="1.5" fill="#1A1A2E"/>
-      {/* Smile */}
-      <path d="M20.5 31C20.5 31 22.5 33.5 27.5 31" stroke="#1A1A2E" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-      {/* Cheeks */}
-      <ellipse cx="18" cy="29.5" rx="2.2" ry="1.3" fill="#F25F4C" opacity="0.45"/>
-      <ellipse cx="30" cy="29.5" rx="2.2" ry="1.3" fill="#F25F4C" opacity="0.45"/>
+      <ellipse cx="24" cy="15" rx="10" ry="12" fill="#FF6B6B"/>
+      <rect x="21.5" y="25" width="5" height="16" rx="2.5" fill="#FF6B6B"/>
+      <ellipse cx="24" cy="15" rx="7" ry="9" fill="#FF9B9B" opacity="0.5"/>
     </svg>
   );
 }
@@ -139,10 +126,10 @@ const css = {
   card:   {background:"#FFFFFF",borderRadius:20,boxShadow:"0 4px 20px rgba(26,26,46,0.08)"},
   cardSm: {background:"#FFFFFF",borderRadius:12,boxShadow:"0 2px 8px rgba(26,26,46,0.06)"},
   input:  {width:"100%",padding:"14px 16px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:15,outline:"none",background:"#FFFFFF",color:"#1A1A2E",marginBottom:0,display:"block",boxSizing:"border-box"},
-  btnPrimary: {width:"100%",padding:"16px",background:"#F25F4C",color:"#FFFFFF",borderRadius:14,fontSize:16,fontWeight:700,border:"none",cursor:"pointer"},
-  btnSecondary: {width:"100%",padding:"14px",background:"#FFF6EB",color:"#1A1A2E",borderRadius:14,fontSize:15,fontWeight:600,border:"1.5px solid #E8EAF0",cursor:"pointer"},
+  btnPrimary: {width:"100%",padding:"16px",background:"#FF6B6B",color:"#FFFFFF",borderRadius:14,fontSize:16,fontWeight:700,border:"none",cursor:"pointer"},
+  btnSecondary: {width:"100%",padding:"14px",background:"#FFFAF7",color:"#1A1A2E",borderRadius:14,fontSize:15,fontWeight:600,border:"1.5px solid #E8EAF0",cursor:"pointer"},
   label:  {fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6},
-  back:   {padding:"18px 20px 8px",display:"flex",alignItems:"center",gap:6,background:"none",border:"none",fontSize:15,color:"#F25F4C",fontWeight:700,cursor:"pointer"},
+  back:   {padding:"18px 20px 8px",display:"flex",alignItems:"center",gap:6,background:"none",border:"none",fontSize:15,color:"#FF6B6B",fontWeight:700,cursor:"pointer"},
   chip:   {display:"inline-flex",alignItems:"center",padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:600},
 };
 
@@ -173,9 +160,10 @@ function NewPasswordScreen({token, onDone}) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{textAlign:"center",marginBottom:32}}>
-        <img src={logoFull} alt="LilEats" style={{height:48,objectFit:"contain"}}/>
+        <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><SpoonLogo size={56}/></div>
+        <div style={{fontSize:34,fontWeight:900,color:"#1A1A2E",letterSpacing:-1}}>Lil<span style={{color:"#FF6B6B"}}>Eats</span></div>
       </div>
       <div style={{width:"100%",maxWidth:380,boxSizing:"border-box"}}>
         <div style={{background:"#FFFFFF",borderRadius:24,boxShadow:"0 8px 40px rgba(26,26,46,0.10)",padding:"28px",boxSizing:"border-box"}}>
@@ -198,7 +186,7 @@ function NewPasswordScreen({token, onDone}) {
                 <input style={{...css.input,border:"1.5px solid #E8EAF0",borderRadius:12,background:"#FAFAFA",boxSizing:"border-box"}} type="password" placeholder="••••••••" value={confirm} onChange={e=>setConfirm(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}/>
               </div>
               {error&&<div style={{background:"#FFF1F2",borderRadius:10,padding:"10px 14px",fontSize:13,color:"#DC2626",marginBottom:16}}>{error}</div>}
-              <button onClick={submit} disabled={loading} style={{...css.btnPrimary,borderRadius:12,boxShadow:"0 4px 16px rgba(242,95,76,0.35)",opacity:loading?0.7:1}}>
+              <button onClick={submit} disabled={loading} style={{...css.btnPrimary,borderRadius:12,boxShadow:"0 4px 16px rgba(255,107,107,0.35)",opacity:loading?0.7:1}}>
                 {loading?"Saving…":"Set new password →"}
               </button>
             </>
@@ -274,7 +262,7 @@ function AuthScreen({onAuth}) {
 
   // ── Email confirmation sent screen ───────────────────────────
   if (emailSent) return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
       <div style={{fontSize:64,marginBottom:16}}>📧</div>
       <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Check your email</div>
       <div style={{fontSize:15,color:"#6B7280",lineHeight:1.7,marginBottom:8,maxWidth:320}}>
@@ -283,7 +271,7 @@ function AuthScreen({onAuth}) {
       <div style={{fontSize:13,color:"#9CA3AF",lineHeight:1.7,marginBottom:32,maxWidth:320}}>
         Check your spam folder if you don't see it. Tap the link then come back and log in.
       </div>
-      <button onClick={()=>{setEmailSent(false);setMode("login");}} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+      <button onClick={()=>{setEmailSent(false);setMode("login");}} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
         Back to log in
       </button>
     </div>
@@ -291,7 +279,7 @@ function AuthScreen({onAuth}) {
 
   // ── Password reset sent screen ───────────────────────────────
   if (resetSent) return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
       <div style={{fontSize:64,marginBottom:16}}>🔑</div>
       <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Reset link sent!</div>
       <div style={{fontSize:15,color:"#6B7280",lineHeight:1.7,marginBottom:8,maxWidth:320}}>
@@ -300,7 +288,7 @@ function AuthScreen({onAuth}) {
       <div style={{fontSize:13,color:"#9CA3AF",lineHeight:1.7,marginBottom:32,maxWidth:320}}>
         Check your spam folder if you don't see it. Click the link in the email to set a new password.
       </div>
-      <button onClick={()=>{setResetSent(false);setMode("login");}} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+      <button onClick={()=>{setResetSent(false);setMode("login");}} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:12,padding:"14px 32px",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
         Back to log in
       </button>
     </div>
@@ -308,9 +296,12 @@ function AuthScreen({onAuth}) {
 
   // ── Forgot password screen ───────────────────────────────────
   if (mode === "forgot") return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{textAlign:"center",marginBottom:32}}>
-        <img src={logoFull} alt="LilEats" style={{height:48,objectFit:"contain",marginBottom:4}}/>
+        <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><SpoonLogo size={56}/></div>
+        <div style={{fontSize:34,fontWeight:900,color:"#1A1A2E",letterSpacing:-1,marginBottom:4}}>
+          Lil<span style={{color:"#FF6B6B"}}>Eats</span>
+        </div>
       </div>
       <div style={{width:"100%",maxWidth:380,boxSizing:"border-box"}}>
         <div style={{background:"#FFFFFF",borderRadius:24,boxShadow:"0 8px 40px rgba(26,26,46,0.10)",padding:"28px",boxSizing:"border-box"}}>
@@ -321,12 +312,12 @@ function AuthScreen({onAuth}) {
             <input style={{...css.input,border:"1.5px solid #E8EAF0",borderRadius:12,background:"#FAFAFA",boxSizing:"border-box"}} type="email" placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submitForgot()}/>
           </div>
           {error&&<div style={{background:"#FFF1F2",borderRadius:10,padding:"10px 14px",fontSize:13,color:"#DC2626",marginBottom:16,lineHeight:1.5}}>{error}</div>}
-          <button onClick={submitForgot} disabled={loading} style={{...css.btnPrimary,borderRadius:12,boxShadow:"0 4px 16px rgba(242,95,76,0.35)",opacity:loading?0.7:1}}>
+          <button onClick={submitForgot} disabled={loading} style={{...css.btnPrimary,borderRadius:12,boxShadow:"0 4px 16px rgba(255,107,107,0.35)",opacity:loading?0.7:1}}>
             {loading?"Sending…":"Send reset link →"}
           </button>
         </div>
         <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"#9CA3AF"}}>
-          <button onClick={()=>{setMode("login");setError("");}} style={{background:"none",border:"none",color:"#F25F4C",fontWeight:700,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>
+          <button onClick={()=>{setMode("login");setError("");}} style={{background:"none",border:"none",color:"#FF6B6B",fontWeight:700,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>
             ← Back to log in
           </button>
         </div>
@@ -335,10 +326,13 @@ function AuthScreen({onAuth}) {
   );
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       {/* Logo */}
       <div style={{textAlign:"center",marginBottom:32}}>
-        <img src={logoFull} alt="LilEats" style={{height:52,objectFit:"contain",marginBottom:4}}/>
+        <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><SpoonLogo size={56}/></div>
+        <div style={{fontSize:34,fontWeight:900,color:"#1A1A2E",letterSpacing:-1,marginBottom:4}}>
+          Lil<span style={{color:"#FF6B6B"}}>Eats</span>
+        </div>
         <div style={{fontSize:14,color:"#9CA3AF"}}>Your calm guide to baby weaning</div>
       </div>
 
@@ -372,7 +366,7 @@ function AuthScreen({onAuth}) {
 
           {error&&<div style={{background:"#FFF1F2",borderRadius:10,padding:"10px 14px",fontSize:13,color:"#DC2626",marginBottom:16,lineHeight:1.5}}>{error}</div>}
 
-          <button onClick={submit} disabled={loading} style={{...css.btnPrimary,borderRadius:12,boxShadow:"0 4px 16px rgba(242,95,76,0.35)",opacity:loading?0.7:1}}>
+          <button onClick={submit} disabled={loading} style={{...css.btnPrimary,borderRadius:12,boxShadow:"0 4px 16px rgba(255,107,107,0.35)",opacity:loading?0.7:1}}>
             {loading?"Please wait…":mode==="login"?"Log in →":"Create account →"}
           </button>
 
@@ -384,7 +378,7 @@ function AuthScreen({onAuth}) {
         </div>
         <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"#9CA3AF"}}>
           {mode==="login"?"Don't have an account? ":"Already have an account? "}
-          <button onClick={()=>{setMode(mode==="login"?"signup":"login");setError("");}} style={{background:"none",border:"none",color:"#F25F4C",fontWeight:700,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>
+          <button onClick={()=>{setMode(mode==="login"?"signup":"login");setError("");}} style={{background:"none",border:"none",color:"#FF6B6B",fontWeight:700,cursor:"pointer",fontSize:13,fontFamily:"inherit"}}>
             {mode==="login"?"Sign up free":"Log in"}
           </button>
         </div>
@@ -579,10 +573,11 @@ export default function App() {
 
   // Loading screen
   if (appLoading) return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
-      <img src={logoFull} alt="LilEats" style={{height:52,objectFit:"contain",marginBottom:8}}/>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+      <div style={{display:"flex",justifyContent:"center",marginBottom:8}}><SpoonLogo size={64}/></div>
+      <div style={{fontSize:28,fontWeight:900,color:"#1A1A2E"}}>Lil<span style={{color:"#FF6B6B"}}>Eats</span></div>
       <div style={{display:"flex",gap:6,marginTop:20}}>
-        {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"#F25F4C",animation:`dot 1.2s ${i*0.2}s infinite ease-in-out`}}/>)}
+        {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"#FF6B6B",animation:`dot 1.2s ${i*0.2}s infinite ease-in-out`}}/>)}
       </div>
     </div>
   );
@@ -612,7 +607,7 @@ export default function App() {
   const allFoods = [...new Set([...ALL_FOODS,...(profile.customFoods||[]),...Object.keys(profile.foodLog)])].sort();
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",position:"relative"}}>
       <style>{GLOBAL_CSS}</style>
 
       {/* Badge unlock toast */}
@@ -694,20 +689,20 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
     const progress = step + 3; // 0, 1, 2
 
     return (
-      <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+      <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 60%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
         {/* Progress dots */}
         <div style={{display:"flex",gap:6,marginBottom:40}}>
           {[0,1,2].map(i=>(
-            <div key={i} style={{width:i===progress?24:8,height:8,borderRadius:4,background:i===progress?"#F25F4C":"#E8EAF0",transition:"all 0.3s"}}/>
+            <div key={i} style={{width:i===progress?24:8,height:8,borderRadius:4,background:i===progress?"#FF6B6B":"#E8EAF0",transition:"all 0.3s"}}/>
           ))}
         </div>
 
         <div style={{fontSize:72,marginBottom:20,lineHeight:1}}>{slide.emoji}</div>
         <div style={{fontSize:26,fontWeight:900,color:"#1A1A2E",letterSpacing:-0.5,marginBottom:8,lineHeight:1.2}}>{slide.title}</div>
-        <div style={{fontSize:14,color:"#F25F4C",fontWeight:600,marginBottom:20}}>{slide.subtitle}</div>
+        <div style={{fontSize:14,color:"#FF6B6B",fontWeight:600,marginBottom:20}}>{slide.subtitle}</div>
         <div style={{fontSize:15,color:"#6B7280",lineHeight:1.8,maxWidth:320,whiteSpace:"pre-line",marginBottom:40}}>{slide.body}</div>
 
-        <button onClick={()=>setStep(step+1)} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(242,95,76,0.35)",fontFamily:"inherit"}}>
+        <button onClick={()=>setStep(step+1)} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(255,107,107,0.35)",fontFamily:"inherit"}}>
           {slide.cta}
         </button>
 
@@ -743,13 +738,13 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
       <style>{GLOBAL_CSS}</style>
 
       {/* Background blobs */}
-      <div style={{position:"absolute",top:-100,right:-100,width:300,height:300,borderRadius:"50%",background:"radial-gradient(circle,#F25F4C22 0%,transparent 70%)",pointerEvents:"none"}}/>
-      <div style={{position:"absolute",bottom:-80,left:-80,width:250,height:250,borderRadius:"50%",background:"radial-gradient(circle,#6FA3D222 0%,transparent 70%)",pointerEvents:"none"}}/>
-      <div style={{position:"absolute",top:"40%",left:-60,width:180,height:180,borderRadius:"50%",background:"radial-gradient(circle,#F2B70522 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",top:-100,right:-100,width:300,height:300,borderRadius:"50%",background:"radial-gradient(circle,#FF6B6B22 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",bottom:-80,left:-80,width:250,height:250,borderRadius:"50%",background:"radial-gradient(circle,#4D96FF22 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",top:"40%",left:-60,width:180,height:180,borderRadius:"50%",background:"radial-gradient(circle,#FFD93D22 0%,transparent 70%)",pointerEvents:"none"}}/>
 
       {onBack && <button onClick={onBack} style={{...css.back,position:"absolute",top:0,left:0}}>← Back</button>}
 
@@ -757,8 +752,16 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
 
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:32}}>
-          <img src={logoFull} alt="LilEats" style={{height:64,objectFit:"contain",marginBottom:8}}/>
-          {!isAdding && <p style={{fontSize:15,color:"#6B7280",marginTop:4}}>Your calm guide to baby weaning</p>}
+          <div style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:72,height:72,borderRadius:22,background:"linear-gradient(135deg,#FF6B6B,#FF9B9B)",boxShadow:"0 8px 24px rgba(255,107,107,0.35)",marginBottom:12}}>
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="18" cy="12" rx="8" ry="9.5" fill="white" opacity="0.95"/>
+                <rect x="16" y="20.5" width="4" height="12" rx="2" fill="white" opacity="0.95"/>
+              </svg>
+            </div>
+          <h1 style={{fontSize:38,fontWeight:900,color:"#1A1A2E",letterSpacing:"-1.5px",lineHeight:1}}>
+            Lil<span style={{color:"#FF6B6B"}}>Eats</span>
+          </h1>
+          {!isAdding && <p style={{fontSize:15,color:"#6B7280",marginTop:8}}>Your calm guide to baby weaning</p>}
         </div>
 
         {/* Step 0: Email capture */}
@@ -775,9 +778,9 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
               value={email}
               onChange={e=>{setEmail(e.target.value);setEmailError("");}}
               placeholder="you@example.com"
-              style={{...css.input,marginBottom:emailError?4:16,borderColor:emailError?"#F25F4C":"#E8EAF0"}}
+              style={{...css.input,marginBottom:emailError?4:16,borderColor:emailError?"#FF6B6B":"#E8EAF0"}}
             />
-            {emailError && <p style={{fontSize:12,color:"#F25F4C",marginBottom:14}}>{emailError}</p>}
+            {emailError && <p style={{fontSize:12,color:"#FF6B6B",marginBottom:14}}>{emailError}</p>}
             <button onClick={handleEmailContinue} style={css.btnPrimary}>Continue →</button>
 
             <p style={{textAlign:"center",fontSize:11,color:"#9CA3AF",marginTop:12}}>No spam. No sharing. Unsubscribe any time.</p>
@@ -796,7 +799,7 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
 
             {/* Photo upload */}
             <div style={{display:"flex",justifyContent:"center",marginBottom:20}}>
-              <button onClick={()=>fileRef.current?.click()} style={{width:80,height:80,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFF6EB",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
+              <button onClick={()=>fileRef.current?.click()} style={{width:80,height:80,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFFAF7",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
                 {photo
                   ? <img src={photo} alt="Baby" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
                   : <div style={{textAlign:"center"}}><div style={{fontSize:24}}>📷</div><div style={{fontSize:10,color:"#9CA3AF",marginTop:2}}>Add photo</div></div>
@@ -833,16 +836,22 @@ function ReadinessScreen({baby, months, onStart}) {
   const [checked, setChecked] = useState({});
   const allChecked = READINESS_SIGNS.every(s => checked[s.id]);
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",paddingBottom:32}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",paddingBottom:32}}>
       <style>{GLOBAL_CSS}</style>
       <div style={{padding:"28px 20px 0",textAlign:"center"}}>
         <div style={{display:"inline-flex",alignItems:"center",gap:8,marginBottom:4}}>
-          <img src={logoPear} alt="" style={{width:32,height:32,objectFit:"contain"}}/>
+          <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#FF6B6B,#FF9B9B)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="24" cy="15" rx="10" ry="12" fill="white"/>
+                <rect x="21.5" y="25" width="5" height="16" rx="2.5" fill="white"/>
+              </svg>
+            </div>
+          <span style={{fontSize:24,fontWeight:900,letterSpacing:"-0.5px"}}><span style={{color:"#1A1A2E"}}>Lil</span><span style={{color:"#FF6B6B"}}>Eats</span></span>
         </div>
       </div>
-      <div style={{margin:"20px 16px",background:"#FFFFFF",borderRadius:20,padding:"20px",border:"1px solid #FFD6D0",boxShadow:"0 4px 20px rgba(242,95,76,0.08)"}}>
+      <div style={{margin:"20px 16px",background:"linear-gradient(135deg,#fff,#FFF0F0)",borderRadius:20,padding:"20px",border:"1px solid #FFE0E0",boxShadow:"0 4px 20px rgba(255,107,107,0.08)"}}>
         {baby.photo
-          ? <div style={{width:64,height:64,borderRadius:"50%",overflow:"hidden",margin:"0 auto 8px",border:"3px solid #F25F4C"}}><img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/></div>
+          ? <div style={{width:64,height:64,borderRadius:"50%",overflow:"hidden",margin:"0 auto 8px",border:"3px solid #FF6B6B"}}><img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/></div>
           : <div style={{fontSize:48,textAlign:"center",marginBottom:4}}>👶</div>
         }
         <div style={{fontSize:22,fontWeight:800,color:"#1A1A2E",textAlign:"center"}}>{baby.name}</div>
@@ -856,20 +865,20 @@ function ReadinessScreen({baby, months, onStart}) {
         <div style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10}}>3 signs to look for</div>
         {READINESS_SIGNS.map(sign => (
           <button key={sign.id} onClick={()=>setChecked(c=>({...c,[sign.id]:!c[sign.id]}))}
-            style={{width:"100%",display:"flex",alignItems:"center",borderRadius:16,padding:"14px",marginBottom:8,border:"none",background:checked[sign.id]?"#FFF1F2":"#FFFFFF",boxShadow:checked[sign.id]?"0 0 0 2px #F25F4C":"0 2px 8px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
+            style={{width:"100%",display:"flex",alignItems:"center",borderRadius:16,padding:"14px",marginBottom:8,border:"none",background:checked[sign.id]?"#FFF1F2":"#FFFFFF",boxShadow:checked[sign.id]?"0 0 0 2px #FF6B6B":"0 2px 8px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
             <span style={{fontSize:26,marginRight:12,flexShrink:0}}>{sign.icon}</span>
             <div style={{flex:1,textAlign:"left"}}>
               <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:2}}>{sign.title}</div>
               <div style={{fontSize:12,color:"#6B7280",lineHeight:1.5}}>{sign.desc}</div>
             </div>
-            <div style={{width:26,height:26,borderRadius:8,background:checked[sign.id]?"#F25F4C":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginLeft:8,transition:"all 0.15s"}}>
+            <div style={{width:26,height:26,borderRadius:8,background:checked[sign.id]?"#FF6B6B":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginLeft:8,transition:"all 0.15s"}}>
               {checked[sign.id]&&<span style={{color:"#fff",fontWeight:700,fontSize:14}}>✓</span>}
             </div>
           </button>
         ))}
         {allChecked && (
           <div className="fadeUp" style={{marginTop:8}}>
-            <div style={{background:"#FFF1F2",border:"2px solid #F25F4C",borderRadius:18,padding:"16px",textAlign:"center",marginBottom:12,boxShadow:"0 4px 20px rgba(242,95,76,0.15)"}}>
+            <div style={{background:"#FFF1F2",border:"2px solid #FF6B6B",borderRadius:18,padding:"16px",textAlign:"center",marginBottom:12,boxShadow:"0 4px 20px rgba(255,107,107,0.15)"}}>
               <div style={{fontSize:28,marginBottom:6}}>🎉</div>
               <div style={{fontSize:16,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>{baby.name} looks ready!</div>
               <div style={{fontSize:13,color:"#6B7280",lineHeight:1.6}}>Chat to your health visitor to confirm, then press below.</div>
@@ -905,12 +914,17 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
       <div style={{padding:"20px 20px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
-            <img src={logoPear} alt="" style={{width:30,height:30,objectFit:"contain"}}/>
-            <img src={logoFull} alt="LilEats" style={{height:20,objectFit:"contain"}}/>
+            <div style={{width:30,height:30,borderRadius:9,background:"linear-gradient(135deg,#FF6B6B,#FF9B9B)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 10px rgba(255,107,107,0.4)"}}>
+              <svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="24" cy="15" rx="10" ry="12" fill="white"/>
+                <rect x="21.5" y="25" width="5" height="16" rx="2.5" fill="white"/>
+              </svg>
+            </div>
+            <span style={{fontSize:20,fontWeight:900,letterSpacing:"-0.5px"}}><span style={{color:"#1A1A2E"}}>Lil</span><span style={{color:"#FF6B6B"}}>Eats</span></span>
           </div>
           <p style={{fontSize:13,color:"#6B7280",marginTop:4}}>Hi! Let's feed <strong style={{color:"#1A1A2E"}}>{baby.name}</strong> today 👋</p>
         </div>
-        <button onClick={()=>setOverlay({type:"settings"})} style={{width:50,height:50,borderRadius:"50%",border:"3px solid #FFD6D0",background:"#FFFFFF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(242,95,76,0.15)",cursor:"pointer"}}>
+        <button onClick={()=>setOverlay({type:"settings"})} style={{width:50,height:50,borderRadius:"50%",border:"3px solid #FFE4E4",background:"#FFFFFF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(255,107,107,0.15)",cursor:"pointer"}}>
           {baby.photo
             ? <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/>
             : <span style={{fontSize:24}}>👶</span>
@@ -954,7 +968,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
 
         if (readyAllergens.length > 0) return (
           <div style={{padding:"0 16px",marginBottom:14}}>
-            <button onClick={()=>setScreen("plan")} style={{width:"100%",display:"flex",alignItems:"center",background:"#F0FFF4",borderRadius:16,padding:"14px",border:"1.5px solid #7FB069",cursor:"pointer",textAlign:"left",gap:10}}>
+            <button onClick={()=>setScreen("plan")} style={{width:"100%",display:"flex",alignItems:"center",background:"#F0FFF4",borderRadius:16,padding:"14px",border:"1.5px solid #6BCB77",cursor:"pointer",textAlign:"left",gap:10}}>
               <span style={{fontSize:22,flexShrink:0}}>✅</span>
               <div style={{flex:1}}>
                 <div style={{fontSize:12,fontWeight:700,color:"#065F46",marginBottom:2}}>
@@ -968,7 +982,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
 
         if (watchingAllergens.length > 0) return (
           <div style={{padding:"0 16px",marginBottom:14}}>
-            <div style={{background:"#FFFBF0",borderRadius:16,padding:"14px",border:"1.5px solid #F2B705"}}>
+            <div style={{background:"#FFFBF0",borderRadius:16,padding:"14px",border:"1.5px solid #FFD93D"}}>
               {watchingAllergens.map(a => {
                 const daysLeft = daysUntilSafe(allergenData[a.id].introduced);
                 return (
@@ -992,7 +1006,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               <div style={{flex:1}}>
                 <div style={{fontSize:12,fontWeight:700,color:"#92400E",marginBottom:2}}>Allergens to introduce this week</div>
                 <div style={{fontSize:12,color:"#78350F",lineHeight:1.5}}>{cw.allergenNote}</div>
-                <div style={{fontSize:11,color:"#F25F4C",fontWeight:700,marginTop:4}}>Go to Plan → Allergens to track →</div>
+                <div style={{fontSize:11,color:"#FF6B6B",fontWeight:700,marginTop:4}}>Go to Plan → Allergens to track →</div>
               </div>
             </button>
           </div>
@@ -1018,14 +1032,14 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
             <div style={{background:"#FFFFFF",borderRadius:20,boxShadow:"0 4px 20px rgba(26,26,46,0.08)",padding:"14px 16px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:todayEntries.length>0?10:0}}>
                 <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E"}}>🍽 What did {baby.name} eat today?</div>
-                <button onClick={()=>setShowJournalAdd(true)} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:10,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add</button>
+                <button onClick={()=>setShowJournalAdd(true)} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:10,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add</button>
               </div>
               {todayEntries.length===0 ? (
                 <div style={{fontSize:12,color:"#9CA3AF",marginTop:8}}>Nothing logged yet — tap + Add to record today's meals.</div>
               ) : (
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   {todayEntries.map((entry,idx)=>(
-                    <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#FFF6EB",borderRadius:10,padding:"8px 10px"}}>
+                    <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#FFFAF7",borderRadius:10,padding:"8px 10px"}}>
                       <div style={{flex:1}}>
                         <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:entry.notes?3:0}}>
                           {entry.foods?.map(f=>(
@@ -1049,15 +1063,15 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
       {/* Stats row */}
       <div style={{padding:"0 16px",marginBottom:16}}>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-          <button onClick={()=>setOverlay({type:"progress"})} style={{background:"#FFF1F2",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(242,95,76,0.12)"}}>
-            <div style={{fontSize:26,fontWeight:900,color:"#F25F4C",lineHeight:1}}>{tried.length}</div>
-            <div style={{fontSize:10,color:"#F25F4C",marginTop:3,fontWeight:700,opacity:0.7}}>foods tried</div>
+          <button onClick={()=>setOverlay({type:"progress"})} style={{background:"linear-gradient(135deg,#FFF1F2,#FFE4E4)",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(255,107,107,0.12)"}}>
+            <div style={{fontSize:26,fontWeight:900,color:"#FF6B6B",lineHeight:1}}>{tried.length}</div>
+            <div style={{fontSize:10,color:"#FF6B6B",marginTop:3,fontWeight:700,opacity:0.7}}>foods tried</div>
           </button>
-          <button onClick={()=>setOverlay({type:"badges"})} style={{background:"#FFFBEB",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",position:"relative",boxShadow:"0 4px 16px rgba(242,183,5,0.15)"}}>
+          <button onClick={()=>setOverlay({type:"badges"})} style={{background:"linear-gradient(135deg,#FFFBEB,#FFF3C4)",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",position:"relative",boxShadow:"0 4px 16px rgba(255,217,61,0.15)"}}>
             <div style={{fontSize:26,fontWeight:900,color:"#F59E0B",lineHeight:1}}>{badges.length}</div>
             <div style={{fontSize:10,color:"#F59E0B",marginTop:3,fontWeight:700,opacity:0.7}}>badges {badges.length>0?"🏅":""}</div>
           </button>
-          <button onClick={()=>setOverlay({type:"progress"})} style={{background:"#F0FFF4",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(127,176,105,0.12)"}}>
+          <button onClick={()=>setOverlay({type:"progress"})} style={{background:"linear-gradient(135deg,#F0FFF4,#DCFCE7)",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(107,203,119,0.12)"}}>
             <div style={{fontSize:26,fontWeight:900,color:"#16A34A",lineHeight:1}}>{Object.values(profile.foodLog).filter(l=>l.length>=7).length}</div>
             <div style={{fontSize:10,color:"#16A34A",marginTop:3,fontWeight:700,opacity:0.7}}>confident</div>
           </button>
@@ -1068,10 +1082,10 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
       <div style={{padding:"0 16px",marginBottom:16}}>
         <div style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10}}>Quick actions</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          <ActionCard emoji="🥗" label="Make a Meal" sub="Meal ideas" onClick={()=>setScreen("meals")} color="#FFF1F2" accent="#F25F4C"/>
-          <ActionCard emoji="📊" label="Food Tracker" sub={`${tried.length} tried`} onClick={()=>setScreen("tracker")} color="#EFF6FF" accent="#6FA3D2"/>
+          <ActionCard emoji="🥗" label="Make a Meal" sub="Meal ideas" onClick={()=>setScreen("meals")} color="#FFF1F2" accent="#FF6B6B"/>
+          <ActionCard emoji="📊" label="Food Tracker" sub={`${tried.length} tried`} onClick={()=>setScreen("tracker")} color="#EFF6FF" accent="#4D96FF"/>
           <ActionCard emoji="📚" label="Learn" sub="NHS guide & tips" onClick={()=>setScreen("learn")} color="#FDF4FF" accent="#C77DFF"/>
-          <ActionCard emoji="🏅" label="Badges" sub={`${badges.length} earned`} onClick={()=>setOverlay({type:"badges"})} color="#FFFBEB" accent="#F2B705"/>
+          <ActionCard emoji="🏅" label="Badges" sub={`${badges.length} earned`} onClick={()=>setOverlay({type:"badges"})} color="#FFFBEB" accent="#FFD93D"/>
         </div>
       </div>
 
@@ -1084,7 +1098,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
             <div style={{display:"flex",gap:8}}>
               {stale.map(f=>(
                 <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
-                  style={{display:"flex",flexDirection:"column",alignItems:"center",background:"#FFF6EB",border:"none",borderRadius:12,padding:"8px",cursor:"pointer",minWidth:62}}>
+                  style={{display:"flex",flexDirection:"column",alignItems:"center",background:"#FFFAF7",border:"none",borderRadius:12,padding:"8px",cursor:"pointer",minWidth:62}}>
                   <span style={{fontSize:24}}>{fe(f)}</span>
                   <span style={{fontSize:10,color:"#1A1A2E",marginTop:3,fontWeight:600}}>{cap(f)}</span>
                 </button>
@@ -1100,13 +1114,13 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
         <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:4}}>
           {WEEKS.map((w,i)=>(
             <button key={i} onClick={()=>setProfile(p=>({...p,activeWeek:i}))}
-              style={{flexShrink:0,padding:"7px 14px",borderRadius:20,fontSize:13,fontWeight:profile.activeWeek===i?700:500,background:profile.activeWeek===i?"#F25F4C":"#FFFFFF",color:profile.activeWeek===i?"#FFFFFF":"#6B7280",border:"none",boxShadow:profile.activeWeek===i?"0 4px 12px rgba(242,95,76,0.3)":"0 2px 6px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
+              style={{flexShrink:0,padding:"7px 14px",borderRadius:20,fontSize:13,fontWeight:profile.activeWeek===i?700:500,background:profile.activeWeek===i?"#FF6B6B":"#FFFFFF",color:profile.activeWeek===i?"#FFFFFF":"#6B7280",border:"none",boxShadow:profile.activeWeek===i?"0 4px 12px rgba(255,107,107,0.3)":"0 2px 6px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
               W{i+1}
             </button>
           ))}
           {profile.activeWeek===5 && (
             <button onClick={()=>setProfile(p=>({...p,activeWeek:6}))}
-              style={{flexShrink:0,padding:"7px 14px",borderRadius:20,fontSize:13,fontWeight:600,background:"#7FB069",color:"#FFFFFF",border:"none",boxShadow:"0 4px 12px rgba(127,176,105,0.3)",whiteSpace:"nowrap"}}>
+              style={{flexShrink:0,padding:"7px 14px",borderRadius:20,fontSize:13,fontWeight:600,background:"#6BCB77",color:"#FFFFFF",border:"none",boxShadow:"0 4px 12px rgba(107,203,119,0.3)",whiteSpace:"nowrap"}}>
               ✓ Finish
             </button>
           )}
@@ -1115,7 +1129,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
 
       {/* Tip */}
       <div style={{padding:"0 16px 8px"}}>
-        <div style={{display:"flex",alignItems:"flex-start",background:"#FFFBEB",borderRadius:18,padding:"14px 16px",boxShadow:"0 4px 16px rgba(245,158,11,0.1)",border:"2px solid #FEF3C722"}}>
+        <div style={{display:"flex",alignItems:"flex-start",background:"linear-gradient(135deg,#FFFBEB,#FFF8E1)",borderRadius:18,padding:"14px 16px",boxShadow:"0 4px 16px rgba(245,158,11,0.1)",border:"2px solid #FEF3C722"}}>
           <span style={{fontSize:22,marginRight:10,flexShrink:0}}>💡</span>
           <div>
             <div style={{fontSize:11,fontWeight:800,color:"#92400E",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>Today's tip</div>
@@ -1154,10 +1168,10 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
 
   useEffect(()=>{ const t=setTimeout(()=>setShowConfetti(false),4000); return ()=>clearTimeout(t); },[]);
 
-  const colors = ["#F25F4C","#F2B705","#7FB069","#6FA3D2","#C77DFF"];
+  const colors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#C77DFF"];
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",position:"relative",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",position:"relative",overflow:"hidden"}}>
       {showConfetti && (
         <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:200}}>
           {[...Array(30)].map((_,i)=>(
@@ -1168,11 +1182,11 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
       <div style={{padding:"32px 20px"}} className="fadeUp">
         <div style={{textAlign:"center",marginBottom:24}}>
           <div style={{fontSize:72,marginBottom:8}}>🎓</div>
-          <h1 style={{fontSize:28,fontWeight:900,color:"#1A1A2E",lineHeight:1.2,letterSpacing:"-0.5px"}}>Weaning complete!<br/><span style={{color:"#F25F4C"}}>Well done {baby.name}!</span></h1>
+          <h1 style={{fontSize:28,fontWeight:900,color:"#1A1A2E",lineHeight:1.2,letterSpacing:"-0.5px"}}>Weaning complete!<br/><span style={{color:"#FF6B6B"}}>Well done {baby.name}!</span></h1>
           <p style={{fontSize:14,color:"#6B7280",lineHeight:1.65,marginTop:10}}>You've finished the 6-week plan. What an incredible journey.</p>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:20}}>
-          {[{n:tried.length,l:"foods tried",c:"#F25F4C"},{n:confident.length,l:"confident",c:"#7FB069"},{n:total,l:"total offers",c:"#6FA3D2"}].map(x=>(
+          {[{n:tried.length,l:"foods tried",c:"#FF6B6B"},{n:confident.length,l:"confident",c:"#6BCB77"},{n:total,l:"total offers",c:"#4D96FF"}].map(x=>(
             <div key={x.l} style={{...css.card,padding:"12px 8px",textAlign:"center"}}>
               <div style={{fontSize:26,fontWeight:900,color:x.c}}>{x.n}</div>
               <div style={{fontSize:11,color:"#6B7280",marginTop:2}}>{x.l}</div>
@@ -1180,7 +1194,7 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
           ))}
         </div>
         {confident.length>0&&(
-          <div style={{...css.card,padding:"16px",marginBottom:16,background:"#F0FFF4"}}>
+          <div style={{...css.card,padding:"16px",marginBottom:16,background:"linear-gradient(135deg,#F0FFF4,#DCFCE7)"}}>
             <div style={{fontSize:13,fontWeight:700,color:"#065F46",marginBottom:8}}>🌟 Confidently eating</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
               {confident.map(f=><span key={f} style={{fontSize:12,background:"rgba(255,255,255,0.8)",borderRadius:20,padding:"3px 10px",color:"#065F46",fontWeight:600}}>{fe(f)} {cap(f)}</span>)}
@@ -1197,7 +1211,7 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
             • From 12 months, switch to full-fat cow's milk
           </div>
         </div>
-        <button onClick={()=>setProfile(p=>({...p,activeWeek:0}))} style={{...css.btnPrimary,background:"#6FA3D2",marginBottom:10}}>🔄 Restart the plan</button>
+        <button onClick={()=>setProfile(p=>({...p,activeWeek:0}))} style={{...css.btnPrimary,background:"#4D96FF",marginBottom:10}}>🔄 Restart the plan</button>
         <button onClick={()=>setScreen("tracker")} style={css.btnSecondary}>📊 View full food tracker</button>
       </div>
     </div>
@@ -1278,7 +1292,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
               return(
                 <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
                   style={{...css.cardSm,display:"flex",alignItems:"center",gap:10,padding:"12px",border:"none",cursor:"pointer",textAlign:"left",position:"relative"}}>
-                  {hasDB&&<div style={{position:"absolute",top:8,right:8,width:6,height:6,borderRadius:"50%",background:"#F25F4C"}}/>}
+                  {hasDB&&<div style={{position:"absolute",top:8,right:8,width:6,height:6,borderRadius:"50%",background:"#FF6B6B"}}/>}
                   <span style={{fontSize:28,flexShrink:0}}>{fe(f)}</span>
                   <div>
                     <div style={{fontSize:13,fontWeight:600,color:"#1A1A2E"}}>{cap(f)}</div>
@@ -1286,7 +1300,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                     <div style={{fontSize:10,color:"#6B7280",marginTop:3}}>
                       {profile.activeWeek===0?"🥣 Purée":profile.activeWeek===1?"🥣 Purée or mash":profile.activeWeek===2?"🥄 Mash or soft lumps":profile.activeWeek===3?"✋ Mash + finger food":profile.activeWeek===4?"✋ Chopped or finger food":"✋ Family texture"}
                     </div>
-                    {hasDB&&<div style={{fontSize:10,color:"#F25F4C",fontWeight:600,marginTop:2}}>{FOOD_DB[f].recipes.length} recipes →</div>}
+                    {hasDB&&<div style={{fontSize:10,color:"#FF6B6B",fontWeight:600,marginTop:2}}>{FOOD_DB[f].recipes.length} recipes →</div>}
                   </div>
                 </button>
               );
@@ -1299,12 +1313,12 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
           <div style={{marginTop:16}}>
             {profile.activeWeek < 5 ? (
               <button onClick={()=>setProfile(p=>({...p,activeWeek:p.activeWeek+1}))}
-                style={{...css.btnPrimary,background:"#7FB069"}}>
+                style={{...css.btnPrimary,background:"#6BCB77"}}>
                 ✓ Week {profile.activeWeek+1} done — advance to Week {profile.activeWeek+2}
               </button>
             ) : (
               <button onClick={()=>setProfile(p=>({...p,activeWeek:6}))}
-                style={{...css.btnPrimary,background:"#7FB069"}}>
+                style={{...css.btnPrimary,background:"#6BCB77"}}>
                 🎓 Complete the 6-week plan!
               </button>
             )}
@@ -1334,9 +1348,9 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
             let badgeColor = "#9CA3AF";
 
             if (isThisWeek && !isIntroduced) { borderColor="#FFB800"; bgColor="#FFFBF0"; badgeText="⭐ This week"; badgeBg="#FEF9C3"; badgeColor="#92400E"; }
-            if (isSafe)     { borderColor="#7FB069"; bgColor="#F0FFF4"; badgeText="✓ Safely introduced"; badgeBg="#D1FAE5"; badgeColor="#065F46"; }
-            if (isReaction) { borderColor="#F25F4C"; bgColor="#FFF1F2"; badgeText="⚠ Reaction noted"; badgeBg="#FEE2E2"; badgeColor="#DC2626"; }
-            if (waiting)    { borderColor="#F2B705"; bgColor="#FFFBF0"; badgeText=daysLeft===0?"✓ Ready to mark safe":`⏳ ${daysLeft} day${daysLeft!==1?"s":""} to go`; badgeBg="#FEF9C3"; badgeColor="#92400E"; }
+            if (isSafe)     { borderColor="#6BCB77"; bgColor="#F0FFF4"; badgeText="✓ Safely introduced"; badgeBg="#D1FAE5"; badgeColor="#065F46"; }
+            if (isReaction) { borderColor="#FF6B6B"; bgColor="#FFF1F2"; badgeText="⚠ Reaction noted"; badgeBg="#FEE2E2"; badgeColor="#DC2626"; }
+            if (waiting)    { borderColor="#FFD93D"; bgColor="#FFFBF0"; badgeText=daysLeft===0?"✓ Ready to mark safe":`⏳ ${daysLeft} day${daysLeft!==1?"s":""} to go`; badgeBg="#FEF9C3"; badgeColor="#92400E"; }
 
             return (
               <div key={a.id} style={{marginBottom:8}}>
@@ -1351,13 +1365,13 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                 {isExpanded && (
                   <div style={{background:bgColor,border:`1.5px solid ${borderColor}`,borderTop:"none",borderRadius:"0 0 16px 16px",padding:"10px 14px 14px"}}>
                     <div style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:8}}>{a.tip}</div>
-                    <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
+                    <div style={{background:"#FFF8E7",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
                       <span style={{fontSize:14,flexShrink:0}}>☀️</span>
                       <div style={{fontSize:11,color:"#92400E",lineHeight:1.6}}><strong>Introduce in the morning</strong> — this gives you the whole day to watch for any reactions before bedtime.</div>
                     </div>
 
                     {!isIntroduced && (
-                      <div style={{background:"#FFF6EB",borderRadius:10,padding:"10px",textAlign:"center"}}>
+                      <div style={{background:"#FFFAF7",borderRadius:10,padding:"10px",textAlign:"center"}}>
                         <div style={{fontSize:12,color:"#9CA3AF"}}>Not started yet.</div>
                         <div style={{fontSize:11,color:"#9CA3AF",marginTop:3}}>Log this food in the tracker or meal plan and the watch will start automatically.</div>
                         <button onClick={()=>startAllergenIntro(a.id)} style={{marginTop:8,background:"none",border:"1.5px solid #E8EAF0",borderRadius:8,padding:"6px 12px",fontSize:11,color:"#9CA3AF",cursor:"pointer"}}>
@@ -1367,7 +1381,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                     )}
 
                     {status?.autoStarted && waiting && (
-                      <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 10px",marginBottom:8,fontSize:11,color:"#92400E"}}>
+                      <div style={{background:"#FFF8F0",borderRadius:10,padding:"8px 10px",marginBottom:8,fontSize:11,color:"#92400E"}}>
                         ✨ Started automatically when you logged this food in the tracker.
                       </div>
                     )}
@@ -1375,8 +1389,8 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                     {waiting && daysLeft===0 && (
                       <div style={{display:"flex",flexDirection:"column",gap:6}}>
                         <div style={{fontSize:12,fontWeight:600,color:"#92400E",marginBottom:2}}>3 days have passed — how did it go?</div>
-                        <button onClick={()=>markAllergenSafe(a.id)} style={{width:"100%",background:"#7FB069",color:"white",border:"none",borderRadius:10,padding:"10px",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ No reaction — safely introduced!</button>
-                        <button onClick={()=>markAllergenReaction(a.id)} style={{width:"100%",background:"#F25F4C",color:"white",border:"none",borderRadius:10,padding:"10px",fontSize:13,fontWeight:700,cursor:"pointer"}}>⚠ Baby had a reaction</button>
+                        <button onClick={()=>markAllergenSafe(a.id)} style={{width:"100%",background:"#6BCB77",color:"white",border:"none",borderRadius:10,padding:"10px",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ No reaction — safely introduced!</button>
+                        <button onClick={()=>markAllergenReaction(a.id)} style={{width:"100%",background:"#FF6B6B",color:"white",border:"none",borderRadius:10,padding:"10px",fontSize:13,fontWeight:700,cursor:"pointer"}}>⚠ Baby had a reaction</button>
                       </div>
                     )}
                     {waiting && daysLeft>0 && (
@@ -1421,7 +1435,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                 style={{width:"100%",display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,border:"none",cursor:"pointer"}}>
                 <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
                 <span style={{flex:1,fontSize:14,color:checked?"#9CA3AF":"#1A1A2E",textDecoration:checked?"line-through":"none",fontWeight:checked?400:500}}>{cap(f)}</span>
-                <div style={{width:24,height:24,borderRadius:7,background:checked?"#7FB069":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+                <div style={{width:24,height:24,borderRadius:7,background:checked?"#6BCB77":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
                   {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
                 </div>
               </button>
@@ -1473,7 +1487,7 @@ function MealsScreen({profile}) {
               {tried.map(f=>{
                 const sel=selected.includes(f);
                 return(
-                  <button key={f} onClick={()=>toggle(f)} style={{display:"flex",alignItems:"center",gap:4,padding:"7px 12px",borderRadius:20,fontSize:13,fontWeight:sel?700:500,background:sel?"#F25F4C":"#F0FFF4",color:sel?"#fff":"#065F46",border:"none",boxShadow:sel?"0 4px 12px rgba(242,95,76,0.25)":"0 2px 6px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
+                  <button key={f} onClick={()=>toggle(f)} style={{display:"flex",alignItems:"center",gap:4,padding:"7px 12px",borderRadius:20,fontSize:13,fontWeight:sel?700:500,background:sel?"#FF6B6B":"#F0FFF4",color:sel?"#fff":"#065F46",border:"none",boxShadow:sel?"0 4px 12px rgba(255,107,107,0.25)":"0 2px 6px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
                     {fe(f)} {cap(f)} {sel?"✓":""}
                   </button>
                 );
@@ -1501,7 +1515,7 @@ function MealsScreen({profile}) {
             : filteredFoods.map(f=>{
               const sel=selected.includes(f);
               return(
-                <button key={f} onClick={()=>toggle(f)} style={{display:"flex",alignItems:"center",gap:4,padding:"7px 12px",borderRadius:20,fontSize:13,fontWeight:sel?700:400,background:sel?"#F25F4C":"#FFFFFF",color:sel?"#fff":"#374151",border:"none",boxShadow:sel?"0 4px 12px rgba(242,95,76,0.25)":"0 2px 6px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
+                <button key={f} onClick={()=>toggle(f)} style={{display:"flex",alignItems:"center",gap:4,padding:"7px 12px",borderRadius:20,fontSize:13,fontWeight:sel?700:400,background:sel?"#FF6B6B":"#FFFFFF",color:sel?"#fff":"#374151",border:"none",boxShadow:sel?"0 4px 12px rgba(255,107,107,0.25)":"0 2px 6px rgba(26,26,46,0.06)",transition:"all 0.15s"}}>
                   {fe(f)} {cap(f)}
                 </button>
               );
@@ -1516,7 +1530,7 @@ function MealsScreen({profile}) {
           </div>
         )}
         {selected.length>0&&suggestions.length===0&&(
-          <div style={{background:"#FFF6EB",borderRadius:16,padding:"18px",textAlign:"center"}}>
+          <div style={{background:"#FFF8E7",borderRadius:16,padding:"18px",textAlign:"center"}}>
             <div style={{fontSize:32,marginBottom:8}}>🤔</div>
             <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:4}}>No matches yet</div>
             <div style={{fontSize:13,color:"#6B7280",lineHeight:1.6}}>Try selecting a few more ingredients — most meals need 2–3 to match.</div>
@@ -1549,15 +1563,15 @@ function MealCard({meal, selected}) {
           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
             <span style={{...css.chip,background:"#FEF9C3",color:"#713F12",fontSize:10,padding:"2px 8px"}}>{meal.stage}</span>
             <span style={{...css.chip,background:"#F3F4F6",color:"#6B7280",fontSize:10,padding:"2px 8px"}}>⏱ {meal.time}</span>
-            {missing.length>0&&<span style={{...css.chip,background:"#FFF1F2",color:"#F25F4C",fontSize:10,padding:"2px 8px"}}>+{missing.length} more needed</span>}
+            {missing.length>0&&<span style={{...css.chip,background:"#FFF1F2",color:"#FF6B6B",fontSize:10,padding:"2px 8px"}}>+{missing.length} more needed</span>}
           </div>
         </div>
-        <span style={{color:"#F25F4C",fontSize:20,transition:"transform 0.2s",transform:open?"rotate(90deg)":"rotate(0deg)",flexShrink:0}}>›</span>
+        <span style={{color:"#FF6B6B",fontSize:20,transition:"transform 0.2s",transform:open?"rotate(90deg)":"rotate(0deg)",flexShrink:0}}>›</span>
       </button>
       {open&&(
         <div style={{borderTop:"1px solid #F3F4F6",padding:"16px"}}>
           {missing.length>0&&(
-            <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:12,color:"#92400E"}}>
+            <div style={{background:"#FFF8E7",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:12,color:"#92400E"}}>
               You'll also need: {missing.map(f=>`${fe(f)} ${cap(f)}`).join(", ")}
             </div>
           )}
@@ -1596,10 +1610,10 @@ function TrackerScreen({profile, allFoods, setOverlay}) {
       <div style={{padding:"22px 20px 14px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
           <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E"}}>Food Tracker</div>
-          <button onClick={()=>setOverlay({type:"addFood"})} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 12px rgba(242,95,76,0.3)"}}>+ Add food</button>
+          <button onClick={()=>setOverlay({type:"addFood"})} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 12px rgba(255,107,107,0.3)"}}>+ Add food</button>
         </div>
         <div style={{display:"flex",gap:8,marginBottom:14}}>
-          {[{n:tried,l:"tried",c:"#F25F4C"},{n:confident,l:"confident",c:"#7FB069"},{n:allFoods.length-tried,l:"to try",c:"#6FA3D2"}].map(x=>(
+          {[{n:tried,l:"tried",c:"#FF6B6B"},{n:confident,l:"confident",c:"#6BCB77"},{n:allFoods.length-tried,l:"to try",c:"#4D96FF"}].map(x=>(
             <div key={x.l} style={{...css.cardSm,padding:"8px 12px",flex:1,textAlign:"center"}}>
               <div style={{fontSize:22,fontWeight:800,color:x.c}}>{x.n}</div>
               <div style={{fontSize:11,color:"#6B7280"}}>{x.l}</div>
@@ -1634,10 +1648,10 @@ function TrackerScreen({profile, allFoods, setOverlay}) {
             const hasDB=!!FOOD_DB[f];
             return(
               <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
-                style={{background:"#FFFFFF",borderRadius:20,display:"flex",flexDirection:"column",padding:"14px",border:`2px solid ${log.length>0?"#FFD6D0":"#F3F4F6"}`,cursor:"pointer",textAlign:"left",position:"relative",boxShadow:"0 4px 16px rgba(26,26,46,0.06)",transition:"transform 0.1s"}}
+                style={{background:"#FFFFFF",borderRadius:20,display:"flex",flexDirection:"column",padding:"14px",border:`2px solid ${log.length>0?"#FFE4E4":"#F3F4F6"}`,cursor:"pointer",textAlign:"left",position:"relative",boxShadow:"0 4px 16px rgba(26,26,46,0.06)",transition:"transform 0.1s"}}
                 onMouseEnter={e=>e.currentTarget.style.transform="scale(1.02)"}
                 onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-                {hasDB&&<div style={{position:"absolute",top:10,right:10,background:"#FFF1F2",borderRadius:6,padding:"2px 6px",fontSize:9,color:"#F25F4C",fontWeight:700}}>recipe</div>}
+                {hasDB&&<div style={{position:"absolute",top:10,right:10,background:"#FFF1F2",borderRadius:6,padding:"2px 6px",fontSize:9,color:"#FF6B6B",fontWeight:700}}>recipe</div>}
                 <div style={{fontSize:38,marginBottom:8}}>{fe(f)}</div>
                 <div style={{fontSize:13,fontWeight:800,color:"#1A1A2E",marginBottom:6}}>{cap(f)}</div>
                 <span style={{...css.chip,background:st.bg,color:st.text,fontSize:10,padding:"3px 10px",marginBottom:log.length>0?4:0,borderRadius:8,fontWeight:700}}>{st.label}</span>
@@ -1694,14 +1708,14 @@ function AllergenScreen({profile, setProfile}) {
       {/* Summary row */}
       <div style={{padding:"10px 16px 4px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
         <div style={{background:"#F0FFF4",borderRadius:14,padding:"10px",textAlign:"center"}}>
-          <div style={{fontSize:20,fontWeight:800,color:"#7FB069"}}>{safeCount}</div>
+          <div style={{fontSize:20,fontWeight:800,color:"#6BCB77"}}>{safeCount}</div>
           <div style={{fontSize:9,color:"#065F46",fontWeight:600}}>introduced safely</div>
         </div>
         <div style={{background:"#FFF1F2",borderRadius:14,padding:"10px",textAlign:"center"}}>
           <div style={{fontSize:20,fontWeight:800,color:"#DC2626"}}>{reactionCount}</div>
           <div style={{fontSize:9,color:"#DC2626",fontWeight:600}}>had reaction</div>
         </div>
-        <div style={{background:"#FFF6EB",borderRadius:14,padding:"10px",textAlign:"center"}}>
+        <div style={{background:"#FFFAF7",borderRadius:14,padding:"10px",textAlign:"center"}}>
           <div style={{fontSize:20,fontWeight:800,color:"#6B7280"}}>{9-safeCount-reactionCount}</div>
           <div style={{fontSize:9,color:"#6B7280",fontWeight:600}}>remaining</div>
         </div>
@@ -1730,9 +1744,9 @@ function AllergenScreen({profile, setProfile}) {
           let badgeBg = "#F3F4F6";
           let badgeColor = "#9CA3AF";
 
-          if (isSafe)     { borderColor="#7FB069"; bgColor="#F0FFF4"; badgeText="✓ Safely introduced"; badgeBg="#D1FAE5"; badgeColor="#065F46"; }
-          if (isReaction) { borderColor="#F25F4C"; bgColor="#FFF1F2"; badgeText="⚠ Reaction noted"; badgeBg="#FEE2E2"; badgeColor="#DC2626"; }
-          if (waiting)    { borderColor="#F2B705"; bgColor="#FFFBF0"; badgeText=daysLeft===0?"✓ Ready to mark safe":`⏳ ${daysLeft} day${daysLeft!==1?"s":""} to go`; badgeBg="#FEF9C3"; badgeColor="#92400E"; }
+          if (isSafe)     { borderColor="#6BCB77"; bgColor="#F0FFF4"; badgeText="✓ Safely introduced"; badgeBg="#D1FAE5"; badgeColor="#065F46"; }
+          if (isReaction) { borderColor="#FF6B6B"; bgColor="#FFF1F2"; badgeText="⚠ Reaction noted"; badgeBg="#FEE2E2"; badgeColor="#DC2626"; }
+          if (waiting)    { borderColor="#FFD93D"; bgColor="#FFFBF0"; badgeText=daysLeft===0?"✓ Ready to mark safe":`⏳ ${daysLeft} day${daysLeft!==1?"s":""} to go`; badgeBg="#FEF9C3"; badgeColor="#92400E"; }
 
           return (
             <div key={a.id}>
@@ -1748,13 +1762,13 @@ function AllergenScreen({profile, setProfile}) {
               {isExpanded && (
                 <div style={{background:bgColor,border:`1.5px solid ${borderColor}`,borderTop:"none",borderRadius:"0 0 16px 16px",padding:"12px 16px 16px",marginTop:-8}}>
                   <div style={{fontSize:13,color:"#6B7280",lineHeight:1.6,marginBottom:8}}>{a.tip}</div>
-                  <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
+                  <div style={{background:"#FFF8E7",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
                     <span style={{fontSize:14,flexShrink:0}}>☀️</span>
                     <div style={{fontSize:11,color:"#92400E",lineHeight:1.6}}><strong>Introduce in the morning</strong> — this gives you the whole day to watch for any reactions before bedtime.</div>
                   </div>
 
                   {!isIntroduced && (
-                    <button onClick={()=>startIntro(a.id)} style={{width:"100%",background:"#F25F4C",color:"white",border:"none",borderRadius:12,padding:"12px",fontSize:14,fontWeight:700,cursor:"pointer"}}>
+                    <button onClick={()=>startIntro(a.id)} style={{width:"100%",background:"#FF6B6B",color:"white",border:"none",borderRadius:12,padding:"12px",fontSize:14,fontWeight:700,cursor:"pointer"}}>
                       Start introduction today
                     </button>
                   )}
@@ -1762,8 +1776,8 @@ function AllergenScreen({profile, setProfile}) {
                   {waiting && daysLeft === 0 && (
                     <div style={{display:"flex",flexDirection:"column",gap:8}}>
                       <div style={{fontSize:13,fontWeight:600,color:"#92400E",marginBottom:4}}>3 days have passed — how did it go?</div>
-                      <button onClick={()=>markSafe(a.id)} style={{width:"100%",background:"#7FB069",color:"white",border:"none",borderRadius:12,padding:"12px",fontSize:14,fontWeight:700,cursor:"pointer"}}>✓ No reaction — safely introduced!</button>
-                      <button onClick={()=>markReaction(a.id)} style={{width:"100%",background:"#F25F4C",color:"white",border:"none",borderRadius:12,padding:"12px",fontSize:14,fontWeight:700,cursor:"pointer"}}>⚠ Baby had a reaction</button>
+                      <button onClick={()=>markSafe(a.id)} style={{width:"100%",background:"#6BCB77",color:"white",border:"none",borderRadius:12,padding:"12px",fontSize:14,fontWeight:700,cursor:"pointer"}}>✓ No reaction — safely introduced!</button>
+                      <button onClick={()=>markReaction(a.id)} style={{width:"100%",background:"#FF6B6B",color:"white",border:"none",borderRadius:12,padding:"12px",fontSize:14,fontWeight:700,cursor:"pointer"}}>⚠ Baby had a reaction</button>
                     </div>
                   )}
 
@@ -1884,13 +1898,13 @@ function JournalScreen({profile, setProfile, allFoods}) {
               <button key={day} onClick={()=>setSelectedDate(dateKey)} style={{
                 aspectRatio:"1",borderRadius:10,border:"none",cursor:"pointer",
                 fontSize:12,fontWeight:isSelected||isToday?700:400,
-                background:isSelected?"#F25F4C":isToday?"#FFF1F2":"transparent",
-                color:isSelected?"#fff":isToday?"#F25F4C":"#1A1A2E",
+                background:isSelected?"#FF6B6B":isToday?"#FFF1F2":"transparent",
+                color:isSelected?"#fff":isToday?"#FF6B6B":"#1A1A2E",
                 position:"relative",display:"flex",alignItems:"center",justifyContent:"center",
               }}>
                 {day}
                 {hasEntries && !isSelected && (
-                  <div style={{position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)",width:4,height:4,borderRadius:"50%",background:hasReaction?"#F25F4C":"#7FB069"}}/>
+                  <div style={{position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)",width:4,height:4,borderRadius:"50%",background:hasReaction?"#FF6B6B":"#6BCB77"}}/>
                 )}
               </button>
             );
@@ -1902,18 +1916,18 @@ function JournalScreen({profile, setProfile, allFoods}) {
       <div style={{padding:"0 16px 100px"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
           <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E"}}>{formatDateDisplay(selectedDate)}</div>
-          <button onClick={()=>setShowAddSheet(true)} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:12,padding:"7px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Add</button>
+          <button onClick={()=>setShowAddSheet(true)} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:12,padding:"7px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Add</button>
         </div>
 
         {selectedEntries.length === 0 ? (
-          <div style={{background:"#FFF6EB",borderRadius:16,padding:"24px",textAlign:"center"}}>
+          <div style={{background:"#FFFAF7",borderRadius:16,padding:"24px",textAlign:"center"}}>
             <div style={{fontSize:32,marginBottom:8}}>📝</div>
             <div style={{fontSize:13,color:"#9CA3AF"}}>No entries yet — tap + Add to log a food</div>
           </div>
         ) : (
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {selectedEntries.map((entry, idx) => (
-              <div key={idx} style={{background:"#FFFFFF",borderRadius:14,padding:"12px 14px",boxShadow:"0 2px 8px rgba(26,26,46,0.06)",border:entry.reaction?"1.5px solid #F25F4C":"1.5px solid #F3F4F6"}}>
+              <div key={idx} style={{background:"#FFFFFF",borderRadius:14,padding:"12px 14px",boxShadow:"0 2px 8px rgba(26,26,46,0.06)",border:entry.reaction?"1.5px solid #FF6B6B":"1.5px solid #F3F4F6"}}>
                 <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:entry.notes?6:0}}>
@@ -2000,7 +2014,7 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
             {filtered.map(f=>{
               const sel = selectedFoods.includes(f);
               return (
-                <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:sel?700:400,background:sel?"#F25F4C":"#F3F4F6",color:sel?"#fff":"#374151",border:"none",cursor:"pointer"}}>
+                <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:sel?700:400,background:sel?"#FF6B6B":"#F3F4F6",color:sel?"#fff":"#374151",border:"none",cursor:"pointer"}}>
                   {fe(f)} {cap(f)}
                 </button>
               );
@@ -2030,14 +2044,14 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
                 if(clean && !selectedFoods.includes(clean)) setSelectedFoods(p=>[...p,clean]);
                 setCustomFood("");
               }}
-              style={{padding:"7px 14px",borderRadius:10,background:"#F25F4C",color:"#fff",border:"none",fontSize:13,fontWeight:700,cursor:"pointer",opacity:customFood.trim()?1:0.4}}>
+              style={{padding:"7px 14px",borderRadius:10,background:"#FF6B6B",color:"#fff",border:"none",fontSize:13,fontWeight:700,cursor:"pointer",opacity:customFood.trim()?1:0.4}}>
               Add
             </button>
           </div>
           {selectedFoods.filter(f=>!allFoods.includes(f)).length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>
               {selectedFoods.filter(f=>!allFoods.includes(f)).map(f=>(
-                <span key={f} onClick={()=>setSelectedFoods(p=>p.filter(x=>x!==f))} style={{background:"#F0F4FF",borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#6FA3D2",cursor:"pointer"}}>✏️ {cap(f)} ×</span>
+                <span key={f} onClick={()=>setSelectedFoods(p=>p.filter(x=>x!==f))} style={{background:"#F0F4FF",borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#4D96FF",cursor:"pointer"}}>✏️ {cap(f)} ×</span>
               ))}
             </div>
           )}
@@ -2045,13 +2059,13 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
 
         {/* Reaction toggle */}
         <div style={{marginBottom:14}}>
-          <button onClick={()=>setReaction(r=>!r)} style={{display:"flex",alignItems:"center",gap:8,background:reaction?"#FFF1F2":"#FFF6EB",border:`1.5px solid ${reaction?"#F25F4C":"#E8EAF0"}`,borderRadius:12,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left"}}>
+          <button onClick={()=>setReaction(r=>!r)} style={{display:"flex",alignItems:"center",gap:8,background:reaction?"#FFF1F2":"#FFFAF7",border:`1.5px solid ${reaction?"#FF6B6B":"#E8EAF0"}`,borderRadius:12,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left"}}>
             <span style={{fontSize:18}}>⚠️</span>
             <div>
               <div style={{fontSize:13,fontWeight:600,color:reaction?"#DC2626":"#374151"}}>Mark as reaction</div>
               <div style={{fontSize:11,color:"#9CA3AF"}}>Flag this meal if baby had any symptoms</div>
             </div>
-            <div style={{marginLeft:"auto",width:20,height:20,borderRadius:"50%",background:reaction?"#F25F4C":"#E8EAF0",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <div style={{marginLeft:"auto",width:20,height:20,borderRadius:"50%",background:reaction?"#FF6B6B":"#E8EAF0",display:"flex",alignItems:"center",justifyContent:"center"}}>
               {reaction&&<span style={{color:"#fff",fontSize:12,fontWeight:700}}>✓</span>}
             </div>
           </button>
@@ -2064,7 +2078,7 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
             style={{width:"100%",padding:"12px 14px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",resize:"none",height:80,fontFamily:"inherit",boxSizing:"border-box"}}/>
         </div>
 
-        <button onClick={save} disabled={selectedFoods.length===0} style={{width:"100%",padding:"14px",background:selectedFoods.length>0?"#F25F4C":"#E8EAF0",color:selectedFoods.length>0?"#fff":"#9CA3AF",borderRadius:12,border:"none",fontSize:15,fontWeight:700,cursor:selectedFoods.length>0?"pointer":"default"}}>
+        <button onClick={save} disabled={selectedFoods.length===0} style={{width:"100%",padding:"14px",background:selectedFoods.length>0?"#FF6B6B":"#E8EAF0",color:selectedFoods.length>0?"#fff":"#9CA3AF",borderRadius:12,border:"none",fontSize:15,fontWeight:700,cursor:selectedFoods.length>0?"pointer":"default"}}>
           Save entry
         </button>
       </div>
@@ -2091,7 +2105,7 @@ function LearnScreen() {
 
       {tab==="guide"&&(
         <div style={{padding:"0 16px 32px"}}>
-          <div style={{background:"#FFF1F2",borderRadius:14,padding:"12px 14px",marginBottom:14,border:"1px solid #FFBDB5"}}>
+          <div style={{background:"#FFF1F2",borderRadius:14,padding:"12px 14px",marginBottom:14,border:"1px solid #FFC9C9"}}>
             <div style={{fontSize:13,color:"#374151",lineHeight:1.7}}>All guidance is based on <strong>NHS Start4Life</strong> and peer-reviewed research. Tap any topic.</div>
           </div>
           {GUIDE_TOPICS.map((section,i)=>(
@@ -2099,7 +2113,7 @@ function LearnScreen() {
               <button onClick={()=>setExpanded(expanded===`g${i}`?null:`g${i}`)} style={{width:"100%",display:"flex",alignItems:"center",padding:"14px",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
                 <span style={{fontSize:26,marginRight:12,flexShrink:0}}>{section.icon}</span>
                 <span style={{fontSize:14,fontWeight:600,color:"#1A1A2E",flex:1}}>{section.title}</span>
-                <span style={{color:"#F25F4C",fontSize:18,transition:"transform 0.2s",transform:expanded===`g${i}`?"rotate(90deg)":"rotate(0deg)"}}>›</span>
+                <span style={{color:"#FF6B6B",fontSize:18,transition:"transform 0.2s",transform:expanded===`g${i}`?"rotate(90deg)":"rotate(0deg)"}}>›</span>
               </button>
               {expanded===`g${i}`&&(
                 <div style={{borderTop:"1px solid #F3F4F6",padding:"14px 16px"}} className="fadeUp">
@@ -2114,7 +2128,7 @@ function LearnScreen() {
 
       {tab==="safety"&&(
         <div style={{padding:"0 16px 32px"}}>
-          <div style={{background:"#FFF1F2",borderRadius:14,padding:"12px 14px",marginBottom:14,border:"1px solid #FFBDB5",display:"flex",gap:8,alignItems:"flex-start"}}>
+          <div style={{background:"#FFF1F2",borderRadius:14,padding:"12px 14px",marginBottom:14,border:"1px solid #FFC9C9",display:"flex",gap:8,alignItems:"flex-start"}}>
             <span style={{fontSize:18,flexShrink:0}}>⚠️</span>
             <div style={{fontSize:13,color:"#374151",lineHeight:1.7}}>Based on <strong>NHS guidance</strong>. When in doubt, always check with your health visitor or GP.</div>
           </div>
@@ -2131,7 +2145,7 @@ function LearnScreen() {
                     <span style={{...css.chip,background:"#F3F4F6",color:"#6B7280",fontSize:10,padding:"2px 8px"}}>{item.age}</span>
                   </div>
                 </div>
-                <span style={{color:"#F25F4C",fontSize:18,transform:expanded===`avoid${i}`?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.2s",display:"inline-block",flexShrink:0}}>›</span>
+                <span style={{color:"#FF6B6B",fontSize:18,transform:expanded===`avoid${i}`?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.2s",display:"inline-block",flexShrink:0}}>›</span>
               </button>
               {expanded===`avoid${i}`&&(
                 <div style={{padding:"0 14px 14px"}}>
@@ -2149,7 +2163,7 @@ function LearnScreen() {
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E"}}>{item.name}</div>
                 </div>
-                <span style={{color:"#F25F4C",fontSize:18,transform:expanded===`choke${i}`?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.2s",display:"inline-block",flexShrink:0}}>›</span>
+                <span style={{color:"#FF6B6B",fontSize:18,transform:expanded===`choke${i}`?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.2s",display:"inline-block",flexShrink:0}}>›</span>
               </button>
               {expanded===`choke${i}`&&(
                 <div style={{padding:"0 14px 14px"}}>
@@ -2187,7 +2201,7 @@ function LearnScreen() {
               <button onClick={()=>setExpanded(expanded===`f${i}`?null:`f${i}`)} style={{width:"100%",display:"flex",alignItems:"center",padding:"14px",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
                 <span style={{fontSize:24,marginRight:12,flexShrink:0}}>{item.icon}</span>
                 <span style={{fontSize:14,fontWeight:600,color:"#1A1A2E",flex:1}}>{item.q}</span>
-                <span style={{color:"#F25F4C",fontSize:18,transition:"transform 0.2s",transform:expanded===`f${i}`?"rotate(90deg)":"rotate(0deg)"}}>›</span>
+                <span style={{color:"#FF6B6B",fontSize:18,transition:"transform 0.2s",transform:expanded===`f${i}`?"rotate(90deg)":"rotate(0deg)"}}>›</span>
               </button>
               {expanded===`f${i}`&&(
                 <div style={{borderTop:"1px solid #F3F4F6",padding:"14px 16px"}} className="fadeUp">
@@ -2215,7 +2229,7 @@ function LearnScreen() {
                   <span style={{...css.chip,background:tagColor,color:tagText,fontSize:10,flexShrink:0}}>{res.tag}</span>
                 </div>
                 <div style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:10}}>{res.desc}</div>
-                <button onClick={()=>window.open(res.url,"_blank")} style={{background:"#FFF6EB",border:"1px solid #E8EAF0",borderRadius:8,padding:"7px 12px",fontSize:12,color:"#F25F4C",fontWeight:600,cursor:"pointer"}}>Open website →</button>
+                <button onClick={()=>window.open(res.url,"_blank")} style={{background:"#FFFAF7",border:"1px solid #E8EAF0",borderRadius:8,padding:"7px 12px",fontSize:12,color:"#FF6B6B",fontWeight:600,cursor:"pointer"}}>Open website →</button>
               </div>
             );
           })}
@@ -2237,7 +2251,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
   const days = last ? daysSince(last.date) : null;
   const lastReaction = last ? REACTIONS.find(r=>r.id===last.reaction) : null;
   return(
-    <div style={{position:"fixed",inset:0,background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 20px",textAlign:"center"}} className="fadeUp">
@@ -2273,12 +2287,12 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
             <div style={{marginTop:10}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                 <div style={{fontSize:11,color:"#9CA3AF",fontWeight:600}}>Recent</div>
-                <button onClick={onDeleteLast} style={{fontSize:11,color:"#F25F4C",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>↩ Undo last</button>
+                <button onClick={onDeleteLast} style={{fontSize:11,color:"#FF6B6B",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>↩ Undo last</button>
               </div>
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {[...log].reverse().slice(0,5).map((e,i)=>{
                   const r=REACTIONS.find(x=>x.id===e.reaction);
-                  return<span key={i} style={{fontSize:11,background:"#FFF6EB",borderRadius:8,padding:"3px 8px",color:"#6B7280"}}>{r?.emoji} {fmtDate(e.date)}</span>;
+                  return<span key={i} style={{fontSize:11,background:"#FFFAF7",borderRadius:8,padding:"3px 8px",color:"#6B7280"}}>{r?.emoji} {fmtDate(e.date)}</span>;
                 })}
               </div>
             </div>
@@ -2289,7 +2303,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
       {/* Prep & Recipes */}
       {!db?(
         <div style={{padding:"0 16px 32px"}}>
-          <div style={{background:"#FFF6EB",borderRadius:12,padding:"16px",fontSize:13,color:"#6B7280",lineHeight:1.7}}>
+          <div style={{background:"#FFFAF7",borderRadius:12,padding:"16px",fontSize:13,color:"#6B7280",lineHeight:1.7}}>
             No detailed guide yet for {cap(food)}. Use the log above to track when you offer it.
           </div>
         </div>
@@ -2309,7 +2323,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
                 <div style={{fontSize:15,fontWeight:800,color:"#1A1A2E",marginBottom:12}}>How to prepare</div>
                 {db.prep.map((step,i)=>(
                   <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-                    <div style={{width:24,height:24,borderRadius:"50%",background:"#FFF1F2",border:"2px solid #F25F4C",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#F25F4C",flexShrink:0}}>{i+1}</div>
+                    <div style={{width:24,height:24,borderRadius:"50%",background:"#FFF1F2",border:"2px solid #FF6B6B",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#FF6B6B",flexShrink:0}}>{i+1}</div>
                     <div style={{fontSize:13,color:"#374151",lineHeight:1.65,paddingTop:3}}>{step}</div>
                   </div>
                 ))}
@@ -2318,7 +2332,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
                 <div style={{fontSize:15,fontWeight:800,color:"#1A1A2E",marginBottom:10}}>🛡️ Safety notes</div>
                 {db.safety.map((note,i)=>(
                   <div key={i} style={{display:"flex",gap:8,marginBottom:7,alignItems:"flex-start"}}>
-                    <span style={{color:note.startsWith("⚠️")?"#F25F4C":"#9CA3AF",flexShrink:0,marginTop:1}}>•</span>
+                    <span style={{color:note.startsWith("⚠️")?"#FF6B6B":"#9CA3AF",flexShrink:0,marginTop:1}}>•</span>
                     <div style={{fontSize:13,color:"#374151",lineHeight:1.65}}>{note.replace("⚠️ ","")}</div>
                   </div>
                 ))}
@@ -2341,21 +2355,21 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
                         <span style={{...css.chip,background:"#F3F4F6",color:"#6B7280",fontSize:10,padding:"2px 7px"}}>🍼 {recipe.serves}</span>
                       </div>
                     </div>
-                    <span style={{color:"#F25F4C",fontSize:20,transition:"transform 0.2s",transform:expandedRecipe===i?"rotate(90deg)":"rotate(0deg)"}}>›</span>
+                    <span style={{color:"#FF6B6B",fontSize:20,transition:"transform 0.2s",transform:expandedRecipe===i?"rotate(90deg)":"rotate(0deg)"}}>›</span>
                   </button>
                   {expandedRecipe===i&&(
                     <div style={{borderTop:"1px solid #F3F4F6",padding:"14px 16px"}} className="fadeUp">
                       <div style={css.label}>Ingredients</div>
                       {recipe.ingredients.map((ing,j)=>(
                         <div key={j} style={{display:"flex",gap:7,marginBottom:5}}>
-                          <span style={{color:"#F25F4C",fontSize:13}}>•</span>
+                          <span style={{color:"#FF6B6B",fontSize:13}}>•</span>
                           <span style={{fontSize:13,color:"#374151",lineHeight:1.5}}>{ing}</span>
                         </div>
                       ))}
                       <div style={{...css.label,marginTop:12}}>Method</div>
                       {recipe.method.map((step,j)=>(
                         <div key={j} style={{display:"flex",gap:8,marginBottom:8,alignItems:"flex-start"}}>
-                          <div style={{width:20,height:20,borderRadius:"50%",background:"#F25F4C",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#fff",flexShrink:0,marginTop:1}}>{j+1}</div>
+                          <div style={{width:20,height:20,borderRadius:"50%",background:"#FF6B6B",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#fff",flexShrink:0,marginTop:1}}>{j+1}</div>
                           <div style={{fontSize:13,color:"#374151",lineHeight:1.65}}>{step}</div>
                         </div>
                       ))}
@@ -2395,7 +2409,7 @@ function ProgressOverlay({profile, allFoods, onClose}) {
   ];
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 32px"}} className="fadeUp">
@@ -2405,9 +2419,9 @@ function ProgressOverlay({profile, allFoods, onClose}) {
         {/* Big stats */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}}>
           {[
-            {n:tried.length,l:"Foods tried",c:"#F25F4C",icon:"🍽"},
-            {n:confident.length,l:"Confident",c:"#7FB069",icon:"💪"},
-            {n:allergensTried.length,l:"Allergens introduced",c:"#6FA3D2",icon:"⭐"},
+            {n:tried.length,l:"Foods tried",c:"#FF6B6B",icon:"🍽"},
+            {n:confident.length,l:"Confident",c:"#6BCB77",icon:"💪"},
+            {n:allergensTried.length,l:"Allergens introduced",c:"#4D96FF",icon:"⭐"},
             {n:allFoods.length-tried.length,l:"Still to try",c:"#C77DFF",icon:"🌱"},
           ].map(x=>(
             <div key={x.l} style={{...css.card,padding:"16px",textAlign:"center"}}>
@@ -2423,7 +2437,7 @@ function ProgressOverlay({profile, allFoods, onClose}) {
           <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:10}}>Overall progress</div>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
             <div style={{flex:1,background:"#F3F4F6",borderRadius:99,height:12,overflow:"hidden"}}>
-              <div style={{width:`${Math.min(100,(tried.length/allFoods.length)*100)}%`,height:"100%",background:"linear-gradient(90deg,#F25F4C,#F2B705)",borderRadius:99,transition:"width 0.5s"}}/>
+              <div style={{width:`${Math.min(100,(tried.length/allFoods.length)*100)}%`,height:"100%",background:"linear-gradient(90deg,#FF6B6B,#FFD93D)",borderRadius:99,transition:"width 0.5s"}}/>
             </div>
             <span style={{fontSize:13,fontWeight:700,color:"#1A1A2E",flexShrink:0}}>{Math.round((tried.length/allFoods.length)*100)}%</span>
           </div>
@@ -2437,10 +2451,10 @@ function ProgressOverlay({profile, allFoods, onClose}) {
             {allergens.map(a=>{
               const done=(log[a]?.length||0)>0;
               return(
-                <div key={a} style={{display:"flex",alignItems:"center",gap:5,background:done?"#F0FFF4":"#FFF6EB",borderRadius:20,padding:"5px 10px",border:`1px solid ${done?"#7FB069":"#E8EAF0"}`}}>
+                <div key={a} style={{display:"flex",alignItems:"center",gap:5,background:done?"#F0FFF4":"#FFFAF7",borderRadius:20,padding:"5px 10px",border:`1px solid ${done?"#6BCB77":"#E8EAF0"}`}}>
                   <span style={{fontSize:12}}>{fe(a)}</span>
                   <span style={{fontSize:11,fontWeight:600,color:done?"#065F46":"#9CA3AF"}}>{cap(a)}</span>
-                  {done&&<span style={{fontSize:11,color:"#7FB069"}}>✓</span>}
+                  {done&&<span style={{fontSize:11,color:"#6BCB77"}}>✓</span>}
                 </div>
               );
             })}
@@ -2495,13 +2509,13 @@ function BadgesOverlay({profile, onClose}) {
         </div>
 
         {/* Progress bar */}
-        <div style={{background:"#FFFFFF",borderRadius:20,padding:"18px",marginBottom:20,boxShadow:"0 4px 20px rgba(242,95,76,0.08)"}}>
+        <div style={{background:"#FFFFFF",borderRadius:20,padding:"18px",marginBottom:20,boxShadow:"0 4px 20px rgba(255,107,107,0.08)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
             <span style={{fontSize:13,fontWeight:700,color:"#1A1A2E"}}>Progress</span>
-            <span style={{fontSize:20,fontWeight:900,color:"#F25F4C"}}>{pct}%</span>
+            <span style={{fontSize:20,fontWeight:900,color:"#FF6B6B"}}>{pct}%</span>
           </div>
           <div style={{background:"#F3F4F6",borderRadius:99,height:12,overflow:"hidden"}}>
-            <div style={{width:`${pct}%`,height:"100%",background:"linear-gradient(90deg,#F25F4C,#F2B705)",borderRadius:99,transition:"width 0.6s ease"}}/>
+            <div style={{width:`${pct}%`,height:"100%",background:"linear-gradient(90deg,#FF6B6B,#FFD93D)",borderRadius:99,transition:"width 0.6s ease"}}/>
           </div>
           <div style={{fontSize:12,color:"#9CA3AF",marginTop:8}}>{earned.length===BADGES.length?"🎉 You've earned them all!":  `${BADGES.length-earned.length} more to go — keep exploring!`}</div>
         </div>
@@ -2511,8 +2525,8 @@ function BadgesOverlay({profile, onClose}) {
           {BADGES.map(b=>{
             const isEarned=earned.includes(b.id);
             return(
-              <div key={b.id} style={{background:isEarned?"#FFFFFF":"#F9FAFB",borderRadius:20,padding:"18px 14px",textAlign:"center",opacity:isEarned?1:0.55,position:"relative",overflow:"hidden",boxShadow:isEarned?"0 4px 20px rgba(242,183,5,0.15)":"none",border:isEarned?"2px solid #F2B70522":"2px solid #F3F4F6"}}>
-                {isEarned&&<div style={{position:"absolute",top:0,left:0,right:0,height:4,background:"linear-gradient(90deg,#F2B705,#F25F4C)",borderRadius:"20px 20px 0 0"}}/>}
+              <div key={b.id} style={{background:isEarned?"#FFFFFF":"#F9FAFB",borderRadius:20,padding:"18px 14px",textAlign:"center",opacity:isEarned?1:0.55,position:"relative",overflow:"hidden",boxShadow:isEarned?"0 4px 20px rgba(255,217,61,0.15)":"none",border:isEarned?"2px solid #FFD93D22":"2px solid #F3F4F6"}}>
+                {isEarned&&<div style={{position:"absolute",top:0,left:0,right:0,height:4,background:"linear-gradient(90deg,#FFD93D,#FF6B6B)",borderRadius:"20px 20px 0 0"}}/>}
                 <div style={{fontSize:42,marginBottom:8,filter:isEarned?"none":"grayscale(1) opacity(0.4)"}}>{b.emoji}</div>
                 <div style={{fontSize:13,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>{b.name}</div>
                 <div style={{fontSize:11,color:"#6B7280",lineHeight:1.5}}>{b.desc}</div>
@@ -2553,7 +2567,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
   };
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 40px"}} className="fadeUp">
@@ -2563,7 +2577,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
           <div style={{marginBottom:22}}>
             <div style={css.label}>Switch baby</div>
             {state.babies.map(b=>(
-              <div key={b.id} style={{...css.card,display:"flex",alignItems:"center",padding:"12px 14px",marginBottom:8,border:b.id===state.activeBabyId?"2px solid #F25F4C":"none"}}>
+              <div key={b.id} style={{...css.card,display:"flex",alignItems:"center",padding:"12px 14px",marginBottom:8,border:b.id===state.activeBabyId?"2px solid #FF6B6B":"none"}}>
                 <div style={{width:40,height:40,borderRadius:"50%",overflow:"hidden",marginRight:12,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                   {b.photo?<img src={b.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{fontSize:20}}>👶</span>}
                 </div>
@@ -2572,8 +2586,8 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
                   <div style={{fontSize:11,color:"#6B7280"}}>{monthsOld(b.dob)} months old</div>
                 </div>
                 {b.id!==state.activeBabyId
-                  ?<button onClick={()=>{ update(s=>({...s,activeBabyId:b.id})); onClose(); }} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:600,cursor:"pointer"}}>Switch</button>
-                  :<span style={{fontSize:12,color:"#F25F4C",fontWeight:700}}>Active</span>
+                  ?<button onClick={()=>{ update(s=>({...s,activeBabyId:b.id})); onClose(); }} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:600,cursor:"pointer"}}>Switch</button>
+                  :<span style={{fontSize:12,color:"#FF6B6B",fontWeight:700}}>Active</span>
                 }
               </div>
             ))}
@@ -2584,7 +2598,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
           <div style={css.label}>Edit {baby.name}</div>
           <div style={{...css.card,padding:"18px"}}>
             <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
-              <button onClick={()=>fileRef.current?.click()} style={{width:70,height:70,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFF6EB",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+              <button onClick={()=>fileRef.current?.click()} style={{width:70,height:70,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFFAF7",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
                 {photo?<img src={photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{textAlign:"center"}}><div style={{fontSize:22}}>📷</div><div style={{fontSize:9,color:"#9CA3AF"}}>Change</div></div>}
               </button>
               <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
@@ -2593,16 +2607,16 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
             <input value={name} onChange={e=>setName(e.target.value)} style={{...css.input,marginBottom:14}}/>
             <label style={css.label}>Date of birth</label>
             <input type="date" value={dob} onChange={e=>setDob(e.target.value)} style={{...css.input,marginBottom:16}}/>
-            <button onClick={save} style={{...css.btnPrimary,background:saved?"#7FB069":"#F25F4C"}}>
+            <button onClick={save} style={{...css.btnPrimary,background:saved?"#6BCB77":"#FF6B6B"}}>
               {saved?"✓ Saved!":"Save changes"}
             </button>
           </div>
         </div>
 
-        <button onClick={onAddBaby} style={{...css.btnSecondary,marginBottom:10,borderColor:"#7FB069",color:"#065F46",background:"#F0FFF4"}}>+ Add another baby</button>
+        <button onClick={onAddBaby} style={{...css.btnSecondary,marginBottom:10,borderColor:"#6BCB77",color:"#065F46",background:"#F0FFF4"}}>+ Add another baby</button>
 
         {state.babies.length>1&&(
-          <button onClick={()=>{update(s=>{const nb=s.babies.filter(b=>b.id!==baby.id);return{...s,babies:nb,activeBabyId:nb[0]?.id||null};});onClose();}} style={{...css.btnSecondary,borderColor:"#FFBDB5",color:"#DC2626",background:"#FFF1F2"}}>
+          <button onClick={()=>{update(s=>{const nb=s.babies.filter(b=>b.id!==baby.id);return{...s,babies:nb,activeBabyId:nb[0]?.id||null};});onClose();}} style={{...css.btnSecondary,borderColor:"#FFC9C9",color:"#DC2626",background:"#FFF1F2"}}>
             Remove {baby.name}
           </button>
         )}
@@ -2655,7 +2669,7 @@ function BugReportSheet({session, onClose}) {
             <div style={{fontSize:48,marginBottom:12}}>✅</div>
             <div style={{fontSize:18,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Bug reported!</div>
             <div style={{fontSize:13,color:"#6B7280",marginBottom:24}}>Thanks — we'll look into it.</div>
-            <button onClick={onClose} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:12,padding:"12px 32px",fontSize:14,fontWeight:700,cursor:"pointer"}}>Done</button>
+            <button onClick={onClose} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:12,padding:"12px 32px",fontSize:14,fontWeight:700,cursor:"pointer"}}>Done</button>
           </div>
         ) : (
           <>
@@ -2671,7 +2685,7 @@ function BugReportSheet({session, onClose}) {
               <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6}}>Which screen? (optional)</label>
               <input value={screen} onChange={e=>setScreen(e.target.value)} placeholder="e.g. Food tracker, Journal, Plan…" style={{width:"100%",padding:"10px 12px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
             </div>
-            <button onClick={submit} disabled={!description.trim()||loading} style={{width:"100%",padding:"14px",background:description.trim()?"#F25F4C":"#E8EAF0",color:description.trim()?"#fff":"#9CA3AF",borderRadius:12,border:"none",fontSize:15,fontWeight:700,cursor:description.trim()?"pointer":"default"}}>
+            <button onClick={submit} disabled={!description.trim()||loading} style={{width:"100%",padding:"14px",background:description.trim()?"#FF6B6B":"#E8EAF0",color:description.trim()?"#fff":"#9CA3AF",borderRadius:12,border:"none",fontSize:15,fontWeight:700,cursor:description.trim()?"pointer":"default"}}>
               {loading?"Sending…":"Send report"}
             </button>
           </>
@@ -2689,7 +2703,7 @@ function BadgeToast({badges, onClose}) {
       <div style={{background:"#1A1A2E",borderRadius:18,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(26,26,46,0.3)"}}>
         <div style={{fontSize:36}}>{b.emoji}</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:11,color:"#F2B705",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:2}}>Badge unlocked! 🎉</div>
+          <div style={{fontSize:11,color:"#FFD93D",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:2}}>Badge unlocked! 🎉</div>
           <div style={{fontSize:15,fontWeight:700,color:"#FFFFFF"}}>{b.name}</div>
           <div style={{fontSize:12,color:"rgba(255,255,255,0.6)",marginTop:1}}>{b.desc}</div>
         </div>
@@ -2707,7 +2721,7 @@ function ReactionSheet({food, log, onLog, onClose}) {
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{GLOBAL_CSS}</style>
-      <div style={{background:"#FFF6EB",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
+      <div style={{background:"#FFFAF7",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         <div style={{textAlign:"center",marginBottom:18}}>
           <div style={{fontSize:52}}>{fe(food)}</div>
@@ -2733,7 +2747,7 @@ function AddFoodSheet({onAdd, onClose}) {
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{GLOBAL_CSS}</style>
-      <div style={{background:"#FFF6EB",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
+      <div style={{background:"#FFFAF7",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         <div style={{fontSize:20,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Add a custom food</div>
         <p style={{fontSize:13,color:"#6B7280",marginBottom:16,lineHeight:1.6}}>Can't find a food in the list? Add it here and track it like any other.</p>
@@ -2763,10 +2777,10 @@ function BottomNav({screen, setScreen, weaningComplete, allergenAlert}) {
         <button key={item.id} onClick={()=>setScreen(item.id)} style={{flex:1,padding:"10px 4px 14px",background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,transition:"all 0.1s"}}>
           <div style={{position:"relative",display:"inline-block"}}>
             <span style={{fontSize:20}}>{item.emoji}</span>
-            {item.alert&&<div style={{position:"absolute",top:-2,right:-4,width:8,height:8,borderRadius:"50%",background:"#F25F4C",border:"1.5px solid white"}}/>}
+            {item.alert&&<div style={{position:"absolute",top:-2,right:-4,width:8,height:8,borderRadius:"50%",background:"#FF6B6B",border:"1.5px solid white"}}/>}
           </div>
-          <span style={{fontSize:10,fontWeight:screen===item.id?700:500,color:screen===item.id?"#F25F4C":"#9CA3AF"}}>{item.label}</span>
-          {screen===item.id&&<div style={{width:16,height:3,borderRadius:2,background:"#F25F4C",marginTop:-2}}/>}
+          <span style={{fontSize:10,fontWeight:screen===item.id?700:500,color:screen===item.id?"#FF6B6B":"#9CA3AF"}}>{item.label}</span>
+          {screen===item.id&&<div style={{width:16,height:3,borderRadius:2,background:"#FF6B6B",marginTop:-2}}/>}
         </button>
       ))}
     </nav>
@@ -2792,7 +2806,7 @@ function ActionCard({emoji, label, sub, onClick, color, accent}) {
 function LoadingDots() {
   return(
     <div style={{display:"flex",gap:7,justifyContent:"center",padding:"18px 0"}}>
-      {[0,1,2].map(i=><div key={i} style={{width:9,height:9,borderRadius:"50%",background:"#F25F4C",animation:`dot 1.2s ${i*0.2}s infinite ease-in-out`}}/>)}
+      {[0,1,2].map(i=><div key={i} style={{width:9,height:9,borderRadius:"50%",background:"#FF6B6B",animation:`dot 1.2s ${i*0.2}s infinite ease-in-out`}}/>)}
     </div>
   );
 }
