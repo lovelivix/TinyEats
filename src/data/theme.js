@@ -1,7 +1,7 @@
 export const THEME = {
-  primary:"#FF6B6B", secondary:"#FFD93D", green:"#6BCB77",
-  blue:"#4D96FF", purple:"#C77DFF",
-  white:"#FFFFFF", bg:"#FFFAF7", surface:"#FFFFFF",
+  primary:"#F25F4C", secondary:"#F2B705", green:"#7FB069",
+  blue:"#6FA3D2", purple:"#C77DFF",
+  white:"#FFFFFF", bg:"#FFF6EB", surface:"#FFFFFF",
   text:"#1A1A2E", textSoft:"#6B7280", border:"#E8EAF0",
   shadow:"0 4px 20px rgba(26,26,46,0.08)", shadowSm:"0 2px 8px rgba(26,26,46,0.06)",
   radius:20, radiusSm:12,
@@ -10,7 +10,7 @@ export const THEME = {
 export const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{background:#FFFAF7;font-family:'Plus Jakarta Sans',sans-serif;}
+  html,body{background:#FFF6EB;font-family:'Plus Jakarta Sans',sans-serif;}
   ::-webkit-scrollbar{display:none;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
   @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
@@ -51,9 +51,9 @@ export const REACTIONS = [
 
 export const STATUS_LEVELS = [
   {min:0,max:0, label:"Not tried",        color:"#E5E7EB",bg:"#F9FAFB",text:"#6B7280"},
-  {min:1,max:1, label:"First taste! 🌱",  color:"#FFD93D",bg:"#FFFBEB",text:"#92400E"},
-  {min:2,max:3, label:"Getting familiar", color:"#6BCB77",bg:"#F0FFF4",text:"#065F46"},
-  {min:4,max:6, label:"Usually accepted", color:"#4D96FF",bg:"#EFF6FF",text:"#1E40AF"},
-  {min:7,max:99,label:"Confident eater!", color:"#FF6B6B",bg:"#FFF1F2",text:"#9F1239"},
+  {min:1,max:1, label:"First taste! 🌱",  color:"#F2B705",bg:"#FFFBEB",text:"#92400E"},
+  {min:2,max:3, label:"Getting familiar", color:"#7FB069",bg:"#F0FFF4",text:"#065F46"},
+  {min:4,max:6, label:"Usually accepted", color:"#6FA3D2",bg:"#EFF6FF",text:"#1E40AF"},
+  {min:7,max:99,label:"Confident eater!", color:"#F25F4C",bg:"#FFF1F2",text:"#9F1239"},
 ];
 export const getStatus = count => STATUS_LEVELS.find(s=>count>=s.min&&count<=s.max)||STATUS_LEVELS[0];
