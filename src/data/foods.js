@@ -374,9 +374,6 @@ export const FOOD_DB = {
 export const STAGE_LABEL = {1:"Purée",2:"Mash/Lumps",3:"Finger Food"};
 export const STAGE_COLOR = {1:"#FEF9C3",2:"#DBEAFE",3:"#DCFCE7"};
 
-function defaultProfile() {
-  return {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],earnedBadges:[],seenBadges:[],allergens:{},journal:{}};
-
 export const ALLERGENS = [
   {id:"peanut",    name:"Peanut",       emoji:"🥜", tip:"Try smooth peanut butter thinned with water or breast milk. Never whole nuts."},
   {id:"egg",       name:"Egg",          emoji:"🥚", tip:"Start with well-cooked scrambled egg or hard boiled. Avoid runny egg."},
