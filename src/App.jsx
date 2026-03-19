@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// TinyEats — Main App
+// LilEats — Main App
 // Modular structure: data in tinyeats-data.js (imported inline)
 // Storage layer abstracted — swap localStorage for Supabase later
 // Auth-ready: email captured at signup, Supabase stub in storage layer
@@ -12,7 +12,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 const THEME = {
   primary:"#FF6B6B", secondary:"#FFD93D", green:"#6BCB77",
   blue:"#4D96FF", purple:"#C77DFF",
-  white:"#FFFFFF", bg:"#F8F9FF", surface:"#FFFFFF",
+  white:"#FFFFFF", bg:"#FFFAF7", surface:"#FFFFFF",
   text:"#1A1A2E", textSoft:"#6B7280", border:"#E8EAF0",
   shadow:"0 4px 20px rgba(26,26,46,0.08)", shadowSm:"0 2px 8px rgba(26,26,46,0.06)",
   radius:20, radiusSm:12,
@@ -21,7 +21,7 @@ const THEME = {
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{background:#F8F9FF;font-family:'Plus Jakarta Sans',sans-serif;}
+  html,body{background:#FFFAF7;font-family:'Plus Jakarta Sans',sans-serif;}
   ::-webkit-scrollbar{display:none;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
   @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
@@ -553,6 +553,33 @@ const RESOURCES = [
   {name:"The LEAP Study",url:"https://www.leapstudy.co.uk",desc:"The landmark study proving early peanut intro reduces allergy risk.",tag:"Research"},
 ];
 
+const FOODS_TO_AVOID = [
+  {emoji:"🍯",name:"Honey",severity:"never",age:"Under 1 year",reason:"Risk of infant botulism — a rare but serious form of food poisoning. Honey can contain Clostridium botulinum spores that a baby's immature gut cannot fight. This includes raw, cooked and pasteurised honey."},
+  {emoji:"🧂",name:"Added salt",severity:"never",age:"Under 1 year",reason:"Baby kidneys cannot process salt. No added salt to cooking, and avoid salty foods like crisps, bacon, processed meats, stock cubes, soy sauce and ready meals. Keep under 1g salt per day."},
+  {emoji:"🍬",name:"Added sugar",severity:"never",age:"Under 1 year",reason:"Damages emerging teeth and encourages a sweet preference. Avoid sweet biscuits, cakes, sweets and sugary drinks. Fruit is fine — its natural sugar is packaged with fibre and nutrients."},
+  {emoji:"🐟",name:"Shark, swordfish & marlin",severity:"never",age:"Under 16 years",reason:"These fish contain high levels of mercury which can harm a developing nervous system. Avoid completely. Tuna is fine in moderation — max 2 portions per week."},
+  {emoji:"🥛",name:"Unpasteurised dairy",severity:"never",age:"Under 1 year",reason:"Unpasteurised (raw) milk and cheese can contain harmful bacteria including Listeria, Salmonella and E. coli. Always choose pasteurised products. Avoid brie, camembert, soft blue cheeses."},
+  {emoji:"🍚",name:"Rice milk",severity:"never",age:"Under 5 years",reason:"Rice milk contains inorganic arsenic which is harmful to young children. Do not use as a milk alternative for under 5s. Oat, soya or unsweetened almond milk are safer alternatives after 1 year."},
+  {emoji:"🧃",name:"Fruit juice & smoothies",severity:"avoid",age:"Under 1 year",reason:"Even unsweetened juice is high in free sugars and damages teeth. If given to older toddlers, dilute heavily (1 part juice to 10 parts water) and only with meals. Whole fruit is always better."},
+  {emoji:"🍵",name:"Tea & coffee",severity:"never",age:"Under 1 year",reason:"Tannins in tea reduce iron absorption. Caffeine affects sleep and development. Never add to food or give as a drink."},
+  {emoji:"🧀",name:"Mould-ripened & blue cheese",severity:"avoid",age:"Under 1 year",reason:"Soft cheeses like brie, camembert and blue varieties may contain Listeria. Hard pasteurised cheeses (cheddar, edam) and pasteurised soft cheeses (cream cheese, cottage cheese) are fine."},
+  {emoji:"🥚",name:"Raw or runny eggs",severity:"avoid",age:"Under 1 year",reason:"Only UK Lion-stamped eggs can be given runny or lightly cooked. All other eggs must be fully cooked with set white and yolk. Never give raw egg in any form."},
+  {emoji:"🫘",name:"Whole nuts",severity:"never",age:"Under 5 years",reason:"A serious choking hazard. Smooth nut butters are fine from 6 months when thinned with water. Never give whole or roughly chopped nuts to under 5s."},
+];
+
+const CHOKING_HAZARDS = [
+  {emoji:"🍇",name:"Whole grapes & cherries",prep:"Always halve lengthways. For under 2s, quarter them. Remove stones completely. The round shape and slippery skin make whole grapes one of the highest-risk choking foods."},
+  {emoji:"🫛",name:"Whole peas",prep:"Lightly mash or crush before serving to young babies. The round shape is a choking risk. Older babies with good chewing can manage whole peas, but always watch closely."},
+  {emoji:"🍒",name:"Cherry tomatoes",prep:"Always halve or quarter. Never serve whole. The skin is slippery and the shape is exactly the wrong size for a baby's airway."},
+  {emoji:"🥕",name:"Raw hard veg",prep:"Raw carrot, apple, celery and similar hard foods must always be cooked until soft or finely grated. Never serve as hard chunks or sticks."},
+  {emoji:"🌽",name:"Popcorn",prep:"Never give to under 5s. Irregular shape, hard pieces and fluffy texture make it impossible to chew safely. A serious choking hazard at any young age."},
+  {emoji:"🍬",name:"Hard sweets & boiled sweets",prep:"Never give to babies or toddlers. Hard round sweets are one of the most common choking hazards in children."},
+  {emoji:"🥜",name:"Whole nuts & seeds",prep:"Never whole under 5 years. Smooth butters are fine from 6 months when properly thinned. Avoid seeded bread for young babies."},
+  {emoji:"🐟",name:"Fish with bones",prep:"Always remove every single bone before serving. Run fingers along the flesh and check twice. Pin bones in salmon are particularly small and hard to spot."},
+  {emoji:"🍓",name:"Large pieces of fruit",prep:"Cut into small pieces appropriate for age. Avoid large wedges of hard fruit. Melon and watermelon should be cut small with rind removed."},
+  {emoji:"🍞",name:"Thick blobs of sticky food",prep:"Thick nut butter, large lumps of cheese or sticky dried fruit can stick in the throat. Always thin nut butters, cut cheese small, and avoid whole dried fruit like raisins for young babies."},
+];
+
 const READINESS_SIGNS = [
   {id:"sit",icon:"🪑",title:"Sits upright with support",desc:"Can hold their head steady — needed to swallow safely."},
   {id:"interest",icon:"👀",title:"Shows interest in food",desc:"Watches you eat, reaches for food, or opens their mouth."},
@@ -643,7 +670,7 @@ const sb = {
 };
 
 // ─── LOCAL SESSION CACHE ──────────────────────────────────────
-const SESSION_KEY = "tinyeats_session";
+const SESSION_KEY = "lileats_session";
 const sessionCache = {
   get: () => { try { const r=localStorage.getItem(SESSION_KEY); return r?JSON.parse(r):null; } catch { return null; } },
   set: (s) => { try { localStorage.setItem(SESSION_KEY,JSON.stringify(s)); } catch {} },
@@ -656,7 +683,7 @@ async function captureEmail(email, babyName) {
   try {
     await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
       method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({email, babyName, source:"TinyEats signup"}),
+      body: JSON.stringify({email, babyName, source:"LilEats signup"}),
     });
   } catch {}
 }
@@ -682,7 +709,7 @@ const css = {
   cardSm: {background:"#FFFFFF",borderRadius:12,boxShadow:"0 2px 8px rgba(26,26,46,0.06)"},
   input:  {width:"100%",padding:"14px 16px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:15,outline:"none",background:"#FFFFFF",color:"#1A1A2E",marginBottom:0,display:"block",boxSizing:"border-box"},
   btnPrimary: {width:"100%",padding:"16px",background:"#FF6B6B",color:"#FFFFFF",borderRadius:14,fontSize:16,fontWeight:700,border:"none",cursor:"pointer"},
-  btnSecondary: {width:"100%",padding:"14px",background:"#F8F9FF",color:"#1A1A2E",borderRadius:14,fontSize:15,fontWeight:600,border:"1.5px solid #E8EAF0",cursor:"pointer"},
+  btnSecondary: {width:"100%",padding:"14px",background:"#FFFAF7",color:"#1A1A2E",borderRadius:14,fontSize:15,fontWeight:600,border:"1.5px solid #E8EAF0",cursor:"pointer"},
   label:  {fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6},
   back:   {padding:"18px 20px 8px",display:"flex",alignItems:"center",gap:6,background:"none",border:"none",fontSize:15,color:"#FF6B6B",fontWeight:700,cursor:"pointer"},
   chip:   {display:"inline-flex",alignItems:"center",padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:600},
@@ -715,10 +742,10 @@ function NewPasswordScreen({token, onDone}) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#F8F9FF 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{textAlign:"center",marginBottom:32}}>
         <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><SpoonLogo size={56}/></div>
-        <div style={{fontSize:34,fontWeight:900,color:"#1A1A2E",letterSpacing:-1}}>Tiny<span style={{color:"#FF6B6B"}}>Eats</span></div>
+        <div style={{fontSize:34,fontWeight:900,color:"#1A1A2E",letterSpacing:-1}}>Lil<span style={{color:"#FF6B6B"}}>Eats</span></div>
       </div>
       <div style={{width:"100%",maxWidth:380,boxSizing:"border-box"}}>
         <div style={{background:"#FFFFFF",borderRadius:24,boxShadow:"0 8px 40px rgba(26,26,46,0.10)",padding:"28px",boxSizing:"border-box"}}>
@@ -817,7 +844,7 @@ function AuthScreen({onAuth}) {
 
   // ── Email confirmation sent screen ───────────────────────────
   if (emailSent) return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#F8F9FF 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
       <div style={{fontSize:64,marginBottom:16}}>📧</div>
       <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Check your email</div>
       <div style={{fontSize:15,color:"#6B7280",lineHeight:1.7,marginBottom:8,maxWidth:320}}>
@@ -834,7 +861,7 @@ function AuthScreen({onAuth}) {
 
   // ── Password reset sent screen ───────────────────────────────
   if (resetSent) return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#F8F9FF 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
       <div style={{fontSize:64,marginBottom:16}}>🔑</div>
       <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Reset link sent!</div>
       <div style={{fontSize:15,color:"#6B7280",lineHeight:1.7,marginBottom:8,maxWidth:320}}>
@@ -851,11 +878,11 @@ function AuthScreen({onAuth}) {
 
   // ── Forgot password screen ───────────────────────────────────
   if (mode === "forgot") return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#F8F9FF 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{textAlign:"center",marginBottom:32}}>
         <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><SpoonLogo size={56}/></div>
         <div style={{fontSize:34,fontWeight:900,color:"#1A1A2E",letterSpacing:-1,marginBottom:4}}>
-          Tiny<span style={{color:"#FF6B6B"}}>Eats</span>
+          Lil<span style={{color:"#FF6B6B"}}>Eats</span>
         </div>
       </div>
       <div style={{width:"100%",maxWidth:380,boxSizing:"border-box"}}>
@@ -881,12 +908,12 @@ function AuthScreen({onAuth}) {
   );
 
   return (
-    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#F8F9FF 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 50%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       {/* Logo */}
       <div style={{textAlign:"center",marginBottom:32}}>
         <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><SpoonLogo size={56}/></div>
         <div style={{fontSize:34,fontWeight:900,color:"#1A1A2E",letterSpacing:-1,marginBottom:4}}>
-          Tiny<span style={{color:"#FF6B6B"}}>Eats</span>
+          Lil<span style={{color:"#FF6B6B"}}>Eats</span>
         </div>
         <div style={{fontSize:14,color:"#9CA3AF"}}>Your calm guide to baby weaning</div>
       </div>
@@ -952,7 +979,14 @@ export default function App() {
   const [overlay, setOverlay] = useState(null);
   const [newBadges, setNewBadges] = useState([]);
   const [appLoading, setAppLoading] = useState(true);
-  const [resetToken, setResetToken] = useState(null); // for password reset flow
+  const [resetToken, setResetToken] = useState(null);
+  const [showBugReport, setShowBugReport] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShowBugReport(true);
+    document.addEventListener("openBugReport", handler);
+    return () => document.removeEventListener("openBugReport", handler);
+  }, []);
   const saveTimer = useRef(null);
 
   // ── Boot: restore session and load data ──────────────────────
@@ -1121,9 +1155,9 @@ export default function App() {
 
   // Loading screen
   if (appLoading) return (
-    <div style={{minHeight:"100vh",background:"#F8F9FF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{display:"flex",justifyContent:"center",marginBottom:8}}><SpoonLogo size={64}/></div>
-      <div style={{fontSize:28,fontWeight:900,color:"#1A1A2E"}}>Tiny<span style={{color:"#FF6B6B"}}>Eats</span></div>
+      <div style={{fontSize:28,fontWeight:900,color:"#1A1A2E"}}>Lil<span style={{color:"#FF6B6B"}}>Eats</span></div>
       <div style={{display:"flex",gap:6,marginTop:20}}>
         {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"#FF6B6B",animation:`dot 1.2s ${i*0.2}s infinite ease-in-out`}}/>)}
       </div>
@@ -1155,13 +1189,14 @@ export default function App() {
   const allFoods = [...new Set([...ALL_FOODS,...(profile.customFoods||[]),...Object.keys(profile.foodLog)])].sort();
 
   return (
-    <div style={{minHeight:"100vh",background:"#F8F9FF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",position:"relative"}}>
       <style>{GLOBAL_CSS}</style>
 
       {/* Badge unlock toast */}
       {newBadges.length > 0 && (
         <BadgeToast badges={newBadges} onClose={() => setNewBadges([])} />
       )}
+      {showBugReport && <BugReportSheet session={session} onClose={()=>setShowBugReport(false)} />}
 
       <div style={{paddingBottom:80}}>
         {screen==="home"    && <HomeScreen    baby={baby} profile={profile} setProfile={setProfile} cw={cw} weaningComplete={weaningComplete} setScreen={setScreen} setOverlay={setOverlay} state={state} />}
@@ -1197,13 +1232,70 @@ export default function App() {
 // ONBOARDING
 // ═══════════════════════════════════════════════════════════════
 function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
-  const [step, setStep] = useState(isAdding ? 1 : 0); // skip email step when adding second baby
+  const [step, setStep] = useState(isAdding ? 1 : -3); // -3,-2,-1 = intro slides, 0=email, 1=baby details
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
   const [photo, setPhoto] = useState(null);
   const [emailError, setEmailError] = useState("");
   const fileRef = useRef();
+
+  const INTRO_SLIDES = [
+    {
+      emoji:"🥦",
+      title:"Welcome to LilEats",
+      subtitle:"Your calm guide to baby weaning",
+      body:"Weaning is one of the most exciting — and nerve-wracking — milestones. LilEats gives you a simple, NHS-safe plan to introduce your baby to food with confidence.",
+      cta:"Next →",
+    },
+    {
+      emoji:"🥄",
+      title:"Two ways to wean",
+      subtitle:"Purée or baby-led — both are great",
+      body:"Purée weaning uses smooth blended food on a spoon. Baby-led weaning (BLW) offers soft finger foods for baby to self-feed. Many families combine both — there's no wrong approach!",
+      cta:"Next →",
+    },
+    {
+      emoji:"📋",
+      title:"How LilEats works",
+      subtitle:"Three simple things",
+      body:"1. Follow the 6-week plan — foods and textures are introduced in the right order.\n\n2. Log what your baby tries in the food tracker.\n\n3. Check the allergen guide when introducing high-risk foods.",
+      cta:"Let's get started →",
+    },
+  ];
+
+  // Show intro slides
+  if (step < 0 && !isAdding) {
+    const slide = INTRO_SLIDES[step + 3];
+    const isLast = step === -1;
+    const progress = step + 3; // 0, 1, 2
+
+    return (
+      <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#FFF5F5 0%,#FFFAF7 60%,#FFF8F0 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+        {/* Progress dots */}
+        <div style={{display:"flex",gap:6,marginBottom:40}}>
+          {[0,1,2].map(i=>(
+            <div key={i} style={{width:i===progress?24:8,height:8,borderRadius:4,background:i===progress?"#FF6B6B":"#E8EAF0",transition:"all 0.3s"}}/>
+          ))}
+        </div>
+
+        <div style={{fontSize:72,marginBottom:20,lineHeight:1}}>{slide.emoji}</div>
+        <div style={{fontSize:26,fontWeight:900,color:"#1A1A2E",letterSpacing:-0.5,marginBottom:8,lineHeight:1.2}}>{slide.title}</div>
+        <div style={{fontSize:14,color:"#FF6B6B",fontWeight:600,marginBottom:20}}>{slide.subtitle}</div>
+        <div style={{fontSize:15,color:"#6B7280",lineHeight:1.8,maxWidth:320,whiteSpace:"pre-line",marginBottom:40}}>{slide.body}</div>
+
+        <button onClick={()=>setStep(step+1)} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:14,padding:"16px 40px",fontSize:16,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(255,107,107,0.35)",fontFamily:"inherit"}}>
+          {slide.cta}
+        </button>
+
+        {step===-3&&(
+          <button onClick={()=>setStep(1)} style={{background:"none",border:"none",color:"#9CA3AF",fontSize:13,cursor:"pointer",marginTop:16,fontFamily:"inherit"}}>
+            Skip intro
+          </button>
+        )}
+      </div>
+    );
+  }
 
   const handlePhotoUpload = e => {
     const file = e.target.files[0];
@@ -1228,7 +1320,7 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"#F8F9FF",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
       <style>{GLOBAL_CSS}</style>
 
       {/* Background blobs */}
@@ -1249,7 +1341,7 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
               </svg>
             </div>
           <h1 style={{fontSize:38,fontWeight:900,color:"#1A1A2E",letterSpacing:"-1.5px",lineHeight:1}}>
-            Tiny<span style={{color:"#FF6B6B"}}>Eats</span>
+            Lil<span style={{color:"#FF6B6B"}}>Eats</span>
           </h1>
           {!isAdding && <p style={{fontSize:15,color:"#6B7280",marginTop:8}}>Your calm guide to baby weaning</p>}
         </div>
@@ -1289,7 +1381,7 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
 
             {/* Photo upload */}
             <div style={{display:"flex",justifyContent:"center",marginBottom:20}}>
-              <button onClick={()=>fileRef.current?.click()} style={{width:80,height:80,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#F8F9FF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
+              <button onClick={()=>fileRef.current?.click()} style={{width:80,height:80,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFFAF7",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
                 {photo
                   ? <img src={photo} alt="Baby" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
                   : <div style={{textAlign:"center"}}><div style={{fontSize:24}}>📷</div><div style={{fontSize:10,color:"#9CA3AF",marginTop:2}}>Add photo</div></div>
@@ -1326,7 +1418,7 @@ function ReadinessScreen({baby, months, onStart}) {
   const [checked, setChecked] = useState({});
   const allChecked = READINESS_SIGNS.every(s => checked[s.id]);
   return (
-    <div style={{minHeight:"100vh",background:"#F8F9FF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",paddingBottom:32}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",paddingBottom:32}}>
       <style>{GLOBAL_CSS}</style>
       <div style={{padding:"28px 20px 0",textAlign:"center"}}>
         <div style={{display:"inline-flex",alignItems:"center",gap:8,marginBottom:4}}>
@@ -1336,7 +1428,7 @@ function ReadinessScreen({baby, months, onStart}) {
                 <rect x="21.5" y="25" width="5" height="16" rx="2.5" fill="white"/>
               </svg>
             </div>
-          <span style={{fontSize:24,fontWeight:900,letterSpacing:"-0.5px"}}><span style={{color:"#1A1A2E"}}>Tiny</span><span style={{color:"#FF6B6B"}}>Eats</span></span>
+          <span style={{fontSize:24,fontWeight:900,letterSpacing:"-0.5px"}}><span style={{color:"#1A1A2E"}}>Lil</span><span style={{color:"#FF6B6B"}}>Eats</span></span>
         </div>
       </div>
       <div style={{margin:"20px 16px",background:"linear-gradient(135deg,#fff,#FFF0F0)",borderRadius:20,padding:"20px",border:"1px solid #FFE0E0",boxShadow:"0 4px 20px rgba(255,107,107,0.08)"}}>
@@ -1410,7 +1502,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                 <rect x="21.5" y="25" width="5" height="16" rx="2.5" fill="white"/>
               </svg>
             </div>
-            <span style={{fontSize:20,fontWeight:900,letterSpacing:"-0.5px"}}><span style={{color:"#1A1A2E"}}>Tiny</span><span style={{color:"#FF6B6B"}}>Eats</span></span>
+            <span style={{fontSize:20,fontWeight:900,letterSpacing:"-0.5px"}}><span style={{color:"#1A1A2E"}}>Lil</span><span style={{color:"#FF6B6B"}}>Eats</span></span>
           </div>
           <p style={{fontSize:13,color:"#6B7280",marginTop:4}}>Hi! Let's feed <strong style={{color:"#1A1A2E"}}>{baby.name}</strong> today 👋</p>
         </div>
@@ -1529,7 +1621,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               ) : (
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   {todayEntries.map((entry,idx)=>(
-                    <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#F8F9FF",borderRadius:10,padding:"8px 10px"}}>
+                    <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#FFFAF7",borderRadius:10,padding:"8px 10px"}}>
                       <div style={{flex:1}}>
                         <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:entry.notes?3:0}}>
                           {entry.foods?.map(f=>(
@@ -1588,7 +1680,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
             <div style={{display:"flex",gap:8}}>
               {stale.map(f=>(
                 <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
-                  style={{display:"flex",flexDirection:"column",alignItems:"center",background:"#F8F9FF",border:"none",borderRadius:12,padding:"8px",cursor:"pointer",minWidth:62}}>
+                  style={{display:"flex",flexDirection:"column",alignItems:"center",background:"#FFFAF7",border:"none",borderRadius:12,padding:"8px",cursor:"pointer",minWidth:62}}>
                   <span style={{fontSize:24}}>{fe(f)}</span>
                   <span style={{fontSize:10,color:"#1A1A2E",marginTop:3,fontWeight:600}}>{cap(f)}</span>
                 </button>
@@ -1661,7 +1753,7 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
   const colors = ["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#C77DFF"];
 
   return (
-    <div style={{minHeight:"100vh",background:"#F8F9FF",position:"relative",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"#FFFAF7",position:"relative",overflow:"hidden"}}>
       {showConfetti && (
         <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:200}}>
           {[...Array(30)].map((_,i)=>(
@@ -1787,7 +1879,10 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                   <div>
                     <div style={{fontSize:13,fontWeight:600,color:"#1A1A2E"}}>{cap(f)}</div>
                     <span style={{...css.chip,background:st.bg,color:st.text,fontSize:10,padding:"2px 7px",marginTop:3}}>{st.label}</span>
-                    {hasDB&&<div style={{fontSize:10,color:"#FF6B6B",fontWeight:600,marginTop:3}}>{FOOD_DB[f].recipes.length} recipes →</div>}
+                    <div style={{fontSize:10,color:"#6B7280",marginTop:3}}>
+                      {profile.activeWeek===0?"🥣 Purée":profile.activeWeek===1?"🥣 Purée or mash":profile.activeWeek===2?"🥄 Mash or soft lumps":profile.activeWeek===3?"✋ Mash + finger food":profile.activeWeek===4?"✋ Chopped or finger food":"✋ Family texture"}
+                    </div>
+                    {hasDB&&<div style={{fontSize:10,color:"#FF6B6B",fontWeight:600,marginTop:2}}>{FOOD_DB[f].recipes.length} recipes →</div>}
                   </div>
                 </button>
               );
@@ -1851,10 +1946,14 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                 </button>
                 {isExpanded && (
                   <div style={{background:bgColor,border:`1.5px solid ${borderColor}`,borderTop:"none",borderRadius:"0 0 16px 16px",padding:"10px 14px 14px"}}>
-                    <div style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:10}}>{a.tip}</div>
+                    <div style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:8}}>{a.tip}</div>
+                    <div style={{background:"#FFF8E7",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
+                      <span style={{fontSize:14,flexShrink:0}}>☀️</span>
+                      <div style={{fontSize:11,color:"#92400E",lineHeight:1.6}}><strong>Introduce in the morning</strong> — this gives you the whole day to watch for any reactions before bedtime.</div>
+                    </div>
 
                     {!isIntroduced && (
-                      <div style={{background:"#F8F9FF",borderRadius:10,padding:"10px",textAlign:"center"}}>
+                      <div style={{background:"#FFFAF7",borderRadius:10,padding:"10px",textAlign:"center"}}>
                         <div style={{fontSize:12,color:"#9CA3AF"}}>Not started yet.</div>
                         <div style={{fontSize:11,color:"#9CA3AF",marginTop:3}}>Log this food in the tracker or meal plan and the watch will start automatically.</div>
                         <button onClick={()=>startAllergenIntro(a.id)} style={{marginTop:8,background:"none",border:"1.5px solid #E8EAF0",borderRadius:8,padding:"6px 12px",fontSize:11,color:"#9CA3AF",cursor:"pointer"}}>
@@ -2150,6 +2249,7 @@ function MealCard({meal, selected}) {
 // ═══════════════════════════════════════════════════════════════
 function TrackerScreen({profile, allFoods, setOverlay}) {
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const tried    = allFoods.filter(f=>(profile.foodLog[f]?.length||0)>0).length;
   const confident = allFoods.filter(f=>(profile.foodLog[f]?.length||0)>=7).length;
   const filtered = allFoods.filter(f=>{
@@ -2157,7 +2257,7 @@ function TrackerScreen({profile, allFoods, setOverlay}) {
     if(filter==="tried")return c>0;
     if(filter==="not")return c===0;
     return true;
-  });
+  }).filter(f=>!search||f.includes(search.toLowerCase()));
   return(
     <div className="fadeUp">
       <div style={{padding:"22px 20px 14px"}}>
@@ -2165,13 +2265,24 @@ function TrackerScreen({profile, allFoods, setOverlay}) {
           <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E"}}>Food Tracker</div>
           <button onClick={()=>setOverlay({type:"addFood"})} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 12px rgba(255,107,107,0.3)"}}>+ Add food</button>
         </div>
-        <div style={{display:"flex",gap:8}}>
+        <div style={{display:"flex",gap:8,marginBottom:14}}>
           {[{n:tried,l:"tried",c:"#FF6B6B"},{n:confident,l:"confident",c:"#6BCB77"},{n:allFoods.length-tried,l:"to try",c:"#4D96FF"}].map(x=>(
             <div key={x.l} style={{...css.cardSm,padding:"8px 12px",flex:1,textAlign:"center"}}>
               <div style={{fontSize:22,fontWeight:800,color:x.c}}>{x.n}</div>
               <div style={{fontSize:11,color:"#6B7280"}}>{x.l}</div>
             </div>
           ))}
+        </div>
+        {/* Search bar */}
+        <div style={{position:"relative",marginBottom:14}}>
+          <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,pointerEvents:"none"}}>🔍</span>
+          <input
+            value={search}
+            onChange={e=>setSearch(e.target.value)}
+            placeholder="Search foods…"
+            style={{width:"100%",padding:"10px 12px 10px 34px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:14,outline:"none",background:"#FFFFFF",color:"#1A1A2E",boxSizing:"border-box"}}
+          />
+          {search&&<button onClick={()=>setSearch("")} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",fontSize:16,color:"#9CA3AF",cursor:"pointer"}}>×</button>}
         </div>
       </div>
       <div style={{padding:"0 16px 32px"}}>
@@ -2257,7 +2368,7 @@ function AllergenScreen({profile, setProfile}) {
           <div style={{fontSize:20,fontWeight:800,color:"#DC2626"}}>{reactionCount}</div>
           <div style={{fontSize:9,color:"#DC2626",fontWeight:600}}>had reaction</div>
         </div>
-        <div style={{background:"#F8F9FF",borderRadius:14,padding:"10px",textAlign:"center"}}>
+        <div style={{background:"#FFFAF7",borderRadius:14,padding:"10px",textAlign:"center"}}>
           <div style={{fontSize:20,fontWeight:800,color:"#6B7280"}}>{9-safeCount-reactionCount}</div>
           <div style={{fontSize:9,color:"#6B7280",fontWeight:600}}>remaining</div>
         </div>
@@ -2303,7 +2414,11 @@ function AllergenScreen({profile, setProfile}) {
 
               {isExpanded && (
                 <div style={{background:bgColor,border:`1.5px solid ${borderColor}`,borderTop:"none",borderRadius:"0 0 16px 16px",padding:"12px 16px 16px",marginTop:-8}}>
-                  <div style={{fontSize:13,color:"#6B7280",lineHeight:1.6,marginBottom:12}}>{a.tip}</div>
+                  <div style={{fontSize:13,color:"#6B7280",lineHeight:1.6,marginBottom:8}}>{a.tip}</div>
+                  <div style={{background:"#FFF8E7",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
+                    <span style={{fontSize:14,flexShrink:0}}>☀️</span>
+                    <div style={{fontSize:11,color:"#92400E",lineHeight:1.6}}><strong>Introduce in the morning</strong> — this gives you the whole day to watch for any reactions before bedtime.</div>
+                  </div>
 
                   {!isIntroduced && (
                     <button onClick={()=>startIntro(a.id)} style={{width:"100%",background:"#FF6B6B",color:"white",border:"none",borderRadius:12,padding:"12px",fontSize:14,fontWeight:700,cursor:"pointer"}}>
@@ -2458,7 +2573,7 @@ function JournalScreen({profile, setProfile, allFoods}) {
         </div>
 
         {selectedEntries.length === 0 ? (
-          <div style={{background:"#F8F9FF",borderRadius:16,padding:"24px",textAlign:"center"}}>
+          <div style={{background:"#FFFAF7",borderRadius:16,padding:"24px",textAlign:"center"}}>
             <div style={{fontSize:32,marginBottom:8}}>📝</div>
             <div style={{fontSize:13,color:"#9CA3AF"}}>No entries yet — tap + Add to log a food</div>
           </div>
@@ -2597,7 +2712,7 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
 
         {/* Reaction toggle */}
         <div style={{marginBottom:14}}>
-          <button onClick={()=>setReaction(r=>!r)} style={{display:"flex",alignItems:"center",gap:8,background:reaction?"#FFF1F2":"#F8F9FF",border:`1.5px solid ${reaction?"#FF6B6B":"#E8EAF0"}`,borderRadius:12,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left"}}>
+          <button onClick={()=>setReaction(r=>!r)} style={{display:"flex",alignItems:"center",gap:8,background:reaction?"#FFF1F2":"#FFFAF7",border:`1.5px solid ${reaction?"#FF6B6B":"#E8EAF0"}`,borderRadius:12,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left"}}>
             <span style={{fontSize:18}}>⚠️</span>
             <div>
               <div style={{fontSize:13,fontWeight:600,color:reaction?"#DC2626":"#374151"}}>Mark as reaction</div>
@@ -2635,7 +2750,7 @@ function LearnScreen() {
       </div>
       <div style={{padding:"0 16px 0"}}>
         <div style={{display:"flex",background:"#F3F4F6",borderRadius:14,padding:4,marginBottom:14}}>
-          {[["guide","📚 Guide"],["equipment","🛒 Kit"],["faq","❓ FAQ"],["links","🔗 Links"]].map(([t,l])=>(
+          {[["guide","📚 Guide"],["safety","⚠️ Safety"],["equipment","🛒 Kit"],["faq","❓ FAQ"],["links","🔗 Links"]].map(([t,l])=>(
             <button key={t} onClick={()=>{setTab(t);setExpanded(null);}} style={{flex:1,padding:"8px 2px",border:"none",borderRadius:10,fontSize:12,fontWeight:600,cursor:"pointer",background:tab===t?"#FFFFFF":"transparent",color:tab===t?"#1A1A2E":"#6B7280",boxShadow:tab===t?"0 2px 8px rgba(26,26,46,0.08)":"none",transition:"all 0.15s"}}>{l}</button>
           ))}
         </div>
@@ -2657,6 +2772,55 @@ function LearnScreen() {
                 <div style={{borderTop:"1px solid #F3F4F6",padding:"14px 16px"}} className="fadeUp">
                   <p style={{fontSize:13,color:"#374151",lineHeight:1.8,whiteSpace:"pre-line"}}>{section.body}</p>
                   <div style={{background:"#EFF6FF",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#1E40AF",marginTop:10}}>✓ NHS Start4Life & peer-reviewed guidance</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab==="safety"&&(
+        <div style={{padding:"0 16px 32px"}}>
+          <div style={{background:"#FFF1F2",borderRadius:14,padding:"12px 14px",marginBottom:14,border:"1px solid #FFC9C9",display:"flex",gap:8,alignItems:"flex-start"}}>
+            <span style={{fontSize:18,flexShrink:0}}>⚠️</span>
+            <div style={{fontSize:13,color:"#374151",lineHeight:1.7}}>Based on <strong>NHS guidance</strong>. When in doubt, always check with your health visitor or GP.</div>
+          </div>
+
+          <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E",marginBottom:10,marginTop:4}}>Foods to avoid</div>
+          {FOODS_TO_AVOID.map((item,i)=>(
+            <div key={i} style={{...css.card,marginBottom:8,overflow:"hidden"}}>
+              <button onClick={()=>setExpanded(expanded===`avoid${i}`?null:`avoid${i}`)} style={{width:"100%",display:"flex",alignItems:"center",padding:"14px",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
+                <span style={{fontSize:24,marginRight:12,flexShrink:0}}>{item.emoji}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:2}}>{item.name}</div>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    <span style={{...css.chip,background:item.severity==="never"?"#FFF1F2":"#FFFBEB",color:item.severity==="never"?"#DC2626":"#92400E",fontSize:10,padding:"2px 8px"}}>{item.severity==="never"?"❌ Never":"⚠️ Avoid"}</span>
+                    <span style={{...css.chip,background:"#F3F4F6",color:"#6B7280",fontSize:10,padding:"2px 8px"}}>{item.age}</span>
+                  </div>
+                </div>
+                <span style={{color:"#FF6B6B",fontSize:18,transform:expanded===`avoid${i}`?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.2s",display:"inline-block",flexShrink:0}}>›</span>
+              </button>
+              {expanded===`avoid${i}`&&(
+                <div style={{padding:"0 14px 14px"}}>
+                  <p style={{fontSize:13,color:"#374151",lineHeight:1.7}}>{item.reason}</p>
+                </div>
+              )}
+            </div>
+          ))}
+
+          <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E",marginBottom:10,marginTop:20}}>Choking hazards — how to prepare safely</div>
+          {CHOKING_HAZARDS.map((item,i)=>(
+            <div key={i} style={{...css.card,marginBottom:8,overflow:"hidden"}}>
+              <button onClick={()=>setExpanded(expanded===`choke${i}`?null:`choke${i}`)} style={{width:"100%",display:"flex",alignItems:"center",padding:"14px",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
+                <span style={{fontSize:24,marginRight:12,flexShrink:0}}>{item.emoji}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E"}}>{item.name}</div>
+                </div>
+                <span style={{color:"#FF6B6B",fontSize:18,transform:expanded===`choke${i}`?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.2s",display:"inline-block",flexShrink:0}}>›</span>
+              </button>
+              {expanded===`choke${i}`&&(
+                <div style={{padding:"0 14px 14px"}}>
+                  <p style={{fontSize:13,color:"#374151",lineHeight:1.7}}>{item.prep}</p>
                 </div>
               )}
             </div>
@@ -2718,7 +2882,7 @@ function LearnScreen() {
                   <span style={{...css.chip,background:tagColor,color:tagText,fontSize:10,flexShrink:0}}>{res.tag}</span>
                 </div>
                 <div style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:10}}>{res.desc}</div>
-                <button onClick={()=>window.open(res.url,"_blank")} style={{background:"#F8F9FF",border:"1px solid #E8EAF0",borderRadius:8,padding:"7px 12px",fontSize:12,color:"#FF6B6B",fontWeight:600,cursor:"pointer"}}>Open website →</button>
+                <button onClick={()=>window.open(res.url,"_blank")} style={{background:"#FFFAF7",border:"1px solid #E8EAF0",borderRadius:8,padding:"7px 12px",fontSize:12,color:"#FF6B6B",fontWeight:600,cursor:"pointer"}}>Open website →</button>
               </div>
             );
           })}
@@ -2740,7 +2904,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
   const days = last ? daysSince(last.date) : null;
   const lastReaction = last ? REACTIONS.find(r=>r.id===last.reaction) : null;
   return(
-    <div style={{position:"fixed",inset:0,background:"#F8F9FF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 20px",textAlign:"center"}} className="fadeUp">
@@ -2781,7 +2945,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {[...log].reverse().slice(0,5).map((e,i)=>{
                   const r=REACTIONS.find(x=>x.id===e.reaction);
-                  return<span key={i} style={{fontSize:11,background:"#F8F9FF",borderRadius:8,padding:"3px 8px",color:"#6B7280"}}>{r?.emoji} {fmtDate(e.date)}</span>;
+                  return<span key={i} style={{fontSize:11,background:"#FFFAF7",borderRadius:8,padding:"3px 8px",color:"#6B7280"}}>{r?.emoji} {fmtDate(e.date)}</span>;
                 })}
               </div>
             </div>
@@ -2792,7 +2956,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
       {/* Prep & Recipes */}
       {!db?(
         <div style={{padding:"0 16px 32px"}}>
-          <div style={{background:"#F8F9FF",borderRadius:12,padding:"16px",fontSize:13,color:"#6B7280",lineHeight:1.7}}>
+          <div style={{background:"#FFFAF7",borderRadius:12,padding:"16px",fontSize:13,color:"#6B7280",lineHeight:1.7}}>
             No detailed guide yet for {cap(food)}. Use the log above to track when you offer it.
           </div>
         </div>
@@ -2898,7 +3062,7 @@ function ProgressOverlay({profile, allFoods, onClose}) {
   ];
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#F8F9FF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 32px"}} className="fadeUp">
@@ -2940,7 +3104,7 @@ function ProgressOverlay({profile, allFoods, onClose}) {
             {allergens.map(a=>{
               const done=(log[a]?.length||0)>0;
               return(
-                <div key={a} style={{display:"flex",alignItems:"center",gap:5,background:done?"#F0FFF4":"#F8F9FF",borderRadius:20,padding:"5px 10px",border:`1px solid ${done?"#6BCB77":"#E8EAF0"}`}}>
+                <div key={a} style={{display:"flex",alignItems:"center",gap:5,background:done?"#F0FFF4":"#FFFAF7",borderRadius:20,padding:"5px 10px",border:`1px solid ${done?"#6BCB77":"#E8EAF0"}`}}>
                   <span style={{fontSize:12}}>{fe(a)}</span>
                   <span style={{fontSize:11,fontWeight:600,color:done?"#065F46":"#9CA3AF"}}>{cap(a)}</span>
                   {done&&<span style={{fontSize:11,color:"#6BCB77"}}>✓</span>}
@@ -3056,7 +3220,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
   };
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#F8F9FF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFAF7",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 40px"}} className="fadeUp">
@@ -3087,7 +3251,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
           <div style={css.label}>Edit {baby.name}</div>
           <div style={{...css.card,padding:"18px"}}>
             <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
-              <button onClick={()=>fileRef.current?.click()} style={{width:70,height:70,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#F8F9FF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+              <button onClick={()=>fileRef.current?.click()} style={{width:70,height:70,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFFAF7",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
                 {photo?<img src={photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{textAlign:"center"}}><div style={{fontSize:22}}>📷</div><div style={{fontSize:9,color:"#9CA3AF"}}>Change</div></div>}
               </button>
               <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
@@ -3110,7 +3274,10 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
           </button>
         )}
 
-        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16}}>
+        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16,display:"flex",flexDirection:"column",gap:8}}>
+          <button onClick={()=>{ onClose(); setTimeout(()=>document.dispatchEvent(new CustomEvent("openBugReport")),50); }} style={{...css.btnSecondary,color:"#6B7280",fontSize:14}}>
+            🐛 Report a bug
+          </button>
           <button onClick={onSignOut} style={{...css.btnSecondary,color:"#6B7280",fontSize:14}}>
             Sign out
           </button>
@@ -3123,6 +3290,64 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
 // ═══════════════════════════════════════════════════════════════
 // BADGE TOAST
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// BUG REPORT
+// ═══════════════════════════════════════════════════════════════
+function BugReportSheet({session, onClose}) {
+  const [description, setDescription] = useState("");
+  const [screen, setScreen] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const submit = async () => {
+    if (!description.trim()) return;
+    setLoading(true);
+    try {
+      const body = `**Description:**\n${description}\n\n**Screen/area:**\n${screen||"Not specified"}\n\n**User:**\n${session?.email||"Unknown"}\n\n**App:**\nLilEats v1`;
+      await fetch("https://api.github.com/repos/lovelivix/TinyEats/issues", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","Authorization":"token ghp_placeholder"},
+        body: JSON.stringify({title:`Bug: ${description.slice(0,60)}`, body, labels:["bug"]}),
+      });
+      setSent(true);
+    } catch {}
+    setLoading(false);
+  };
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:300,display:"flex",alignItems:"flex-end",maxWidth:430,margin:"0 auto"}}>
+      <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",padding:"20px 20px 40px"}}>
+        {sent ? (
+          <div style={{textAlign:"center",padding:"24px 0"}}>
+            <div style={{fontSize:48,marginBottom:12}}>✅</div>
+            <div style={{fontSize:18,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Bug reported!</div>
+            <div style={{fontSize:13,color:"#6B7280",marginBottom:24}}>Thanks — we'll look into it.</div>
+            <button onClick={onClose} style={{background:"#FF6B6B",color:"#fff",border:"none",borderRadius:12,padding:"12px 32px",fontSize:14,fontWeight:700,cursor:"pointer"}}>Done</button>
+          </div>
+        ) : (
+          <>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div style={{fontSize:16,fontWeight:800,color:"#1A1A2E"}}>🐛 Report a bug</div>
+              <button onClick={onClose} style={{background:"#F3F4F6",border:"none",borderRadius:8,width:28,height:28,fontSize:16,cursor:"pointer"}}>×</button>
+            </div>
+            <div style={{marginBottom:12}}>
+              <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6}}>What happened?</label>
+              <textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder="Describe what went wrong…" style={{width:"100%",padding:"12px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",resize:"none",height:100,fontFamily:"inherit",boxSizing:"border-box"}}/>
+            </div>
+            <div style={{marginBottom:20}}>
+              <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6}}>Which screen? (optional)</label>
+              <input value={screen} onChange={e=>setScreen(e.target.value)} placeholder="e.g. Food tracker, Journal, Plan…" style={{width:"100%",padding:"10px 12px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+            <button onClick={submit} disabled={!description.trim()||loading} style={{width:"100%",padding:"14px",background:description.trim()?"#FF6B6B":"#E8EAF0",color:description.trim()?"#fff":"#9CA3AF",borderRadius:12,border:"none",fontSize:15,fontWeight:700,cursor:description.trim()?"pointer":"default"}}>
+              {loading?"Sending…":"Send report"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function BadgeToast({badges, onClose}) {
   useEffect(()=>{const t=setTimeout(onClose,4000);return()=>clearTimeout(t);},[]);
   const b = badges[0];
@@ -3149,7 +3374,7 @@ function ReactionSheet({food, log, onLog, onClose}) {
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{GLOBAL_CSS}</style>
-      <div style={{background:"#F8F9FF",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
+      <div style={{background:"#FFFAF7",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         <div style={{textAlign:"center",marginBottom:18}}>
           <div style={{fontSize:52}}>{fe(food)}</div>
@@ -3175,7 +3400,7 @@ function AddFoodSheet({onAdd, onClose}) {
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{GLOBAL_CSS}</style>
-      <div style={{background:"#F8F9FF",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
+      <div style={{background:"#FFFAF7",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         <div style={{fontSize:20,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Add a custom food</div>
         <p style={{fontSize:13,color:"#6B7280",marginBottom:16,lineHeight:1.6}}>Can't find a food in the list? Add it here and track it like any other.</p>
