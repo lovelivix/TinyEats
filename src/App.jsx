@@ -140,7 +140,7 @@ const css = {
   cardSm: {background:"#FFFFFF",borderRadius:12,boxShadow:"0 2px 8px rgba(26,26,46,0.06)"},
   input:  {width:"100%",padding:"14px 16px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:15,outline:"none",background:"#FFFFFF",color:"#1A1A2E",marginBottom:0,display:"block",boxSizing:"border-box"},
   btnPrimary: {width:"100%",padding:"16px",background:"#F25F4C",color:"#FFFFFF",borderRadius:14,fontSize:16,fontWeight:700,border:"none",cursor:"pointer"},
-  btnSecondary: {width:"100%",padding:"14px",background:"#FFF6EB",color:"#1A1A2E",borderRadius:14,fontSize:15,fontWeight:600,border:"1.5px solid #E8EAF0",cursor:"pointer"},
+  btnSecondary: {width:"100%",padding:"14px",background:"#FFFFFF",color:"#1A1A2E",borderRadius:14,fontSize:15,fontWeight:600,border:"1.5px solid #E8EAF0",cursor:"pointer"},
   label:  {fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6},
   back:   {padding:"18px 20px 8px",display:"flex",alignItems:"center",gap:6,background:"none",border:"none",fontSize:15,color:"#F25F4C",fontWeight:700,cursor:"pointer"},
   chip:   {display:"inline-flex",alignItems:"center",padding:"4px 12px",borderRadius:20,fontSize:12,fontWeight:600},
@@ -173,7 +173,7 @@ function NewPasswordScreen({token, onDone}) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{textAlign:"center",marginBottom:32}}>
         <img src="/logo-full.png" alt="LilEats" style={{height:48,objectFit:"contain"}}/>
       </div>
@@ -274,7 +274,7 @@ function AuthScreen({onAuth}) {
 
   // ── Email confirmation sent screen ───────────────────────────
   if (emailSent) return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
       <div style={{fontSize:64,marginBottom:16}}>📧</div>
       <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Check your email</div>
       <div style={{fontSize:15,color:"#6B7280",lineHeight:1.7,marginBottom:8,maxWidth:320}}>
@@ -291,7 +291,7 @@ function AuthScreen({onAuth}) {
 
   // ── Password reset sent screen ───────────────────────────────
   if (resetSent) return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
       <div style={{fontSize:64,marginBottom:16}}>🔑</div>
       <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:8}}>Reset link sent!</div>
       <div style={{fontSize:15,color:"#6B7280",lineHeight:1.7,marginBottom:8,maxWidth:320}}>
@@ -308,7 +308,7 @@ function AuthScreen({onAuth}) {
 
   // ── Forgot password screen ───────────────────────────────────
   if (mode === "forgot") return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{textAlign:"center",marginBottom:32}}>
         <img src="/logo-full.png" alt="LilEats" style={{height:48,objectFit:"contain",marginBottom:4}}/>
       </div>
@@ -335,7 +335,7 @@ function AuthScreen({onAuth}) {
   );
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       {/* Logo */}
       <div style={{textAlign:"center",marginBottom:32}}>
         <img src="/logo-full.png" alt="LilEats" style={{height:52,objectFit:"contain",marginBottom:4}}/>
@@ -579,7 +579,7 @@ export default function App() {
 
   // Loading screen
   if (appLoading) return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <img src="/logo-full.png" alt="LilEats" style={{height:52,objectFit:"contain",marginBottom:8}}/>
       <div style={{display:"flex",gap:6,marginTop:20}}>
         {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"#F25F4C",animation:`dot 1.2s ${i*0.2}s infinite ease-in-out`}}/>)}
@@ -612,7 +612,7 @@ export default function App() {
   const allFoods = [...new Set([...ALL_FOODS,...(profile.customFoods||[]),...Object.keys(profile.foodLog)])].sort();
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",position:"relative"}}>
       <style>{GLOBAL_CSS}</style>
 
       {/* Badge unlock toast */}
@@ -694,7 +694,7 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
     const progress = step + 3; // 0, 1, 2
 
     return (
-      <div style={{minHeight:"100vh",background:"#FFF6EB",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
+      <div style={{minHeight:"100vh",background:"#FFFFFF",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:"'Plus Jakarta Sans',sans-serif",textAlign:"center"}}>
         {/* Progress dots */}
         <div style={{display:"flex",gap:6,marginBottom:40}}>
           {[0,1,2].map(i=>(
@@ -743,7 +743,7 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
   };
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
       <style>{GLOBAL_CSS}</style>
 
       {/* Background blobs */}
@@ -796,7 +796,7 @@ function OnboardingScreen({onComplete, isAdding, onBack, onEmailCapture}) {
 
             {/* Photo upload */}
             <div style={{display:"flex",justifyContent:"center",marginBottom:20}}>
-              <button onClick={()=>fileRef.current?.click()} style={{width:80,height:80,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFF6EB",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
+              <button onClick={()=>fileRef.current?.click()} style={{width:80,height:80,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFFFFF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
                 {photo
                   ? <img src={photo} alt="Baby" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
                   : <div style={{textAlign:"center"}}><div style={{fontSize:24}}>📷</div><div style={{fontSize:10,color:"#9CA3AF",marginTop:2}}>Add photo</div></div>
@@ -833,7 +833,7 @@ function ReadinessScreen({baby, months, onStart}) {
   const [checked, setChecked] = useState({});
   const allChecked = READINESS_SIGNS.every(s => checked[s.id]);
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",paddingBottom:32}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",paddingBottom:32}}>
       <style>{GLOBAL_CSS}</style>
       <div style={{padding:"28px 20px 0",textAlign:"center"}}>
         <div style={{display:"inline-flex",alignItems:"center",gap:8,marginBottom:4}}>
@@ -1025,7 +1025,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               ) : (
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   {todayEntries.map((entry,idx)=>(
-                    <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#FFF6EB",borderRadius:10,padding:"8px 10px"}}>
+                    <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#FFFFFF",borderRadius:10,padding:"8px 10px"}}>
                       <div style={{flex:1}}>
                         <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:entry.notes?3:0}}>
                           {entry.foods?.map(f=>(
@@ -1084,7 +1084,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
             <div style={{display:"flex",gap:8}}>
               {stale.map(f=>(
                 <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
-                  style={{display:"flex",flexDirection:"column",alignItems:"center",background:"#FFF6EB",border:"none",borderRadius:12,padding:"8px",cursor:"pointer",minWidth:62}}>
+                  style={{display:"flex",flexDirection:"column",alignItems:"center",background:"#FFFFFF",border:"none",borderRadius:12,padding:"8px",cursor:"pointer",minWidth:62}}>
                   <span style={{fontSize:24}}>{fe(f)}</span>
                   <span style={{fontSize:10,color:"#1A1A2E",marginTop:3,fontWeight:600}}>{cap(f)}</span>
                 </button>
@@ -1157,7 +1157,7 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
   const colors = ["#F25F4C","#F2B705","#7FB069","#6FA3D2","#C77DFF"];
 
   return (
-    <div style={{minHeight:"100vh",background:"#FFF6EB",position:"relative",overflow:"hidden"}}>
+    <div style={{minHeight:"100vh",background:"#FFFFFF",position:"relative",overflow:"hidden"}}>
       {showConfetti && (
         <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:200}}>
           {[...Array(30)].map((_,i)=>(
@@ -1351,13 +1351,13 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                 {isExpanded && (
                   <div style={{background:bgColor,border:`1.5px solid ${borderColor}`,borderTop:"none",borderRadius:"0 0 16px 16px",padding:"10px 14px 14px"}}>
                     <div style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:8}}>{a.tip}</div>
-                    <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
+                    <div style={{background:"#FFFFFF",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
                       <span style={{fontSize:14,flexShrink:0}}>☀️</span>
                       <div style={{fontSize:11,color:"#92400E",lineHeight:1.6}}><strong>Introduce in the morning</strong> — this gives you the whole day to watch for any reactions before bedtime.</div>
                     </div>
 
                     {!isIntroduced && (
-                      <div style={{background:"#FFF6EB",borderRadius:10,padding:"10px",textAlign:"center"}}>
+                      <div style={{background:"#FFFFFF",borderRadius:10,padding:"10px",textAlign:"center"}}>
                         <div style={{fontSize:12,color:"#9CA3AF"}}>Not started yet.</div>
                         <div style={{fontSize:11,color:"#9CA3AF",marginTop:3}}>Log this food in the tracker or meal plan and the watch will start automatically.</div>
                         <button onClick={()=>startAllergenIntro(a.id)} style={{marginTop:8,background:"none",border:"1.5px solid #E8EAF0",borderRadius:8,padding:"6px 12px",fontSize:11,color:"#9CA3AF",cursor:"pointer"}}>
@@ -1367,7 +1367,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                     )}
 
                     {status?.autoStarted && waiting && (
-                      <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 10px",marginBottom:8,fontSize:11,color:"#92400E"}}>
+                      <div style={{background:"#FFFFFF",borderRadius:10,padding:"8px 10px",marginBottom:8,fontSize:11,color:"#92400E"}}>
                         ✨ Started automatically when you logged this food in the tracker.
                       </div>
                     )}
@@ -1516,7 +1516,7 @@ function MealsScreen({profile}) {
           </div>
         )}
         {selected.length>0&&suggestions.length===0&&(
-          <div style={{background:"#FFF6EB",borderRadius:16,padding:"18px",textAlign:"center"}}>
+          <div style={{background:"#FFFFFF",borderRadius:16,padding:"18px",textAlign:"center"}}>
             <div style={{fontSize:32,marginBottom:8}}>🤔</div>
             <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:4}}>No matches yet</div>
             <div style={{fontSize:13,color:"#6B7280",lineHeight:1.6}}>Try selecting a few more ingredients — most meals need 2–3 to match.</div>
@@ -1557,7 +1557,7 @@ function MealCard({meal, selected}) {
       {open&&(
         <div style={{borderTop:"1px solid #F3F4F6",padding:"16px"}}>
           {missing.length>0&&(
-            <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:12,color:"#92400E"}}>
+            <div style={{background:"#FFFFFF",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:12,color:"#92400E"}}>
               You'll also need: {missing.map(f=>`${fe(f)} ${cap(f)}`).join(", ")}
             </div>
           )}
@@ -1701,7 +1701,7 @@ function AllergenScreen({profile, setProfile}) {
           <div style={{fontSize:20,fontWeight:800,color:"#DC2626"}}>{reactionCount}</div>
           <div style={{fontSize:9,color:"#DC2626",fontWeight:600}}>had reaction</div>
         </div>
-        <div style={{background:"#FFF6EB",borderRadius:14,padding:"10px",textAlign:"center"}}>
+        <div style={{background:"#FFFFFF",borderRadius:14,padding:"10px",textAlign:"center"}}>
           <div style={{fontSize:20,fontWeight:800,color:"#6B7280"}}>{9-safeCount-reactionCount}</div>
           <div style={{fontSize:9,color:"#6B7280",fontWeight:600}}>remaining</div>
         </div>
@@ -1748,7 +1748,7 @@ function AllergenScreen({profile, setProfile}) {
               {isExpanded && (
                 <div style={{background:bgColor,border:`1.5px solid ${borderColor}`,borderTop:"none",borderRadius:"0 0 16px 16px",padding:"12px 16px 16px",marginTop:-8}}>
                   <div style={{fontSize:13,color:"#6B7280",lineHeight:1.6,marginBottom:8}}>{a.tip}</div>
-                  <div style={{background:"#FFF6EB",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
+                  <div style={{background:"#FFFFFF",borderRadius:10,padding:"8px 10px",marginBottom:10,display:"flex",gap:6,alignItems:"flex-start"}}>
                     <span style={{fontSize:14,flexShrink:0}}>☀️</span>
                     <div style={{fontSize:11,color:"#92400E",lineHeight:1.6}}><strong>Introduce in the morning</strong> — this gives you the whole day to watch for any reactions before bedtime.</div>
                   </div>
@@ -1906,7 +1906,7 @@ function JournalScreen({profile, setProfile, allFoods}) {
         </div>
 
         {selectedEntries.length === 0 ? (
-          <div style={{background:"#FFF6EB",borderRadius:16,padding:"24px",textAlign:"center"}}>
+          <div style={{background:"#FFFFFF",borderRadius:16,padding:"24px",textAlign:"center"}}>
             <div style={{fontSize:32,marginBottom:8}}>📝</div>
             <div style={{fontSize:13,color:"#9CA3AF"}}>No entries yet — tap + Add to log a food</div>
           </div>
@@ -2045,7 +2045,7 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
 
         {/* Reaction toggle */}
         <div style={{marginBottom:14}}>
-          <button onClick={()=>setReaction(r=>!r)} style={{display:"flex",alignItems:"center",gap:8,background:reaction?"#FFF1F2":"#FFF6EB",border:`1.5px solid ${reaction?"#F25F4C":"#E8EAF0"}`,borderRadius:12,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left"}}>
+          <button onClick={()=>setReaction(r=>!r)} style={{display:"flex",alignItems:"center",gap:8,background:reaction?"#FFF1F2":"#FFFFFF",border:`1.5px solid ${reaction?"#F25F4C":"#E8EAF0"}`,borderRadius:12,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left"}}>
             <span style={{fontSize:18}}>⚠️</span>
             <div>
               <div style={{fontSize:13,fontWeight:600,color:reaction?"#DC2626":"#374151"}}>Mark as reaction</div>
@@ -2215,7 +2215,7 @@ function LearnScreen() {
                   <span style={{...css.chip,background:tagColor,color:tagText,fontSize:10,flexShrink:0}}>{res.tag}</span>
                 </div>
                 <div style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:10}}>{res.desc}</div>
-                <button onClick={()=>window.open(res.url,"_blank")} style={{background:"#FFF6EB",border:"1px solid #E8EAF0",borderRadius:8,padding:"7px 12px",fontSize:12,color:"#F25F4C",fontWeight:600,cursor:"pointer"}}>Open website →</button>
+                <button onClick={()=>window.open(res.url,"_blank")} style={{background:"#FFFFFF",border:"1px solid #E8EAF0",borderRadius:8,padding:"7px 12px",fontSize:12,color:"#F25F4C",fontWeight:600,cursor:"pointer"}}>Open website →</button>
               </div>
             );
           })}
@@ -2237,7 +2237,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
   const days = last ? daysSince(last.date) : null;
   const lastReaction = last ? REACTIONS.find(r=>r.id===last.reaction) : null;
   return(
-    <div style={{position:"fixed",inset:0,background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 20px",textAlign:"center"}} className="fadeUp">
@@ -2278,7 +2278,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
               <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                 {[...log].reverse().slice(0,5).map((e,i)=>{
                   const r=REACTIONS.find(x=>x.id===e.reaction);
-                  return<span key={i} style={{fontSize:11,background:"#FFF6EB",borderRadius:8,padding:"3px 8px",color:"#6B7280"}}>{r?.emoji} {fmtDate(e.date)}</span>;
+                  return<span key={i} style={{fontSize:11,background:"#FFFFFF",borderRadius:8,padding:"3px 8px",color:"#6B7280"}}>{r?.emoji} {fmtDate(e.date)}</span>;
                 })}
               </div>
             </div>
@@ -2289,7 +2289,7 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
       {/* Prep & Recipes */}
       {!db?(
         <div style={{padding:"0 16px 32px"}}>
-          <div style={{background:"#FFF6EB",borderRadius:12,padding:"16px",fontSize:13,color:"#6B7280",lineHeight:1.7}}>
+          <div style={{background:"#FFFFFF",borderRadius:12,padding:"16px",fontSize:13,color:"#6B7280",lineHeight:1.7}}>
             No detailed guide yet for {cap(food)}. Use the log above to track when you offer it.
           </div>
         </div>
@@ -2395,7 +2395,7 @@ function ProgressOverlay({profile, allFoods, onClose}) {
   ];
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 32px"}} className="fadeUp">
@@ -2437,7 +2437,7 @@ function ProgressOverlay({profile, allFoods, onClose}) {
             {allergens.map(a=>{
               const done=(log[a]?.length||0)>0;
               return(
-                <div key={a} style={{display:"flex",alignItems:"center",gap:5,background:done?"#F0FFF4":"#FFF6EB",borderRadius:20,padding:"5px 10px",border:`1px solid ${done?"#7FB069":"#E8EAF0"}`}}>
+                <div key={a} style={{display:"flex",alignItems:"center",gap:5,background:done?"#F0FFF4":"#FFFFFF",borderRadius:20,padding:"5px 10px",border:`1px solid ${done?"#7FB069":"#E8EAF0"}`}}>
                   <span style={{fontSize:12}}>{fe(a)}</span>
                   <span style={{fontSize:11,fontWeight:600,color:done?"#065F46":"#9CA3AF"}}>{cap(a)}</span>
                   {done&&<span style={{fontSize:11,color:"#7FB069"}}>✓</span>}
@@ -2553,7 +2553,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
   };
 
   return(
-    <div style={{position:"fixed",inset:0,background:"#FFF6EB",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
       <div style={{padding:"0 20px 40px"}} className="fadeUp">
@@ -2584,7 +2584,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
           <div style={css.label}>Edit {baby.name}</div>
           <div style={{...css.card,padding:"18px"}}>
             <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
-              <button onClick={()=>fileRef.current?.click()} style={{width:70,height:70,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFF6EB",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+              <button onClick={()=>fileRef.current?.click()} style={{width:70,height:70,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFFFFF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
                 {photo?<img src={photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{textAlign:"center"}}><div style={{fontSize:22}}>📷</div><div style={{fontSize:9,color:"#9CA3AF"}}>Change</div></div>}
               </button>
               <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
@@ -2707,7 +2707,7 @@ function ReactionSheet({food, log, onLog, onClose}) {
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{GLOBAL_CSS}</style>
-      <div style={{background:"#FFF6EB",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
+      <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         <div style={{textAlign:"center",marginBottom:18}}>
           <div style={{fontSize:52}}>{fe(food)}</div>
@@ -2733,7 +2733,7 @@ function AddFoodSheet({onAdd, onClose}) {
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{GLOBAL_CSS}</style>
-      <div style={{background:"#FFF6EB",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
+      <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 44px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         <div style={{fontSize:20,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Add a custom food</div>
         <p style={{fontSize:13,color:"#6B7280",marginBottom:16,lineHeight:1.6}}>Can't find a food in the list? Add it here and track it like any other.</p>

@@ -1,7 +1,7 @@
 export const THEME = {
   primary:"#F25F4C", secondary:"#F2B705", green:"#7FB069",
   blue:"#6FA3D2", purple:"#C77DFF",
-  white:"#FFFFFF", bg:"#FFF6EB", surface:"#FFFFFF",
+  white:"#FFFFFF", bg:"#FFFFFF", surface:"#FFFFFF",
   text:"#1A1A2E", textSoft:"#6B7280", border:"#E8EAF0",
   shadow:"0 4px 20px rgba(26,26,46,0.08)", shadowSm:"0 2px 8px rgba(26,26,46,0.06)",
   radius:20, radiusSm:12,
@@ -10,7 +10,7 @@ export const THEME = {
 export const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{background:#FFF6EB;font-family:'Plus Jakarta Sans',sans-serif;}
+  html,body{background:#FFFFFF;font-family:'Plus Jakarta Sans',sans-serif;}
   ::-webkit-scrollbar{display:none;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
   @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
