@@ -929,10 +929,13 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
           <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E",lineHeight:1.2,marginBottom:4}}>{cw.title}</div>
           <div style={{fontSize:13,color:"#6B7280",marginBottom:12}}>{cw.subtitle}</div>
           <div style={{fontSize:13,color:"#374151",lineHeight:1.7,background:"rgba(255,255,255,0.65)",borderRadius:12,padding:"10px 12px",marginBottom:12}}>{cw.reassurance}</div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12}}>
             <span style={{...css.chip,background:"rgba(255,255,255,0.8)",color:"#374151"}}>🍽 {cw.mealsPerDay}</span>
             <span style={{...css.chip,background:"rgba(255,255,255,0.8)",color:"#374151"}}>🥄 {cw.texture.split(",")[0]}</span>
           </div>
+          <button onClick={()=>setScreen("plan")} style={{width:"100%",padding:"11px",background:"#F25F4C",color:"#fff",border:"none",borderRadius:12,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+            Go to this week's plan →
+          </button>
         </div>
       </div>
 
