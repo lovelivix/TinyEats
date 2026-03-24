@@ -2566,10 +2566,11 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
   };
 
   return(
+    <>
     <div style={{position:"fixed",inset:0,background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
-      <div style={{padding:"0 20px 40px"}} className="fadeUp">
+      <div style={{padding:"0 20px 120px"}} className="fadeUp">
         <h2 style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:20}}>Settings</h2>
 
         {state.babies.length>1&&(
@@ -2659,9 +2660,9 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
         </div>
       </div>
     </div>
-
     {showPrivacy && <PrivacyScreen onClose={()=>setShowPrivacy(false)}/>}
     {showTerms && <TermsScreen onClose={()=>setShowTerms(false)}/>}
+    </>
   );
 }
 
