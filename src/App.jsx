@@ -2546,6 +2546,8 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
   const [photo, setPhoto] = useState(baby.photo||null);
   const [saved, setSaved] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const fileRef = useRef();
 
   const handlePhoto = e => {
@@ -2644,6 +2646,91 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
               </div>
             </div>
           )}
+        </div>
+
+        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16,display:"flex",flexDirection:"column",gap:8}}>
+          <div style={css.label}>Legal</div>
+          <button onClick={()=>setShowPrivacy(true)} style={{...css.btnSecondary,color:"#6B7280",fontSize:13,textAlign:"left"}}>📄 Privacy Policy</button>
+          <button onClick={()=>setShowTerms(true)} style={{...css.btnSecondary,color:"#6B7280",fontSize:13,textAlign:"left"}}>📋 Terms of Use</button>
+        </div>
+
+        <div style={{marginTop:16,textAlign:"center"}}>
+          <span style={{fontSize:11,color:"#D1D5DB"}}>LilEats · lileats.app · v1</span>
+        </div>
+      </div>
+    </div>
+
+    {showPrivacy && <PrivacyScreen onClose={()=>setShowPrivacy(false)}/>}
+    {showTerms && <TermsScreen onClose={()=>setShowTerms(false)}/>}
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRIVACY POLICY
+// ═══════════════════════════════════════════════════════════════
+function PrivacyScreen({onClose}) {
+  return (
+    <div style={{position:"fixed",inset:0,background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:200}}>
+      <style>{GLOBAL_CSS}</style>
+      <button onClick={onClose} style={css.back}>← Back</button>
+      <div style={{padding:"0 20px 60px"}} className="fadeUp">
+        <h2 style={{fontSize:22,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Privacy Policy</h2>
+        <p style={{fontSize:12,color:"#9CA3AF",marginBottom:24}}>Last updated: March 2026</p>
+
+        {[
+          {title:"Who we are", body:"LilEats is a baby weaning tracking app available at lileats.app. For any privacy-related questions, contact us at tinyeatsapp@gmail.com."},
+          {title:"What data we collect", body:"We collect:\n• Your email address (used to create and access your account)\n• Your baby's name and date of birth\n• Food logs, journal entries and allergen records you enter\n• Baby photos you choose to upload (optional)\n\nWe do not collect any payment information, location data, or device identifiers."},
+          {title:"How we use your data", body:"Your data is used solely to provide the LilEats service — specifically to save and sync your baby's weaning progress across your devices. We do not use your data for advertising, profiling, or any commercial purpose."},
+          {title:"Who we share it with", body:"We do not sell, rent or share your personal data with any third parties.\n\nYour data is stored securely using Supabase (supabase.com), a third-party database provider. Supabase processes data on our behalf and is bound by a data processing agreement. No other third parties have access to your data."},
+          {title:"How long we keep it", body:"We keep your data for as long as you have an active account. You can delete all of your baby's data at any time from Settings → Your data. If you wish to delete your account entirely, email us at tinyeatsapp@gmail.com and we will remove all your data within 30 days."},
+          {title:"Your rights", body:"Under UK GDPR, you have the right to:\n• Access the data we hold about you\n• Correct inaccurate data\n• Delete your data\n• Restrict how we process your data\n• Object to processing\n\nTo exercise any of these rights, email tinyeatsapp@gmail.com."},
+          {title:"Cookies", body:"LilEats uses minimal cookies necessary for authentication and session management. We use Vercel Analytics to count visitor numbers — this does not track individuals or use advertising cookies."},
+          {title:"Children's data", body:"LilEats is used by parents to track their own baby's weaning progress. We do not knowingly collect data directly from children. All data is entered and controlled by the parent or guardian."},
+          {title:"Changes to this policy", body:"If we make significant changes to this Privacy Policy, we will notify users via the app. Continued use of LilEats after changes constitutes acceptance of the updated policy."},
+        ].map(s=>(
+          <div key={s.title} style={{marginBottom:20}}>
+            <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:6}}>{s.title}</div>
+            <p style={{fontSize:13,color:"#374151",lineHeight:1.8,whiteSpace:"pre-line"}}>{s.body}</p>
+          </div>
+        ))}
+        <div style={{background:"#F9FAFB",borderRadius:12,padding:"14px",marginTop:8}}>
+          <p style={{fontSize:12,color:"#6B7280",lineHeight:1.7}}>Questions? Email us at <span style={{color:"#F25F4C",fontWeight:600}}>tinyeatsapp@gmail.com</span></p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TERMS OF USE
+// ═══════════════════════════════════════════════════════════════
+function TermsScreen({onClose}) {
+  return (
+    <div style={{position:"fixed",inset:0,background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:200}}>
+      <style>{GLOBAL_CSS}</style>
+      <button onClick={onClose} style={css.back}>← Back</button>
+      <div style={{padding:"0 20px 60px"}} className="fadeUp">
+        <h2 style={{fontSize:22,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Terms of Use</h2>
+        <p style={{fontSize:12,color:"#9CA3AF",marginBottom:24}}>Last updated: March 2026</p>
+
+        {[
+          {title:"Acceptance of terms", body:"By using LilEats, you agree to these Terms of Use. If you do not agree, please do not use the app. These terms are governed by the laws of England and Wales."},
+          {title:"Not medical advice", body:"LilEats is an informational tool to help parents track their baby's weaning journey. It is not a medical device, does not provide medical advice, and should not be used as a substitute for professional medical guidance.\n\nAlways consult a qualified healthcare professional — such as your GP, health visitor, or paediatrician — before making decisions about your baby's diet or health. If your baby has a reaction to any food, seek medical advice immediately. In an emergency, call 999."},
+          {title:"Accuracy of content", body:"The weaning guidance in LilEats is based on NHS Start4Life recommendations and publicly available nutritional guidance. We make every effort to keep content accurate and up to date, but we cannot guarantee that all information is complete, current or error-free.\n\nYou are responsible for verifying any information with a healthcare professional before acting on it."},
+          {title:"Limitation of liability", body:"To the fullest extent permitted by law, LilEats and its creator are not liable for:\n• Any decisions made based on information in the app\n• Any harm, injury or loss resulting from use of the app\n• Any inaccuracies in the content\n• Any data loss or technical issues\n\nYour use of LilEats is entirely at your own risk."},
+          {title:"Your account", body:"You are responsible for maintaining the security of your account and password. You must not share your account with others or use the app on behalf of another person without their consent. You must be 18 or over to create an account."},
+          {title:"Your data", body:"You own your data. By using LilEats you grant us a limited licence to store and process your data solely to provide the service. We do not claim any ownership over your baby's information. See our Privacy Policy for full details."},
+          {title:"Acceptable use", body:"You agree not to misuse LilEats. You must not attempt to access other users' data, reverse engineer the app, use it for any commercial purpose, or use it in any way that violates applicable law."},
+          {title:"Changes to the service", body:"We may update, change or discontinue LilEats at any time. We will give reasonable notice of any significant changes where possible."},
+          {title:"Contact", body:"For any questions about these terms, email tinyeatsapp@gmail.com."},
+        ].map(s=>(
+          <div key={s.title} style={{marginBottom:20}}>
+            <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:6}}>{s.title}</div>
+            <p style={{fontSize:13,color:"#374151",lineHeight:1.8,whiteSpace:"pre-line"}}>{s.body}</p>
+          </div>
+        ))}
+        <div style={{background:"#F9FAFB",borderRadius:12,padding:"14px",marginTop:8}}>
+          <p style={{fontSize:12,color:"#6B7280",lineHeight:1.7}}>Questions? Email us at <span style={{color:"#F25F4C",fontWeight:600}}>tinyeatsapp@gmail.com</span></p>
         </div>
       </div>
     </div>
