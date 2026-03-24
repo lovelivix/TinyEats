@@ -643,7 +643,14 @@ export default function App() {
       {overlay?.type==="food"     && <FoodOverlay food={overlay.data} log={profile.foodLog[overlay.data]||[]} onLog={logReaction} onDeleteLast={()=>deleteLastReaction(overlay.data)} onClose={()=>setOverlay(null)} />}
       {overlay?.type==="reaction" && <ReactionSheet food={overlay.data} log={profile.foodLog[overlay.data]||[]} onLog={logReaction} onClose={()=>setOverlay(null)} />}
       {overlay?.type==="addFood"  && <AddFoodSheet onAdd={addCustomFood} onClose={()=>setOverlay(null)} />}
-      {overlay?.type==="settings" && <SettingsOverlay state={state} update={update} baby={baby} setProfile={setProfile} onAddBaby={()=>setOverlay({type:"addBaby"})} onClose={()=>setOverlay(null)} onSignOut={signOut} onUpdateBaby={async (id, data) => { await sb.authed(session.token).updateBaby(id, data); }} />}
+      {overlay?.type==="settings" && <SettingsOverlay state={state} update={update} baby={baby} setProfile={setProfile} onAddBaby={()=>setOverlay({type:"addBaby"})} onClose={()=>setOverlay(null)} onSignOut={signOut} onUpdateBaby={async (id, data) => { await sb.authed(session.token).updateBaby(id, data); }} session={session} onDeleteData={async () => {
+        try {
+          const api = sb.authed(session.token);
+          await api.saveProfile(baby.id, session.userId, {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],earnedBadges:[],seenBadges:[],allergens:{},journal:{}});
+          setProfile(()=>({weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],earnedBadges:[],seenBadges:[],allergens:{},journal:{}}));
+        } catch {}
+        setOverlay(null);
+      }} />}
       {overlay?.type==="addBaby"  && <OnboardingScreen onComplete={addBaby} isAdding onBack={()=>setOverlay({type:"settings"})} />}
       {overlay?.type==="badges"   && <BadgesOverlay profile={profile} onClose={()=>setOverlay(null)} />}
       {overlay?.type==="progress" && <ProgressOverlay profile={profile} allFoods={allFoods} onClose={()=>setOverlay(null)} />}
@@ -2533,11 +2540,12 @@ function BadgesOverlay({profile, onClose}) {
 // ═══════════════════════════════════════════════════════════════
 // SETTINGS OVERLAY
 // ═══════════════════════════════════════════════════════════════
-function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, onSignOut, onUpdateBaby}) {
+function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, onSignOut, onUpdateBaby, session, onDeleteData}) {
   const [name, setName] = useState(baby.name);
   const [dob, setDob] = useState(baby.dob);
   const [photo, setPhoto] = useState(baby.photo||null);
   const [saved, setSaved] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef();
 
   const handlePhoto = e => {
@@ -2617,6 +2625,25 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
           <button onClick={onSignOut} style={{...css.btnSecondary,color:"#6B7280",fontSize:14}}>
             Sign out
           </button>
+        </div>
+
+        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16}}>
+          <div style={css.label}>Your data</div>
+          <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:12}}>Your data is stored securely and never shared with third parties. You can delete all of {baby.name}'s data at any time.</p>
+          {!confirmDelete ? (
+            <button onClick={()=>setConfirmDelete(true)} style={{...css.btnSecondary,borderColor:"#FFBDB5",color:"#DC2626",background:"#FFF1F2",fontSize:13}}>
+              🗑 Delete all of {baby.name}'s data
+            </button>
+          ) : (
+            <div style={{background:"#FFF1F2",borderRadius:14,padding:"16px",border:"1.5px solid #FFBDB5"}}>
+              <div style={{fontSize:14,fontWeight:700,color:"#DC2626",marginBottom:6}}>Are you sure?</div>
+              <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:12}}>This will permanently delete all food logs, journal entries, allergen records and progress for {baby.name}. This cannot be undone.</p>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>setConfirmDelete(false)} style={{...css.btnSecondary,flex:1,fontSize:13}}>Cancel</button>
+                <button onClick={onDeleteData} style={{flex:1,padding:"12px",background:"#DC2626",color:"#fff",border:"none",borderRadius:12,fontSize:13,fontWeight:700,cursor:"pointer"}}>Yes, delete</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
