@@ -2619,6 +2619,7 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const fileRef = useRef();
 
   const handlePhoto = e => {
@@ -2726,14 +2727,306 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
           <button onClick={()=>setShowTerms(true)} style={{...css.btnSecondary,color:"#6B7280",fontSize:13,textAlign:"left"}}>📋 Terms of Use</button>
         </div>
 
+        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16,display:"flex",flexDirection:"column",gap:8}}>
+          <div style={css.label}>Export</div>
+          <button onClick={()=>setShowExport(true)} style={{...css.btnSecondary,color:"#6FA3D2",fontSize:13,textAlign:"left",borderColor:"#BFDBFE",background:"#EFF6FF"}}>📋 Export health summary PDF</button>
+          <p style={{fontSize:11,color:"#9CA3AF",lineHeight:1.5}}>Free during beta. A summary of {baby.name}'s weaning journey for your health visitor or GP.</p>
+        </div>
+
+        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16}}>
+          <div style={css.label}>Support LilEats</div>
+          <div style={{background:"#FFF8F0",borderRadius:14,padding:"14px",border:"1px solid #F2D49A",marginBottom:8}}>
+            <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E",marginBottom:4}}>☕ Like LilEats? Buy us a coffee</div>
+            <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:10}}>LilEats is free and made by a mum, for mums. If it's helped your weaning journey, a small donation keeps it running. Thank you so much 🍐</p>
+            <button onClick={()=>window.open("https://buy.stripe.com/aFaaEZ3Tw6bHfLx3kq6AM0j","_blank")} style={{width:"100%",padding:"11px",background:"#F2B705",color:"#1A1A2E",border:"none",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+              ☕ Support LilEats
+            </button>
+          </div>
+        </div>
+
         <div style={{marginTop:16,textAlign:"center"}}>
-          <span style={{fontSize:11,color:"#D1D5DB"}}>LilEats · lileats.app · v1</span>
+          <span style={{fontSize:11,color:"#D1D5DB"}}>LilEats · lileats.app · v1.0</span>
         </div>
       </div>
     </div>
     {showPrivacy && <PrivacyScreen onClose={()=>setShowPrivacy(false)}/>}
     {showTerms && <TermsScreen onClose={()=>setShowTerms(false)}/>}
+    {showExport && <ExportSheet baby={baby} profile={profile} onClose={()=>setShowExport(false)}/>}
     </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT SHEET
+// ═══════════════════════════════════════════════════════════════
+function ExportSheet({baby, profile, onClose}) {
+  const [notes, setNotes] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const generate = async () => {
+    setGenerating(true);
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+      const W = 210; const margin = 18; const cw = W - margin*2;
+      let y = 0;
+
+      const CORAL = [242,95,76]; const DARK = [26,26,46]; const GRAY = [107,114,128];
+      const LGRAY = [243,244,246]; const RED = [220,38,38]; const GREEN = [47,133,90];
+      const AMBER = [184,134,11];
+
+      const disclaimer = "BETA · For informational purposes only · Not a medical record · Not medical advice · Always consult your GP or health visitor · LilEats accepts no liability for decisions made based on this document · In an emergency call 999";
+
+      // Header band
+      doc.setFillColor(...DARK);
+      doc.rect(0,0,W,28,"F");
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(9); doc.setFont("helvetica","normal");
+      doc.text("WEANING HEALTH SUMMARY — BETA", margin, 10);
+      doc.setFontSize(14); doc.setFont("helvetica","bold");
+      doc.text(baby.name, margin, 19);
+      doc.setFontSize(8); doc.setFont("helvetica","normal");
+      doc.setTextColor(180,180,180);
+      doc.text(`Generated ${new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})} · lileats.app · v1.0`, margin, 24.5);
+      y = 36;
+
+      // Beta disclaimer box
+      doc.setFillColor(255,241,242); doc.setDrawColor(255,189,181);
+      doc.roundedRect(margin, y, cw, 14, 2, 2, "FD");
+      doc.setTextColor(...RED); doc.setFontSize(7.5); doc.setFont("helvetica","bold");
+      doc.text("⚠ IMPORTANT DISCLAIMER", margin+4, y+5);
+      doc.setFont("helvetica","normal"); doc.setTextColor(100,20,20);
+      const discLines = doc.splitTextToSize(disclaimer, cw-8);
+      doc.text(discLines, margin+4, y+10);
+      y += 20;
+
+      // Baby details
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...DARK);
+      doc.text("BABY DETAILS", margin, y); y += 5;
+      doc.setDrawColor(229,231,235); doc.line(margin, y, margin+cw, y); y += 4;
+
+      const dob = new Date(baby.dob);
+      const wstart = profile.weaningStartDate ? new Date(profile.weaningStartDate) : null;
+      const daysSince = wstart ? Math.floor((Date.now()-wstart)/864e5) : null;
+      const details = [
+        ["Name", baby.name],
+        ["Date of birth", dob.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})],
+        ["Weaning started", wstart ? wstart.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}) : "Not recorded"],
+        ["Days since weaning started", daysSince !== null ? `${daysSince} days` : "—"],
+        ["Current week", `Week ${Math.min((profile.activeWeek||0)+1,6)} of 6`],
+      ];
+      details.forEach(([k,v]) => {
+        doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...GRAY);
+        doc.text(k, margin, y);
+        doc.setTextColor(...DARK); doc.setFont("helvetica","bold");
+        doc.text(v, margin+60, y);
+        y += 6;
+      });
+      y += 4;
+
+      // Food progress
+      const log = profile.foodLog||{};
+      const tried = Object.keys(log).filter(f=>log[f]?.length>0);
+      const confident = tried.filter(f=>(log[f]?.length||0)>=7);
+      const reactions = tried.filter(f=>log[f]?.some(e=>e.reaction==="reaction"));
+
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...DARK);
+      doc.text("FOOD PROGRESS", margin, y); y += 5;
+      doc.setDrawColor(229,231,235); doc.line(margin, y, margin+cw, y); y += 4;
+
+      // Stats row
+      const stats = [[tried.length,"foods tried",GREEN],[confident.length,"confident",AMBER],[reactions.length,"reactions",RED]];
+      stats.forEach(([n,l,c],i) => {
+        const x = margin + i*(cw/3);
+        doc.setFillColor(248,250,252); doc.roundedRect(x, y, cw/3-3, 14, 2, 2, "F");
+        doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.setTextColor(...c);
+        doc.text(String(n), x+4, y+9);
+        doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+        doc.text(l, x+4, y+13);
+      });
+      y += 20;
+
+      // Foods table
+      if (tried.length > 0) {
+        doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...DARK);
+        doc.text("Foods tried", margin, y); y += 4;
+        // Header
+        doc.setFillColor(...LGRAY);
+        doc.rect(margin, y, cw, 6, "F");
+        doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+        doc.text("Food", margin+2, y+4);
+        doc.text("Offers", margin+80, y+4);
+        doc.text("Status", margin+110, y+4);
+        doc.text("Last offered", margin+148, y+4);
+        y += 7;
+        tried.slice(0,20).forEach((food,i) => {
+          if (y > 260) { doc.addPage(); y = 20; }
+          if (i%2===0) { doc.setFillColor(249,250,251); doc.rect(margin,y-1,cw,6,"F"); }
+          const entries = log[food]||[];
+          const count = entries.length;
+          const last = entries[entries.length-1];
+          const lastDate = last ? new Date(last.date||last).toLocaleDateString("en-GB",{day:"numeric",month:"short"}) : "—";
+          const hasReaction = entries.some(e=>e.reaction==="reaction");
+          const statusLabel = hasReaction?"⚠ Reaction":count>=7?"Confident":count>=4?"Usually accepted":count>=2?"Getting familiar":"First taste";
+          const statusColor = hasReaction?RED:count>=7?GREEN:count>=4?[30,64,175]:count>=2?GREEN:AMBER;
+          doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(...DARK);
+          doc.text(food.charAt(0).toUpperCase()+food.slice(1), margin+2, y+4);
+          doc.text(String(count), margin+84, y+4);
+          doc.setTextColor(...statusColor); doc.setFont("helvetica","bold");
+          doc.text(statusLabel, margin+110, y+4);
+          doc.setFont("helvetica","normal"); doc.setTextColor(...GRAY);
+          doc.text(lastDate, margin+148, y+4);
+          y += 6;
+        });
+        if (tried.length > 20) {
+          doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+          doc.text(`+ ${tried.length-20} more foods not shown`, margin, y+4);
+          y += 8;
+        }
+        y += 4;
+      }
+
+      // Allergens
+      if (y > 230) { doc.addPage(); y = 20; }
+      const allergenData = profile.allergens||{};
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...DARK);
+      doc.text("ALLERGEN LOG", margin, y); y += 5;
+      doc.setDrawColor(229,231,235); doc.line(margin, y, margin+cw, y); y += 4;
+
+      const ALLERGEN_NAMES = {peanut:"Peanut 🥜",egg:"Egg 🥚",dairy:"Cow's milk 🥛",wheat:"Wheat/Gluten 🌾",fish:"Fish 🐟",shellfish:"Shellfish 🦐",sesame:"Sesame 🫙",soy:"Soy 🫘",treenut:"Tree nuts 🌰"};
+      const introduced = Object.keys(allergenData);
+      const notStarted = Object.keys(ALLERGEN_NAMES).filter(id=>!allergenData[id]);
+
+      if (introduced.length > 0) {
+        doc.setFillColor(...LGRAY);
+        doc.rect(margin, y, cw, 6, "F");
+        doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+        doc.text("Allergen", margin+2, y+4);
+        doc.text("Date introduced", margin+80, y+4);
+        doc.text("Outcome", margin+140, y+4);
+        y += 7;
+        introduced.forEach((id,i) => {
+          if (y > 260) { doc.addPage(); y = 20; }
+          if (i%2===0) { doc.setFillColor(249,250,251); doc.rect(margin,y-1,cw,6,"F"); }
+          const s = allergenData[id];
+          const dateStr = s.introduced ? new Date(s.introduced).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "—";
+          const outcome = s.reaction?"⚠ Reaction noted":s.safe?"✓ Safely introduced":"Watching — 3-day check";
+          const outcomeColor = s.reaction?RED:s.safe?GREEN:AMBER;
+          doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(...DARK);
+          doc.text(ALLERGEN_NAMES[id]||id, margin+2, y+4);
+          doc.setTextColor(...GRAY); doc.text(dateStr, margin+80, y+4);
+          doc.setTextColor(...outcomeColor); doc.setFont("helvetica","bold");
+          doc.text(outcome, margin+140, y+4);
+          y += 6;
+        });
+        y += 4;
+      }
+
+      // Not yet introduced
+      if (notStarted.length > 0) {
+        if (y > 255) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...GRAY);
+        doc.text("Not yet introduced:", margin, y); y += 5;
+        doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(...GRAY);
+        const notStartedText = notStarted.map(id=>ALLERGEN_NAMES[id]||id).join("  ·  ");
+        const lines = doc.splitTextToSize(notStartedText, cw);
+        doc.text(lines, margin, y);
+        y += lines.length*5 + 4;
+      }
+
+      // Flagged reactions
+      const flagged = [];
+      Object.entries(profile.journal||{}).forEach(([date,entries]) => {
+        (entries||[]).forEach(e => { if (e.reaction) flagged.push({date, ...e}); });
+      });
+      if (flagged.length > 0) {
+        if (y > 230) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...DARK);
+        doc.text("FLAGGED REACTIONS", margin, y); y += 5;
+        doc.setDrawColor(229,231,235); doc.line(margin, y, margin+cw, y); y += 4;
+        flagged.slice(0,10).forEach(entry => {
+          if (y > 255) { doc.addPage(); y = 20; }
+          doc.setFillColor(255,241,242); doc.roundedRect(margin, y, cw, entry.notes?14:10, 2, 2, "F");
+          doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...RED);
+          const foods = (entry.foods||[]).map(f=>f.charAt(0).toUpperCase()+f.slice(1)).join(", ");
+          doc.text(`${foods} — ${new Date(entry.date).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}`, margin+3, y+6);
+          if (entry.notes) {
+            doc.setFont("helvetica","normal"); doc.setTextColor(100,20,20);
+            doc.text(entry.notes.slice(0,100), margin+3, y+11);
+            y += 16;
+          } else { y += 12; }
+        });
+        y += 4;
+      }
+
+      // Parent notes
+      if (notes.trim()) {
+        if (y > 230) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...DARK);
+        doc.text("PARENT NOTES", margin, y); y += 5;
+        doc.setDrawColor(229,231,235); doc.line(margin, y, margin+cw, y); y += 4;
+        doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...DARK);
+        const noteLines = doc.splitTextToSize(notes, cw);
+        doc.text(noteLines, margin, y);
+        y += noteLines.length*5 + 4;
+      }
+
+      // Footer on every page
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= pageCount; p++) {
+        doc.setPage(p);
+        doc.setFillColor(248,250,252);
+        doc.rect(0, 284, W, 13, "F");
+        doc.setFont("helvetica","normal"); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
+        doc.text("This document was generated automatically and has not been verified by a medical professional. It is not a medical record and should not be used as one.", margin, 289, {maxWidth: cw-20});
+        doc.text(`Page ${p} of ${pageCount} · lileats.app · tinyeatsapp@gmail.com`, W-margin, 292, {align:"right"});
+      }
+
+      const filename = `LilEats_${baby.name.replace(/\s+/g,"_")}_${new Date().toISOString().slice(0,10)}.pdf`;
+      doc.save(filename);
+      setDone(true);
+    } catch(e) {
+      console.error(e);
+    }
+    setGenerating(false);
+  };
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"/>
+      <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 48px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
+        <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
+        {done ? (
+          <div style={{textAlign:"center",padding:"16px 0"}}>
+            <div style={{fontSize:48,marginBottom:12}}>✅</div>
+            <div style={{fontSize:18,fontWeight:800,color:"#1A1A2E",marginBottom:6}}>PDF downloaded!</div>
+            <div style={{fontSize:13,color:"#6B7280",marginBottom:20,lineHeight:1.6}}>Your health summary has been saved to your device.</div>
+            <button onClick={onClose} style={{...css.btnPrimary}}>Done</button>
+          </div>
+        ) : (
+          <>
+            <div style={{fontSize:18,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Export health summary</div>
+            <div style={{fontSize:13,color:"#6B7280",marginBottom:16,lineHeight:1.6}}>A PDF summary of {baby.name}'s weaning journey — free during beta 🍐</div>
+            <div style={{background:"#FFF8F0",borderRadius:12,padding:"12px 14px",marginBottom:16,border:"1px solid #F2D49A"}}>
+              <div style={{fontSize:12,fontWeight:700,color:"#92400E",marginBottom:4}}>What's included</div>
+              <div style={{fontSize:12,color:"#78350F",lineHeight:1.7}}>• Baby details & weaning timeline<br/>• All foods tried with status & dates<br/>• Full allergen log<br/>• Flagged reactions from journal<br/>• Allergens not yet introduced<br/>• Your notes (below)</div>
+            </div>
+            <div style={{marginBottom:14}}>
+              <label style={css.label}>Parent notes (optional)</label>
+              <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="e.g. Saw GP on 10 Mar. Currently avoiding peanuts on advice." style={{width:"100%",padding:"12px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",resize:"none",height:80,fontFamily:"inherit",boxSizing:"border-box"}}/>
+            </div>
+            <div style={{background:"#FFF1F2",borderRadius:10,padding:"10px 12px",marginBottom:16,fontSize:11,color:"#991B1B",lineHeight:1.6}}>
+              ⚠ This PDF is not a medical record. Always consult your GP or health visitor.
+            </div>
+            <button onClick={generate} disabled={generating} style={{...css.btnPrimary,background:generating?"#9CA3AF":"#6FA3D2",marginBottom:8}}>
+              {generating?"Generating…":"Download PDF"}
+            </button>
+            <button onClick={onClose} style={css.btnSecondary}>Cancel</button>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
