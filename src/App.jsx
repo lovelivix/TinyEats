@@ -2761,9 +2761,9 @@ function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, o
 // ═══════════════════════════════════════════════════════════════
 function ExportSheet({baby, profile, onClose}) {
   const [notes, setNotes] = useState("");
-  const [done, setDone] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
-  const generate = () => {
+  if (showSummary) {
     const log = profile.foodLog||{};
     const tried = Object.keys(log).filter(f=>log[f]?.length>0);
     const confident = tried.filter(f=>(log[f]?.length||0)>=7);
@@ -2778,143 +2778,144 @@ function ExportSheet({baby, profile, onClose}) {
       (entries||[]).forEach(e=>{ if(e.reaction) flagged.push({date,...e}); });
     });
 
-    const foodRows = tried.map(food => {
-      const entries = log[food]||[];
-      const count = entries.length;
-      const last = entries[entries.length-1];
-      const lastDate = last ? new Date(last.date||last).toLocaleDateString("en-GB",{day:"numeric",month:"short"}) : "—";
-      const hasReaction = entries.some(e=>e.reaction==="reaction");
-      const status = hasReaction?"⚠ Reaction":count>=7?"Confident":count>=4?"Usually accepted":count>=2?"Getting familiar":"First taste";
-      const color = hasReaction?"#DC2626":count>=7?"#2D6A20":count>=4?"#1E40AF":count>=2?"#2D6A20":"#92400E";
-      return `<tr><td>${food.charAt(0).toUpperCase()+food.slice(1)}</td><td style="text-align:center">${count}</td><td style="color:${color};font-weight:600">${status}</td><td style="text-align:center;color:#6B7280">${lastDate}</td></tr>`;
-    }).join("");
+    const s = {
+      page:{background:"#FFFFFF",minHeight:"100vh",fontFamily:"Arial,sans-serif",fontSize:"12px",color:"#1A1A2E"},
+      header:{background:"#1A1A2E",color:"white",padding:"16px 20px"},
+      disc:{background:"#FFF1F2",border:"1px solid #FFBDB5",padding:"10px 16px",margin:"14px 16px",borderRadius:"8px",fontSize:"11px",color:"#991B1B",lineHeight:"1.6"},
+      section:{padding:"0 16px",marginTop:"14px"},
+      h2:{fontSize:"10px",fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.06em",color:"#6B7280",borderBottom:"1px solid #E5E7EB",paddingBottom:"4px",marginBottom:"8px"},
+      table:{width:"100%",borderCollapse:"collapse",fontSize:"11px"},
+      th:{background:"#F3F4F6",padding:"5px 8px",textAlign:"left",color:"#6B7280",fontWeight:"600"},
+      td:{padding:"5px 8px",borderBottom:"1px solid #F3F4F6"},
+    };
 
-    const allergenRows = introduced.map(id => {
-      const s = allergenData[id];
-      const dateStr = s.introduced ? new Date(s.introduced).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "—";
-      const outcome = s.reaction?"⚠ Reaction noted":s.safe?"✓ Safely introduced":"Watching";
-      const color = s.reaction?"#DC2626":s.safe?"#2D6A20":"#92400E";
-      return `<tr><td>${ALLERGEN_NAMES[id]||id}</td><td style="text-align:center;color:#6B7280">${dateStr}</td><td style="color:${color};font-weight:600">${outcome}</td></tr>`;
-    }).join("");
+    return (
+      <div style={{position:"fixed",inset:0,zIndex:300,overflowY:"auto",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+        <style>{`@media print{.no-print{display:none!important;}body{margin:0;}}`}</style>
+        <div className="no-print" style={{background:"#1A1A2E",padding:"10px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,zIndex:10}}>
+          <button onClick={()=>setShowSummary(false)} style={{background:"none",border:"none",color:"white",fontSize:"13px",cursor:"pointer",fontFamily:"inherit"}}>← Back</button>
+          <span style={{color:"white",fontSize:"12px",fontWeight:"600"}}>Health Summary</span>
+          <button onClick={()=>window.print()} style={{background:"#F25F4C",border:"none",color:"white",borderRadius:"8px",padding:"6px 12px",fontSize:"12px",fontWeight:"700",cursor:"pointer",fontFamily:"inherit"}}>Save / Print</button>
+        </div>
 
-    const reactionRows = flagged.map(e=>{
-      const foods = (e.foods||[]).map(f=>f.charAt(0).toUpperCase()+f.slice(1)).join(", ");
-      return `<tr style="background:#FFF1F2"><td colspan="3"><strong style="color:#DC2626">${foods}</strong> — ${new Date(e.date).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}${e.notes?`<br/><span style="color:#6B7280;font-size:11px">${e.notes}</span>`:""}</td></tr>`;
-    }).join("");
+        <div style={s.page}>
+          <div style={s.header}>
+            <div style={{fontSize:"10px",color:"#9CA3AF",marginBottom:"3px"}}>WEANING HEALTH SUMMARY — BETA</div>
+            <div style={{fontSize:"18px",fontWeight:"700",marginBottom:"2px"}}>{baby.name}</div>
+            <div style={{fontSize:"10px",color:"#9CA3AF"}}>Generated {new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})} · lileats.app · v1.0</div>
+          </div>
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>LilEats — ${baby.name} Health Summary</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:Arial,sans-serif;font-size:12px;color:#1A1A2E;padding:0;}
-  .header{background:#1A1A2E;color:white;padding:18px 24px;}
-  .header h1{font-size:18px;margin-bottom:2px;}
-  .header p{font-size:10px;color:#9CA3AF;}
-  .disclaimer{background:#FFF1F2;border:1px solid #FFBDB5;padding:10px 16px;margin:16px 24px;border-radius:6px;font-size:10px;color:#991B1B;line-height:1.6;}
-  .disclaimer strong{display:block;margin-bottom:3px;}
-  .content{padding:0 24px 24px;}
-  h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;border-bottom:1px solid #E5E7EB;padding-bottom:4px;margin:18px 0 10px;}
-  .stats{display:flex;gap:10px;margin-bottom:16px;}
-  .stat{flex:1;background:#F9FAFB;border-radius:6px;padding:10px;text-align:center;}
-  .stat .n{font-size:22px;font-weight:700;}
-  .stat .l{font-size:10px;color:#6B7280;}
-  table{width:100%;border-collapse:collapse;font-size:11px;}
-  th{background:#F3F4F6;padding:5px 8px;text-align:left;color:#6B7280;font-weight:600;}
-  td{padding:5px 8px;border-bottom:1px solid #F3F4F6;}
-  tr:nth-child(even) td{background:#FAFAFA;}
-  .notes{background:#F9FAFB;border-radius:6px;padding:12px;font-size:11px;line-height:1.7;}
-  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #E5E7EB;font-size:9px;color:#9CA3AF;line-height:1.6;}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
-</style></head><body>
-<div class="header">
-  <div style="font-size:10px;color:#9CA3AF;margin-bottom:4px;">WEANING HEALTH SUMMARY — BETA</div>
-  <h1>${baby.name}</h1>
-  <p>Generated ${new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})} · lileats.app · v1.0</p>
-</div>
-<div class="disclaimer">
-  <strong>⚠ IMPORTANT: This document is not a medical record and has not been verified by a medical professional.</strong>
-  It is provided for informational purposes only and should not be used as a substitute for professional medical advice.
-  Always consult your GP or health visitor before acting on any information. LilEats accepts no liability for decisions made based on this document.
-  In an emergency, call 999 immediately.
-</div>
-<div class="content">
-  <h2>Baby details</h2>
-  <table>
-    <tr><td style="color:#6B7280;width:40%">Name</td><td><strong>${baby.name}</strong></td></tr>
-    <tr><td style="color:#6B7280">Date of birth</td><td>${new Date(baby.dob).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}</td></tr>
-    <tr><td style="color:#6B7280">Weaning started</td><td>${wstart?wstart.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}):"Not recorded"}</td></tr>
-    <tr><td style="color:#6B7280">Days since weaning started</td><td>${daysSinceStart!==null?`${daysSinceStart} days`:"—"}</td></tr>
-    <tr><td style="color:#6B7280">Current week</td><td>Week ${Math.min((profile.activeWeek||0)+1,6)} of 6</td></tr>
-  </table>
+          <div style={s.disc}>
+            <strong style={{display:"block",marginBottom:"3px"}}>⚠ IMPORTANT DISCLAIMER</strong>
+            This document is not a medical record and has not been verified by a medical professional. It is for informational purposes only. Always consult your GP or health visitor. LilEats accepts no liability for decisions made based on this document. In an emergency call 999.
+          </div>
 
-  <h2>Food progress</h2>
-  <div class="stats">
-    <div class="stat"><div class="n" style="color:#2D6A20">${tried.length}</div><div class="l">foods tried</div></div>
-    <div class="stat"><div class="n" style="color:#1E40AF">${confident.length}</div><div class="l">confident</div></div>
-    <div class="stat"><div class="n" style="color:#DC2626">${flagged.length}</div><div class="l">reactions flagged</div></div>
-  </div>
-  ${tried.length>0?`<table><thead><tr><th>Food</th><th style="text-align:center">Offers</th><th>Status</th><th style="text-align:center">Last offered</th></tr></thead><tbody>${foodRows}</tbody></table>`:"<p style='color:#6B7280;font-size:11px'>No foods logged yet.</p>"}
+          <div style={s.section}>
+            <div style={s.h2}>Baby details</div>
+            <table style={s.table}>
+              <tbody>
+                {[["Name",baby.name],["Date of birth",new Date(baby.dob).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})],["Weaning started",wstart?wstart.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}):"Not recorded"],["Days weaning",daysSinceStart!==null?`${daysSinceStart} days`:"—"],["Current week",`Week ${Math.min((profile.activeWeek||0)+1,6)} of 6`]].map(([k,v])=>(
+                  <tr key={k}><td style={{...s.td,color:"#6B7280",width:"40%"}}>{k}</td><td style={{...s.td,fontWeight:"600"}}>{v}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-  <h2>Allergen log</h2>
-  ${introduced.length>0?`<table><thead><tr><th>Allergen</th><th style="text-align:center">Date introduced</th><th>Outcome</th></tr></thead><tbody>${allergenRows}</tbody></table>`:"<p style='color:#6B7280;font-size:11px'>No allergens introduced yet.</p>"}
-  ${notStarted.length>0?`<p style="font-size:11px;color:#6B7280;margin-top:8px"><strong>Not yet introduced:</strong> ${notStarted.map(id=>ALLERGEN_NAMES[id]).join(", ")}</p>`:""}
+          <div style={s.section}>
+            <div style={s.h2}>Food progress</div>
+            <div style={{display:"flex",gap:"8px",marginBottom:"10px"}}>
+              {[[tried.length,"foods tried","#2D6A20"],[confident.length,"confident","#1E40AF"],[flagged.length,"reactions","#DC2626"]].map(([n,l,c])=>(
+                <div key={l} style={{flex:1,background:"#F9FAFB",borderRadius:"6px",padding:"8px",textAlign:"center"}}>
+                  <div style={{fontSize:"20px",fontWeight:"700",color:c}}>{n}</div>
+                  <div style={{fontSize:"10px",color:"#6B7280"}}>{l}</div>
+                </div>
+              ))}
+            </div>
+            {tried.length>0 ? (
+              <table style={s.table}>
+                <thead><tr><th style={s.th}>Food</th><th style={{...s.th,textAlign:"center"}}>Offers</th><th style={s.th}>Status</th><th style={{...s.th,textAlign:"center"}}>Last</th></tr></thead>
+                <tbody>
+                  {tried.map((food,i)=>{
+                    const entries=log[food]||[]; const count=entries.length;
+                    const last=entries[entries.length-1];
+                    const lastDate=last?new Date(last.date||last).toLocaleDateString("en-GB",{day:"numeric",month:"short"}):"—";
+                    const hasR=entries.some(e=>e.reaction==="reaction");
+                    const status=hasR?"⚠ Reaction":count>=7?"Confident":count>=4?"Usually accepted":count>=2?"Getting familiar":"First taste";
+                    const color=hasR?"#DC2626":count>=7?"#2D6A20":count>=4?"#1E40AF":"#92400E";
+                    return <tr key={food} style={{background:i%2===0?"#FAFAFA":"white"}}><td style={s.td}>{food.charAt(0).toUpperCase()+food.slice(1)}</td><td style={{...s.td,textAlign:"center"}}>{count}</td><td style={{...s.td,color,fontWeight:"600"}}>{status}</td><td style={{...s.td,textAlign:"center",color:"#6B7280"}}>{lastDate}</td></tr>;
+                  })}
+                </tbody>
+              </table>
+            ) : <p style={{fontSize:"11px",color:"#6B7280"}}>No foods logged yet.</p>}
+          </div>
 
-  ${flagged.length>0?`<h2>Flagged reactions</h2><table><tbody>${reactionRows}</tbody></table>`:""}
+          <div style={s.section}>
+            <div style={s.h2}>Allergen log</div>
+            {introduced.length>0 ? (
+              <table style={s.table}>
+                <thead><tr><th style={s.th}>Allergen</th><th style={{...s.th,textAlign:"center"}}>Date introduced</th><th style={s.th}>Outcome</th></tr></thead>
+                <tbody>
+                  {introduced.map((id,i)=>{
+                    const a=allergenData[id];
+                    const dateStr=a.introduced?new Date(a.introduced).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"—";
+                    const outcome=a.reaction?"⚠ Reaction noted":a.safe?"✓ Safely introduced":"Watching";
+                    const color=a.reaction?"#DC2626":a.safe?"#2D6A20":"#92400E";
+                    return <tr key={id} style={{background:i%2===0?"#FAFAFA":"white"}}><td style={s.td}>{ALLERGEN_NAMES[id]||id}</td><td style={{...s.td,textAlign:"center",color:"#6B7280"}}>{dateStr}</td><td style={{...s.td,color,fontWeight:"600"}}>{outcome}</td></tr>;
+                  })}
+                </tbody>
+              </table>
+            ) : <p style={{fontSize:"11px",color:"#6B7280"}}>No allergens introduced yet.</p>}
+            {notStarted.length>0 && <p style={{fontSize:"11px",color:"#6B7280",marginTop:"8px"}}><strong>Not yet introduced:</strong> {notStarted.map(id=>ALLERGEN_NAMES[id]).join(", ")}</p>}
+          </div>
 
-  ${notes.trim()?`<h2>Parent notes</h2><div class="notes">${notes}</div>`:""}
+          {flagged.length>0 && (
+            <div style={s.section}>
+              <div style={s.h2}>Flagged reactions</div>
+              {flagged.map((e,i)=>(
+                <div key={i} style={{background:"#FFF1F2",borderRadius:"6px",padding:"10px",marginBottom:"6px",border:"1px solid #FFBDB5"}}>
+                  <div style={{fontSize:"12px",fontWeight:"700",color:"#DC2626",marginBottom:"3px"}}>{(e.foods||[]).map(f=>f.charAt(0).toUpperCase()+f.slice(1)).join(", ")} — {new Date(e.date).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}</div>
+                  {e.notes && <div style={{fontSize:"11px",color:"#6B7280"}}>{e.notes}</div>}
+                </div>
+              ))}
+            </div>
+          )}
 
-  <div class="footer">
-    This document was generated automatically by LilEats (lileats.app) and has not been verified by a medical professional.
-    It is not a medical record and should not be used as one. Always verify information with your healthcare provider.
-    Contact: tinyeatsapp@gmail.com · Generated: ${new Date().toLocaleString("en-GB")}
-  </div>
-</div>
-</body></html>`;
+          {notes.trim() && (
+            <div style={s.section}>
+              <div style={s.h2}>Parent notes</div>
+              <div style={{background:"#F9FAFB",borderRadius:"6px",padding:"12px",fontSize:"11px",lineHeight:"1.7"}}>{notes}</div>
+            </div>
+          )}
 
-    const blob = new Blob([html], {type:"text/html"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.target = "_blank";
-    a.rel = "noopener";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url), 10000);
-    setDone(true);
-  };
+          <div style={{margin:"20px 16px",paddingTop:"12px",borderTop:"1px solid #E5E7EB",fontSize:"9px",color:"#9CA3AF",lineHeight:"1.6"}}>
+            This document was generated automatically by LilEats and has not been verified by a medical professional. It is not a medical record. Always consult your healthcare provider. Contact: tinyeatsapp@gmail.com
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 48px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
-        {done ? (
-          <div style={{textAlign:"center",padding:"16px 0"}}>
-            <div style={{fontSize:48,marginBottom:12}}>✅</div>
-            <div style={{fontSize:18,fontWeight:800,color:"#1A1A2E",marginBottom:6}}>Summary opened!</div>
-            <div style={{fontSize:13,color:"#6B7280",marginBottom:20,lineHeight:1.6}}>A print dialog should have appeared. Choose "Save as PDF" to download it to your device.</div>
-            <button onClick={onClose} style={{...css.btnPrimary}}>Done</button>
-          </div>
-        ) : (
-          <>
-            <div style={{fontSize:18,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Export health summary</div>
-            <div style={{fontSize:13,color:"#6B7280",marginBottom:16,lineHeight:1.6}}>A PDF summary of {baby.name}'s weaning journey — free during beta 🍐</div>
-            <div style={{background:"#FFF8F0",borderRadius:12,padding:"12px 14px",marginBottom:16,border:"1px solid #F2D49A"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#92400E",marginBottom:4}}>What's included</div>
-              <div style={{fontSize:12,color:"#78350F",lineHeight:1.7}}>• Baby details & weaning timeline<br/>• All foods tried with status & dates<br/>• Full allergen log<br/>• Flagged reactions from journal<br/>• Allergens not yet introduced<br/>• Your notes (below)</div>
-            </div>
-            <div style={{marginBottom:14}}>
-              <label style={css.label}>Parent notes (optional)</label>
-              <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="e.g. Saw GP on 10 Mar. Currently avoiding peanuts on advice." style={{width:"100%",padding:"12px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",resize:"none",height:80,fontFamily:"inherit",boxSizing:"border-box"}}/>
-            </div>
-            <div style={{background:"#FFF1F2",borderRadius:10,padding:"10px 12px",marginBottom:16,fontSize:11,color:"#991B1B",lineHeight:1.6}}>
-              ⚠ This is not a medical record. Always consult your GP or health visitor.
-            </div>
-            <button onClick={generate} style={{...css.btnPrimary,background:"#6FA3D2",marginBottom:8}}>
-              Open & save as PDF
-            </button>
-            <button onClick={onClose} style={css.btnSecondary}>Cancel</button>
-          </>
-        )}
+        <div style={{fontSize:18,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Export health summary</div>
+        <div style={{fontSize:13,color:"#6B7280",marginBottom:16,lineHeight:1.6}}>A summary of {baby.name}'s weaning journey — free during beta 🍐</div>
+        <div style={{background:"#FFF8F0",borderRadius:12,padding:"12px 14px",marginBottom:16,border:"1px solid #F2D49A"}}>
+          <div style={{fontSize:12,fontWeight:700,color:"#92400E",marginBottom:4}}>What's included</div>
+          <div style={{fontSize:12,color:"#78350F",lineHeight:1.7}}>• Baby details & weaning timeline<br/>• All foods tried with status & dates<br/>• Full allergen log<br/>• Flagged reactions from journal<br/>• Allergens not yet introduced<br/>• Your notes (below)</div>
+        </div>
+        <div style={{marginBottom:14}}>
+          <label style={css.label}>Parent notes (optional)</label>
+          <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="e.g. Saw GP on 10 Mar. Currently avoiding peanuts on advice." style={{width:"100%",padding:"12px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",resize:"none",height:80,fontFamily:"inherit",boxSizing:"border-box"}}/>
+        </div>
+        <div style={{background:"#FFF1F2",borderRadius:10,padding:"10px 12px",marginBottom:16,fontSize:11,color:"#991B1B",lineHeight:1.6}}>
+          ⚠ This is not a medical record. Always consult your GP or health visitor.
+        </div>
+        <button onClick={()=>setShowSummary(true)} style={{...css.btnPrimary,background:"#6FA3D2",marginBottom:8}}>
+          View health summary
+        </button>
+        <button onClick={onClose} style={css.btnSecondary}>Cancel</button>
       </div>
     </div>
   );
