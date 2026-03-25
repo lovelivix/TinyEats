@@ -697,7 +697,7 @@ export default function App() {
         {screen==="plan"    && !weaningComplete && <PlanScreen profile={profile} setProfile={setProfile} cw={cw} setOverlay={setOverlay} session={session} baby={baby} />}
         {screen==="meals"   && <MealsScreen profile={profile} />}
         {screen==="tracker"  && <TrackerScreen profile={profile} allFoods={allFoods} setOverlay={setOverlay} />}
-        {screen==="journal"  && <JournalScreen profile={profile} setProfile={setProfile} allFoods={allFoods} />}
+        {screen==="journal"  && <JournalScreen profile={profile} setProfile={setProfile} allFoods={allFoods} baby={baby} />}
         {screen==="learn"    && <LearnScreen />}
       </div>
 
@@ -1880,11 +1880,12 @@ function AllergenScreen({profile, setProfile}) {
 // ═══════════════════════════════════════════════════════════════
 // JOURNAL SCREEN
 // ═══════════════════════════════════════════════════════════════
-function JournalScreen({profile, setProfile, allFoods}) {
+function JournalScreen({profile, setProfile, allFoods, baby}) {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(toDateKey(today));
   const [showAddSheet, setShowAddSheet] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   const journal = profile.journal || {};
 
@@ -1927,10 +1928,16 @@ function JournalScreen({profile, setProfile, allFoods}) {
 
   return (
     <div className="fadeUp">
-      <div style={{padding:"22px 20px 14px"}}>
-        <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E"}}>Food Journal</div>
-        <div style={{fontSize:13,color:"#6B7280",marginTop:4}}>Tap a day to see or add entries</div>
+      <div style={{padding:"22px 20px 14px",display:"flex",alignItems:"flex-start",justifyContent:"space-between"}}>
+        <div>
+          <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E"}}>Food Journal</div>
+          <div style={{fontSize:13,color:"#6B7280",marginTop:4}}>Tap a day to see or add entries</div>
+        </div>
+        <button onClick={()=>setShowExport(true)} style={{display:"flex",alignItems:"center",gap:5,background:"#EFF6FF",border:"none",borderRadius:10,padding:"7px 12px",fontSize:12,fontWeight:700,color:"#6FA3D2",cursor:"pointer",marginTop:4,flexShrink:0}}>
+          📋 Export
+        </button>
       </div>
+      {showExport && baby && <ExportSheet baby={baby} profile={profile} onClose={()=>setShowExport(false)}/>}
 
       {/* Calendar */}
       <div style={{margin:"0 16px",background:"#FFFFFF",borderRadius:20,boxShadow:"0 4px 20px rgba(26,26,46,0.08)",padding:"16px",marginBottom:16}}>
