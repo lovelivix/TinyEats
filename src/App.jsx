@@ -714,7 +714,7 @@ export default function App() {
       {overlay?.type==="food"     && <FoodOverlay food={overlay.data} log={profile.foodLog[overlay.data]||[]} onLog={logReaction} onDeleteLast={()=>deleteLastReaction(overlay.data)} onClose={()=>setOverlay(null)} />}
       {overlay?.type==="reaction" && <ReactionSheet food={overlay.data} log={profile.foodLog[overlay.data]||[]} onLog={logReaction} onClose={()=>setOverlay(null)} />}
       {overlay?.type==="addFood"  && <AddFoodSheet onAdd={addCustomFood} onClose={()=>setOverlay(null)} />}
-      {overlay?.type==="settings" && <SettingsOverlay state={state} update={update} baby={baby} setProfile={setProfile} onAddBaby={()=>setOverlay({type:"addBaby"})} onClose={()=>setOverlay(null)} onSignOut={signOut} onUpdateBaby={async (id, data) => { await sb.authed(session.token).updateBaby(id, data); }} session={session} onDeleteData={async () => {
+      {overlay?.type==="settings" && <SettingsOverlay state={state} update={update} baby={baby} profile={profile} setProfile={setProfile} onAddBaby={()=>setOverlay({type:"addBaby"})} onClose={()=>setOverlay(null)} onSignOut={signOut} onUpdateBaby={async (id, data) => { await sb.authed(session.token).updateBaby(id, data); }} session={session} onDeleteData={async () => {
         try {
           const api = sb.authed(session.token);
           await api.saveProfile(baby.id, session.userId, {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],earnedBadges:[],seenBadges:[],allergens:{},journal:{}});
@@ -2611,7 +2611,7 @@ function BadgesOverlay({profile, onClose}) {
 // ═══════════════════════════════════════════════════════════════
 // SETTINGS OVERLAY
 // ═══════════════════════════════════════════════════════════════
-function SettingsOverlay({state, update, baby, setProfile, onAddBaby, onClose, onSignOut, onUpdateBaby, session, onDeleteData}) {
+function SettingsOverlay({state, update, baby, profile, setProfile, onAddBaby, onClose, onSignOut, onUpdateBaby, session, onDeleteData}) {
   const [name, setName] = useState(baby.name);
   const [dob, setDob] = useState(baby.dob);
   const [photo, setPhoto] = useState(baby.photo||null);
