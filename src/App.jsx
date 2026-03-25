@@ -2870,12 +2870,16 @@ function ExportSheet({baby, profile, onClose}) {
 </div>
 </body></html>`;
 
-    const w = window.open("","_blank");
-    if (w) {
-      w.document.write(html);
-      w.document.close();
-      setTimeout(()=>{ w.print(); }, 500);
-    }
+    const blob = new Blob([html], {type:"text/html"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 10000);
     setDone(true);
   };
 
