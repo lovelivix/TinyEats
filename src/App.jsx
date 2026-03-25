@@ -2639,112 +2639,134 @@ function SettingsOverlay({state, update, baby, profile, setProfile, onAddBaby, o
 
   return(
     <>
-    <div style={{position:"fixed",inset:0,background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
+    <div style={{position:"fixed",inset:0,background:"#F5F5F5",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",overflowY:"auto",zIndex:100}}>
       <style>{GLOBAL_CSS}</style>
       <button onClick={onClose} style={css.back}>← Back</button>
-      <div style={{padding:"0 20px 120px"}} className="fadeUp">
-        <h2 style={{fontSize:24,fontWeight:800,color:"#1A1A2E",marginBottom:20}}>Settings</h2>
+      <div style={{padding:"0 0 100px"}} className="fadeUp">
+        <h2 style={{fontSize:24,fontWeight:800,color:"#1A1A2E",padding:"0 20px 20px"}}>Settings</h2>
 
-        {state.babies.length>1&&(
-          <div style={{marginBottom:22}}>
-            <div style={css.label}>Switch baby</div>
-            {state.babies.map(b=>(
-              <div key={b.id} style={{...css.card,display:"flex",alignItems:"center",padding:"12px 14px",marginBottom:8,border:b.id===state.activeBabyId?"2px solid #F25F4C":"none"}}>
-                <div style={{width:40,height:40,borderRadius:"50%",overflow:"hidden",marginRight:12,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  {b.photo?<img src={b.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{fontSize:20}}>👶</span>}
+        {/* BABY PROFILE */}
+        <div style={{padding:"0 16px",marginBottom:28}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8,paddingLeft:4}}>Baby profile</div>
+          <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+            {/* Photo + name row */}
+            <div style={{padding:"16px",display:"flex",alignItems:"center",gap:14,borderBottom:"1px solid #F3F4F6"}}>
+              <button onClick={()=>fileRef.current?.click()} style={{width:56,height:56,borderRadius:"50%",border:"2px dashed #E8EAF0",background:photo?"transparent":"#F9FAFB",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0}}>
+                {photo?<img src={photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{textAlign:"center"}}><div style={{fontSize:20}}>📷</div><div style={{fontSize:9,color:"#9CA3AF"}}>Change</div></div>}
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
+              <div style={{flex:1}}>
+                <input value={name} onChange={e=>setName(e.target.value)} style={{width:"100%",fontSize:15,fontWeight:700,color:"#1A1A2E",border:"none",outline:"none",background:"transparent",padding:0,fontFamily:"inherit"}} placeholder="Baby's name"/>
+                <input type="date" value={dob} onChange={e=>setDob(e.target.value)} style={{width:"100%",fontSize:12,color:"#6B7280",border:"none",outline:"none",background:"transparent",padding:0,marginTop:2,fontFamily:"inherit"}}/>
+              </div>
+              <button onClick={save} style={{background:saved?"#7FB069":"#F25F4C",color:"#fff",border:"none",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+                {saved?"✓ Saved":"Save"}
+              </button>
+            </div>
+            {/* Add baby */}
+            <button onClick={onAddBaby} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",borderBottom:state.babies.length>1?"1px solid #F3F4F6":"none"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"#F0FFF4",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>➕</div>
+              <span style={{fontSize:14,color:"#065F46",fontWeight:600}}>Add another baby</span>
+              <span style={{marginLeft:"auto",color:"#D1D5DB",fontSize:16}}>›</span>
+            </button>
+            {/* Switch baby */}
+            {state.babies.length>1 && state.babies.map(b=>(
+              <div key={b.id} style={{padding:"12px 16px",display:"flex",alignItems:"center",gap:12,borderBottom:"1px solid #F3F4F6"}}>
+                <div style={{width:32,height:32,borderRadius:"50%",overflow:"hidden",background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  {b.photo?<img src={b.photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{fontSize:16}}>👶</span>}
                 </div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E"}}>{b.name}</div>
-                  <div style={{fontSize:11,color:"#6B7280"}}>{monthsOld(b.dob)} months old</div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E"}}>{b.name}</div>
+                  <div style={{fontSize:11,color:"#9CA3AF"}}>{monthsOld(b.dob)} months old</div>
                 </div>
                 {b.id!==state.activeBabyId
-                  ?<button onClick={()=>{ update(s=>({...s,activeBabyId:b.id})); onClose(); }} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:600,cursor:"pointer"}}>Switch</button>
-                  :<span style={{fontSize:12,color:"#F25F4C",fontWeight:700}}>Active</span>
+                  ?<button onClick={()=>{ update(s=>({...s,activeBabyId:b.id})); onClose(); }} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:600,cursor:"pointer"}}>Switch</button>
+                  :<span style={{fontSize:12,color:"#F25F4C",fontWeight:700}}>Active ✓</span>
                 }
               </div>
             ))}
-          </div>
-        )}
-
-        <div style={{marginBottom:22}}>
-          <div style={css.label}>Edit {baby.name}</div>
-          <div style={{...css.card,padding:"18px"}}>
-            <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
-              <button onClick={()=>fileRef.current?.click()} style={{width:70,height:70,borderRadius:"50%",border:"2.5px dashed #E8EAF0",background:photo?"transparent":"#FFFFFF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
-                {photo?<img src={photo} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<div style={{textAlign:"center"}}><div style={{fontSize:22}}>📷</div><div style={{fontSize:9,color:"#9CA3AF"}}>Change</div></div>}
+            {state.babies.length>1&&(
+              <button onClick={()=>{update(s=>{const nb=s.babies.filter(b=>b.id!==baby.id);return{...s,babies:nb,activeBabyId:nb[0]?.id||null};});onClose();}} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+                <div style={{width:32,height:32,borderRadius:9,background:"#FFF1F2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🗑</div>
+                <span style={{fontSize:14,color:"#DC2626",fontWeight:600}}>Remove {baby.name}</span>
               </button>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
-            </div>
-            <label style={css.label}>Name</label>
-            <input value={name} onChange={e=>setName(e.target.value)} style={{...css.input,marginBottom:14}}/>
-            <label style={css.label}>Date of birth</label>
-            <input type="date" value={dob} onChange={e=>setDob(e.target.value)} style={{...css.input,marginBottom:16}}/>
-            <button onClick={save} style={{...css.btnPrimary,background:saved?"#7FB069":"#F25F4C"}}>
-              {saved?"✓ Saved!":"Save changes"}
-            </button>
+            )}
           </div>
         </div>
 
-        <button onClick={onAddBaby} style={{...css.btnSecondary,marginBottom:10,borderColor:"#7FB069",color:"#065F46",background:"#F0FFF4"}}>+ Add another baby</button>
-
-        {state.babies.length>1&&(
-          <button onClick={()=>{update(s=>{const nb=s.babies.filter(b=>b.id!==baby.id);return{...s,babies:nb,activeBabyId:nb[0]?.id||null};});onClose();}} style={{...css.btnSecondary,borderColor:"#FFBDB5",color:"#DC2626",background:"#FFF1F2"}}>
-            Remove {baby.name}
-          </button>
-        )}
-
-        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16,display:"flex",flexDirection:"column",gap:8}}>
-          <button onClick={()=>{ onClose(); setTimeout(()=>document.dispatchEvent(new CustomEvent("openBugReport")),50); }} style={{...css.btnSecondary,color:"#6B7280",fontSize:14}}>
-            🐛 Report a bug
-          </button>
-          <button onClick={onSignOut} style={{...css.btnSecondary,color:"#6B7280",fontSize:14}}>
-            Sign out
-          </button>
-        </div>
-
-        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16}}>
-          <div style={css.label}>Your data</div>
-          <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:12}}>Your data is stored securely and never shared with third parties. You can delete all of {baby.name}'s data at any time.</p>
-          {!confirmDelete ? (
-            <button onClick={()=>setConfirmDelete(true)} style={{...css.btnSecondary,borderColor:"#FFBDB5",color:"#DC2626",background:"#FFF1F2",fontSize:13}}>
-              🗑 Delete all of {baby.name}'s data
-            </button>
-          ) : (
-            <div style={{background:"#FFF1F2",borderRadius:14,padding:"16px",border:"1.5px solid #FFBDB5"}}>
-              <div style={{fontSize:14,fontWeight:700,color:"#DC2626",marginBottom:6}}>Are you sure?</div>
-              <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:12}}>This will permanently delete all food logs, journal entries, allergen records and progress for {baby.name}. This cannot be undone.</p>
-              <div style={{display:"flex",gap:8}}>
-                <button onClick={()=>setConfirmDelete(false)} style={{...css.btnSecondary,flex:1,fontSize:13}}>Cancel</button>
-                <button onClick={onDeleteData} style={{flex:1,padding:"12px",background:"#DC2626",color:"#fff",border:"none",borderRadius:12,fontSize:13,fontWeight:700,cursor:"pointer"}}>Yes, delete</button>
+        {/* TOOLS */}
+        <div style={{padding:"0 16px",marginBottom:28}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8,paddingLeft:4}}>Tools</div>
+          <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+            <button onClick={()=>window.open("https://buy.stripe.com/aFaaEZ3Tw6bHfLx3kq6AM0j","_blank")} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",borderBottom:"1px solid #F3F4F6"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"#FFFBEB",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>☕</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,color:"#1A1A2E",fontWeight:600}}>Support LilEats</div>
+                <div style={{fontSize:11,color:"#9CA3AF",marginTop:1}}>Made by a mum, for mums — buy us a coffee</div>
               </div>
-            </div>
-          )}
-        </div>
-
-        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16,display:"flex",flexDirection:"column",gap:8}}>
-          <div style={css.label}>Legal</div>
-          <button onClick={()=>setShowPrivacy(true)} style={{...css.btnSecondary,color:"#6B7280",fontSize:13,textAlign:"left"}}>📄 Privacy Policy</button>
-          <button onClick={()=>setShowTerms(true)} style={{...css.btnSecondary,color:"#6B7280",fontSize:13,textAlign:"left"}}>📋 Terms of Use</button>
-        </div>
-
-        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16,display:"flex",flexDirection:"column",gap:8}}>
-          <div style={css.label}>Export</div>
-          <button onClick={()=>setShowExport(true)} style={{...css.btnSecondary,color:"#6FA3D2",fontSize:13,textAlign:"left",borderColor:"#BFDBFE",background:"#EFF6FF"}}>📋 Export health summary PDF</button>
-          <p style={{fontSize:11,color:"#9CA3AF",lineHeight:1.5}}>Free during beta. A summary of {baby.name}'s weaning journey for your health visitor or GP.</p>
-        </div>
-
-        <div style={{borderTop:"1px solid #F3F4F6",marginTop:16,paddingTop:16}}>
-          <div style={css.label}>Support LilEats</div>
-          <div style={{background:"#FFF8F0",borderRadius:14,padding:"14px",border:"1px solid #F2D49A",marginBottom:8}}>
-            <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E",marginBottom:4}}>☕ Like LilEats? Buy us a coffee</div>
-            <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:10}}>LilEats is free and made by a mum, for mums. If it's helped your weaning journey, a small donation keeps it running. Thank you so much 🍐</p>
-            <button onClick={()=>window.open("https://buy.stripe.com/aFaaEZ3Tw6bHfLx3kq6AM0j","_blank")} style={{width:"100%",padding:"11px",background:"#F2B705",color:"#1A1A2E",border:"none",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
-              ☕ Support LilEats
+              <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
+            </button>
+            <button onClick={()=>setShowExport(true)} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"#EFF6FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>📋</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,color:"#1A1A2E",fontWeight:600}}>Export health summary</div>
+                <div style={{fontSize:11,color:"#9CA3AF",marginTop:1}}>PDF for your GP or health visitor · Free in beta</div>
+              </div>
+              <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
             </button>
           </div>
         </div>
 
-        <div style={{marginTop:16,textAlign:"center"}}>
+        {/* DATA & PRIVACY */}
+        <div style={{padding:"0 16px",marginBottom:28}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8,paddingLeft:4}}>Data & privacy</div>
+          <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+            <button onClick={()=>setShowPrivacy(true)} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",borderBottom:"1px solid #F3F4F6"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>📄</div>
+              <span style={{fontSize:14,color:"#1A1A2E",fontWeight:600,flex:1}}>Privacy Policy</span>
+              <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
+            </button>
+            <button onClick={()=>setShowTerms(true)} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",borderBottom:"1px solid #F3F4F6"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>📋</div>
+              <span style={{fontSize:14,color:"#1A1A2E",fontWeight:600,flex:1}}>Terms of Use</span>
+              <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
+            </button>
+            {!confirmDelete ? (
+              <button onClick={()=>setConfirmDelete(true)} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+                <div style={{width:32,height:32,borderRadius:9,background:"#FFF1F2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🗑</div>
+                <span style={{fontSize:14,color:"#DC2626",fontWeight:600,flex:1}}>Delete {baby.name}'s data</span>
+                <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
+              </button>
+            ) : (
+              <div style={{padding:"14px 16px",background:"#FFF1F2"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#DC2626",marginBottom:6}}>Are you sure?</div>
+                <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:12}}>Permanently deletes all food logs, journal entries, allergen records and progress for {baby.name}. Cannot be undone.</p>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>setConfirmDelete(false)} style={{...css.btnSecondary,flex:1,fontSize:13}}>Cancel</button>
+                  <button onClick={onDeleteData} style={{flex:1,padding:"12px",background:"#DC2626",color:"#fff",border:"none",borderRadius:12,fontSize:13,fontWeight:700,cursor:"pointer"}}>Yes, delete</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ACCOUNT */}
+        <div style={{padding:"0 16px",marginBottom:28}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8,paddingLeft:4}}>Account</div>
+          <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+            <button onClick={()=>{ onClose(); setTimeout(()=>document.dispatchEvent(new CustomEvent("openBugReport")),50); }} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",borderBottom:"1px solid #F3F4F6"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🐛</div>
+              <span style={{fontSize:14,color:"#1A1A2E",fontWeight:600,flex:1}}>Report a bug</span>
+              <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
+            </button>
+            <button onClick={onSignOut} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🚪</div>
+              <span style={{fontSize:14,color:"#6B7280",fontWeight:600,flex:1}}>Sign out</span>
+            </button>
+          </div>
+        </div>
+
+        <div style={{textAlign:"center",paddingBottom:20}}>
           <span style={{fontSize:11,color:"#D1D5DB"}}>LilEats · lileats.app · v1.0</span>
         </div>
       </div>
