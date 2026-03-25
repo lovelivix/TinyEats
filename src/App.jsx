@@ -394,6 +394,68 @@ function AuthScreen({onAuth}) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// DISCLAIMER SPLASH
+// ═══════════════════════════════════════════════════════════════
+function DisclaimerScreen({onAccept}) {
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  if (showPrivacy) return <PrivacyScreen onClose={()=>setShowPrivacy(false)}/>;
+  if (showTerms) return <TermsScreen onClose={()=>setShowTerms(false)}/>;
+  return (
+    <div style={{minHeight:"100vh",background:"#FFFFFF",fontFamily:"'Plus Jakarta Sans',sans-serif",maxWidth:430,margin:"0 auto",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-between",padding:"48px 24px 40px"}}>
+      <style>{GLOBAL_CSS}</style>
+      <div style={{width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:32}}>
+          <img src="/logo-full.png" alt="LilEats" style={{height:44,objectFit:"contain",marginBottom:20,display:"block",marginLeft:"auto",marginRight:"auto"}}/>
+          <div style={{fontSize:22,fontWeight:800,color:"#1A1A2E",marginBottom:6}}>Before you start</div>
+          <div style={{fontSize:13,color:"#9CA3AF"}}>Please read this — it only takes a moment</div>
+        </div>
+
+        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:24}}>
+          <div style={{display:"flex",gap:12,background:"#F9FAFB",borderRadius:14,padding:"14px"}}>
+            <span style={{fontSize:20,flexShrink:0}}>🍐</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E",marginBottom:3}}>Made by a mum, for mums</div>
+              <div style={{fontSize:12,color:"#6B7280",lineHeight:1.65}}>LilEats is a free weaning tracker made with love. It is not a medical product or service.</div>
+            </div>
+          </div>
+
+          <div style={{display:"flex",gap:12,background:"#FFF8F0",borderRadius:14,padding:"14px",border:"1px solid #F2D49A"}}>
+            <span style={{fontSize:20,flexShrink:0}}>⚕️</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:"#B8860B",marginBottom:3}}>Not medical advice</div>
+              <div style={{fontSize:12,color:"#78350F",lineHeight:1.65}}>Always follow guidance from your GP or health visitor — especially around allergens and reactions. Never delay seeking medical help based on anything in this app.</div>
+            </div>
+          </div>
+
+          <div style={{display:"flex",gap:12,background:"#FFF1F2",borderRadius:14,padding:"14px",border:"1px solid #FFBDB5"}}>
+            <span style={{fontSize:20,flexShrink:0}}>🚨</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:"#DC2626",marginBottom:3}}>In an emergency, call 999</div>
+              <div style={{fontSize:12,color:"#991B1B",lineHeight:1.65}}>If your baby has a serious reaction, difficulty breathing, or you are concerned about their health — call 999 immediately.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{fontSize:11,color:"#9CA3AF",lineHeight:1.7,textAlign:"center",marginBottom:8}}>
+          By continuing you agree to our{" "}
+          <button onClick={()=>setShowPrivacy(true)} style={{background:"none",border:"none",color:"#F25F4C",fontWeight:600,fontSize:11,cursor:"pointer",padding:0,fontFamily:"inherit"}}>Privacy Policy</button>
+          {" "}and{" "}
+          <button onClick={()=>setShowTerms(true)} style={{background:"none",border:"none",color:"#F25F4C",fontWeight:600,fontSize:11,cursor:"pointer",padding:0,fontFamily:"inherit"}}>Terms of Use</button>.
+        </div>
+      </div>
+
+      <div style={{width:"100%"}}>
+        <button onClick={onAccept} style={{width:"100%",padding:"16px",background:"#F25F4C",color:"#fff",border:"none",borderRadius:14,fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit",marginBottom:12}}>
+          I understand — let's go! 🍐
+        </button>
+        <div style={{textAlign:"center",fontSize:11,color:"#D1D5DB"}}>v1.0 · lileats.app</div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // ROOT
 // ═══════════════════════════════════════════════════════════════
 export default function App() {
@@ -405,6 +467,9 @@ export default function App() {
   const [appLoading, setAppLoading] = useState(true);
   const [resetToken, setResetToken] = useState(null);
   const [showBugReport, setShowBugReport] = useState(false);
+  const [showSplash, setShowSplash] = useState(() => {
+    try { return !localStorage.getItem("lileats_disclaimer_v1"); } catch { return true; }
+  });
 
   useEffect(() => {
     const handler = () => setShowBugReport(true);
@@ -586,6 +651,12 @@ export default function App() {
       </div>
     </div>
   );
+
+  // Disclaimer splash — shown once only
+  if (showSplash) return <DisclaimerScreen onAccept={()=>{
+    try { localStorage.setItem("lileats_disclaimer_v1","1"); } catch {}
+    setShowSplash(false);
+  }}/>;
 
   // Password reset flow
   if (resetToken) return <NewPasswordScreen token={resetToken} onDone={() => { setResetToken(null); }} />;
