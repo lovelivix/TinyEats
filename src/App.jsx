@@ -2767,6 +2767,16 @@ function ExportSheet({baby, profile, onClose}) {
   const generate = async () => {
     setGenerating(true);
     try {
+      // Load jsPDF dynamically if not already loaded
+      if (!window.jspdf) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
       const W = 210; const margin = 18; const cw = W - margin*2;
@@ -2994,7 +3004,6 @@ function ExportSheet({baby, profile, onClose}) {
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"/>
       <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:430,padding:"22px 18px 48px",animation:"slideUp 0.25s cubic-bezier(0.16,1,0.3,1)"}}>
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         {done ? (
