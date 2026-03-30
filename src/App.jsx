@@ -1958,6 +1958,7 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
   const [showExport, setShowExport] = useState(false);
   const [undoBuffer, setUndoBuffer] = useState(null);
   const undoTimerRef = useRef(null);
+  const [editingIdx, setEditingIdx] = useState(null);
 
   const journal = profile.journal || {};
 
@@ -2104,7 +2105,10 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
                     {entry.notes && <div style={{fontSize:12,color:"#6B7280",lineHeight:1.5}}>{entry.notes}</div>}
                     <div style={{fontSize:11,color:"#9CA3AF",marginTop:4}}>{formatTime(entry.time)}</div>
                   </div>
-                  <button onClick={()=>deleteEntry(selectedDate,idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:18,cursor:"pointer",padding:"0 4px",flexShrink:0}}>×</button>
+                  <div style={{display:"flex",gap:2,flexShrink:0}}>
+                    <button onClick={()=>setEditingIdx(idx)} style={{background:"none",border:"none",color:"#9CA3AF",fontSize:14,cursor:"pointer",padding:"0 4px"}}>✏️</button>
+                    <button onClick={()=>deleteEntry(selectedDate,idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:18,cursor:"pointer",padding:"0 4px"}}>×</button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -2136,16 +2140,51 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
           onClose={()=>setShowAddSheet(false)}
         />
       )}
+
+      {editingIdx !== null && selectedEntries[editingIdx] && (
+        <AddJournalEntry
+          date={selectedDate}
+          allFoods={allFoods}
+          editEntry={selectedEntries[editingIdx]}
+          onSave={(updatedEntry) => {
+            setProfile(p => {
+              const entries = [...(p.journal?.[selectedDate]||[])];
+              const originalFoods = entries[editingIdx]?.foods || [];
+              entries[editingIdx] = updatedEntry;
+              const newJournal = {...(p.journal||{}), [selectedDate]: entries};
+              // Add any newly introduced foods to foodLog (don't remove old ones)
+              const newFoodLog = {...p.foodLog};
+              (updatedEntry.foods||[]).forEach(food => {
+                if (!originalFoods.includes(food)) {
+                  newFoodLog[food] = [...(newFoodLog[food]||[]), {date:updatedEntry.time||new Date().toISOString(), reaction:updatedEntry.reactionType||"good", fromJournal:true}];
+                }
+              });
+              return {...p, journal:newJournal, foodLog:newFoodLog};
+            });
+            setEditingIdx(null);
+          }}
+          onClose={()=>setEditingIdx(null)}
+        />
+      )}
     </div>
   );
 }
 
-function AddJournalEntry({date, allFoods, prefilledFood=null, onSave, onClose}) {
-  const [selectedFoods, setSelectedFoods] = useState(prefilledFood ? [prefilledFood] : []);
+function AddJournalEntry({date, allFoods, prefilledFood=null, editEntry=null, onSave, onClose}) {
+  const isEditing = !!editEntry;
+  const [selectedFoods, setSelectedFoods] = useState(() => {
+    if (editEntry) return editEntry.foods || [];
+    if (prefilledFood) return [prefilledFood];
+    return [];
+  });
   const [customFood, setCustomFood] = useState("");
-  const [notes, setNotes] = useState("");
-  const [reactionType, setReactionType] = useState(null);
+  const [notes, setNotes] = useState(editEntry?.notes || "");
+  const [reactionType, setReactionType] = useState(editEntry?.reactionType || null);
   const [time, setTime] = useState(() => {
+    if (editEntry?.time) {
+      const d = new Date(editEntry.time);
+      return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    }
     const now = new Date();
     return `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
   });
@@ -2166,7 +2205,7 @@ function AddJournalEntry({date, allFoods, prefilledFood=null, onSave, onClose}) 
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:200,display:"flex",alignItems:"flex-end",maxWidth:430,margin:"0 auto"}}>
       <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",padding:"20px 20px 40px",maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <div style={{fontSize:16,fontWeight:800,color:"#1A1A2E"}}>{prefilledFood ? `Log ${cap(prefilledFood)}` : "Log a meal"}</div>
+          <div style={{fontSize:16,fontWeight:800,color:"#1A1A2E"}}>{isEditing ? "Edit entry" : prefilledFood ? `Log ${cap(prefilledFood)}` : "Log a meal"}</div>
           <button onClick={onClose} style={{background:"#F3F4F6",border:"none",borderRadius:8,width:28,height:28,fontSize:16,cursor:"pointer"}}>×</button>
         </div>
 
@@ -2271,7 +2310,7 @@ function AddJournalEntry({date, allFoods, prefilledFood=null, onSave, onClose}) 
         </div>
 
         <button onClick={save} disabled={selectedFoods.length===0} style={{width:"100%",padding:"14px",background:selectedFoods.length>0?"#F25F4C":"#E8EAF0",color:selectedFoods.length>0?"#fff":"#9CA3AF",borderRadius:12,border:"none",fontSize:15,fontWeight:700,cursor:selectedFoods.length>0?"pointer":"default"}}>
-          Save entry
+          {isEditing ? "Save changes" : "Save entry"}
         </button>
       </div>
     </div>
