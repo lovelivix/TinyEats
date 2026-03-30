@@ -706,8 +706,33 @@ export default function App() {
       } />
 
       {/* Overlays */}
-      {overlay?.type==="food"     && <FoodOverlay food={overlay.data} log={profile.foodLog[overlay.data]||[]} onLog={logReaction} onDeleteLast={()=>deleteLastReaction(overlay.data)} onClose={()=>setOverlay(null)} />}
-      {overlay?.type==="reaction" && <ReactionSheet food={overlay.data} log={profile.foodLog[overlay.data]||[]} onLog={logReaction} onClose={()=>setOverlay(null)} />}
+      {overlay?.type==="food"     && <FoodOverlay food={overlay.data} log={profile.foodLog[overlay.data]||[]} onDeleteLast={()=>deleteLastReaction(overlay.data)} onOpenLog={(food)=>setOverlay({type:"logFood",data:food,prev:"food"})} onClose={()=>setOverlay(null)} />}
+      {overlay?.type==="logFood"  && (()=>{
+        const now = new Date();
+        const todayKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+        return <AddJournalEntry
+          date={todayKey}
+          allFoods={allFoods}
+          prefilledFood={overlay.data}
+          onSave={(entry) => {
+            setProfile(p => {
+              const newJournal = {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), entry]};
+              const newFoodLog = {...p.foodLog};
+              (entry.foods||[]).forEach(food => {
+                newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:entry.reactionType||"good", fromJournal:true}];
+                // Auto-start allergen watch if needed
+                const allergenId = FOOD_DB[food]?.allergen;
+                if (allergenId && !p.allergens?.[allergenId]?.introduced) {
+                  p = {...p, allergens:{...(p.allergens||{}), [allergenId]:{introduced:new Date().toISOString(),safe:false,reaction:false,autoStarted:true}}};
+                }
+              });
+              return {...p, journal:newJournal, foodLog:newFoodLog};
+            });
+            setOverlay(overlay.prev==="food" ? {type:"food",data:overlay.data} : null);
+          }}
+          onClose={()=>setOverlay(overlay.prev==="food" ? {type:"food",data:overlay.data} : null)}
+        />;
+      })()}
       {overlay?.type==="addFood"  && <AddFoodSheet onAdd={addCustomFood} onClose={()=>setOverlay(null)} />}
       {overlay?.type==="settings" && <SettingsOverlay state={state} update={update} baby={baby} profile={profile} setProfile={setProfile} onAddBaby={()=>setOverlay({type:"addBaby"})} onClose={()=>setOverlay(null)} onSignOut={signOut} onUpdateBaby={async (id, data) => { await sb.authed(session.token).updateBaby(id, data); }} session={session} onDeleteData={async () => {
         try {
@@ -1103,11 +1128,14 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                   {todayEntries.map((entry,idx)=>(
                     <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#FFFFFF",borderRadius:10,padding:"8px 10px"}}>
                       <div style={{flex:1}}>
-                        <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:entry.notes?3:0}}>
+                        <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:(entry.notes||entry.reactionType)?3:0}}>
                           {entry.foods?.map(f=>(
                             <span key={f} style={{fontSize:12,fontWeight:600,color:entry.reaction?"#DC2626":"#1A1A2E"}}>{fe(f)} {cap(f)}</span>
                           ))}
-                          {entry.reaction&&<span style={{fontSize:11,color:"#DC2626",fontWeight:600}}>⚠ Reaction</span>}
+                          {entry.reactionType ? (()=>{
+                            const r = REACTIONS.find(x=>x.id===entry.reactionType);
+                            return r ? <span style={{fontSize:11,fontWeight:600,color:r.text}}>{r.emoji} {r.label}</span> : null;
+                          })() : entry.reaction ? <span style={{fontSize:11,color:"#DC2626",fontWeight:600}}>⚠ Reaction</span> : null}
                         </div>
                         {entry.notes&&<div style={{fontSize:11,color:"#9CA3AF"}}>{entry.notes}</div>}
                         <div style={{fontSize:10,color:"#9CA3AF",marginTop:2}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</div>
@@ -1209,7 +1237,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               const newJournal = {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), entry]};
               const newFoodLog = {...p.foodLog};
               (entry.foods||[]).forEach(food => {
-                newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:"good", fromJournal:true}];
+                newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:entry.reactionType||"good", fromJournal:true}];
               });
               return {...p, journal:newJournal, foodLog:newFoodLog};
             });
@@ -2003,11 +2031,14 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
               <div key={idx} style={{background:"#FFFFFF",borderRadius:14,padding:"12px 14px",boxShadow:"0 2px 8px rgba(26,26,46,0.06)",border:entry.reaction?"1.5px solid #F25F4C":"1.5px solid #F3F4F6"}}>
                 <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
                   <div style={{flex:1}}>
-                    <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:entry.notes?6:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginBottom:(entry.notes||entry.reactionType)?6:0}}>
                       {entry.foods?.map(f=>(
                         <span key={f} style={{background:"#F0FFF4",borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#065F46"}}>{fe(f)} {cap(f)}</span>
                       ))}
-                      {entry.reaction && <span style={{background:"#FFF1F2",borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#DC2626"}}>⚠ Reaction</span>}
+                      {entry.reactionType ? (()=>{
+                        const r = REACTIONS.find(x=>x.id===entry.reactionType);
+                        return r ? <span style={{background:r.color,borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600,color:r.text}}>{r.emoji} {r.label}</span> : null;
+                      })() : entry.reaction ? <span style={{background:"#FFF1F2",borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#DC2626"}}>⚠ Reaction</span> : null}
                     </div>
                     {entry.notes && <div style={{fontSize:12,color:"#6B7280",lineHeight:1.5}}>{entry.notes}</div>}
                     <div style={{fontSize:11,color:"#9CA3AF",marginTop:4}}>{formatTime(entry.time)}</div>
@@ -2029,7 +2060,7 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
               const newJournal = {...(p.journal||{}), [selectedDate]: [...(p.journal?.[selectedDate]||[]), entry]};
               const newFoodLog = {...p.foodLog};
               (entry.foods||[]).forEach(food => {
-                newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:"good", fromJournal:true}];
+                newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:entry.reactionType||"good", fromJournal:true}];
               });
               return {...p, journal:newJournal, foodLog:newFoodLog};
             });
@@ -2042,11 +2073,11 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
   );
 }
 
-function AddJournalEntry({date, allFoods, onSave, onClose}) {
-  const [selectedFoods, setSelectedFoods] = useState([]);
+function AddJournalEntry({date, allFoods, prefilledFood=null, onSave, onClose}) {
+  const [selectedFoods, setSelectedFoods] = useState(prefilledFood ? [prefilledFood] : []);
   const [customFood, setCustomFood] = useState("");
   const [notes, setNotes] = useState("");
-  const [reaction, setReaction] = useState(false);
+  const [reactionType, setReactionType] = useState(null);
   const [time, setTime] = useState(() => {
     const now = new Date();
     return `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
@@ -2061,14 +2092,14 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
     const [h,m] = time.split(":").map(Number);
     const [y,mo,d] = date.split("-").map(Number);
     const dt = new Date(y, mo-1, d, h, m);
-    onSave({foods:selectedFoods, notes:notes.trim(), reaction, time:dt.toISOString()});
+    onSave({foods:selectedFoods, notes:notes.trim(), reactionType, reaction: reactionType==="reaction", time:dt.toISOString()});
   };
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:200,display:"flex",alignItems:"flex-end",maxWidth:430,margin:"0 auto"}}>
       <div style={{background:"#FFFFFF",borderRadius:"24px 24px 0 0",width:"100%",padding:"20px 20px 40px",maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <div style={{fontSize:16,fontWeight:800,color:"#1A1A2E"}}>Log a meal</div>
+          <div style={{fontSize:16,fontWeight:800,color:"#1A1A2E"}}>{prefilledFood ? `Log ${cap(prefilledFood)}` : "Log a meal"}</div>
           <button onClick={onClose} style={{background:"#F3F4F6",border:"none",borderRadius:8,width:28,height:28,fontSize:16,cursor:"pointer"}}>×</button>
         </div>
 
@@ -2082,21 +2113,37 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
         {/* Foods */}
         <div style={{marginBottom:14}}>
           <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6}}>Foods tried</label>
-          <div style={{position:"relative",marginBottom:8}}>
-            <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:13}}>🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…"
-              style={{width:"100%",padding:"8px 12px 8px 30px",borderRadius:10,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
-          </div>
-          <div style={{display:"flex",flexWrap:"wrap",gap:6,maxHeight:140,overflowY:"auto"}}>
-            {filtered.map(f=>{
-              const sel = selectedFoods.includes(f);
-              return (
-                <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:sel?700:400,background:sel?"#F25F4C":"#F3F4F6",color:sel?"#fff":"#374151",border:"none",cursor:"pointer"}}>
-                  {fe(f)} {cap(f)}
+          {prefilledFood ? (
+            <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
+              <span style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:700,background:"#F25F4C",color:"#fff"}}>
+                {fe(prefilledFood)} {cap(prefilledFood)}
+              </span>
+              {selectedFoods.filter(f=>f!==prefilledFood).map(f=>(
+                <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:700,background:"#F25F4C",color:"#fff",border:"none",cursor:"pointer"}}>
+                  {fe(f)} {cap(f)} ×
                 </button>
-              );
-            })}
-          </div>
+              ))}
+              <button onClick={()=>setSearch(s=>s===""?"\u200b":"")} style={{padding:"5px 10px",borderRadius:20,fontSize:12,background:"#F3F4F6",color:"#6B7280",border:"none",cursor:"pointer"}}>+ add more</button>
+            </div>
+          ) : (
+            <div style={{position:"relative",marginBottom:8}}>
+              <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:13}}>🔍</span>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…"
+                style={{width:"100%",padding:"8px 12px 8px 30px",borderRadius:10,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+          )}
+          {(!prefilledFood || search) && (
+            <div style={{display:"flex",flexWrap:"wrap",gap:6,maxHeight:140,overflowY:"auto"}}>
+              {filtered.map(f=>{
+                const sel = selectedFoods.includes(f);
+                return (
+                  <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:sel?700:400,background:sel?"#F25F4C":"#F3F4F6",color:sel?"#fff":"#374151",border:"none",cursor:"pointer"}}>
+                    {fe(f)} {cap(f)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Custom food */}
           <div style={{display:"flex",gap:6,marginTop:8}}>
@@ -2125,27 +2172,28 @@ function AddJournalEntry({date, allFoods, onSave, onClose}) {
               Add
             </button>
           </div>
-          {selectedFoods.filter(f=>!allFoods.includes(f)).length>0&&(
+          {selectedFoods.filter(f=>!allFoods.includes(f) && f!==prefilledFood).length>0&&(
             <div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>
-              {selectedFoods.filter(f=>!allFoods.includes(f)).map(f=>(
+              {selectedFoods.filter(f=>!allFoods.includes(f) && f!==prefilledFood).map(f=>(
                 <span key={f} onClick={()=>setSelectedFoods(p=>p.filter(x=>x!==f))} style={{background:"#F0F4FF",borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600,color:"#6FA3D2",cursor:"pointer"}}>✏️ {cap(f)} ×</span>
               ))}
             </div>
           )}
         </div>
 
-        {/* Reaction toggle */}
+        {/* How did it go — reaction type */}
         <div style={{marginBottom:14}}>
-          <button onClick={()=>setReaction(r=>!r)} style={{display:"flex",alignItems:"center",gap:8,background:reaction?"#FFF1F2":"#FFFFFF",border:`1.5px solid ${reaction?"#F25F4C":"#E8EAF0"}`,borderRadius:12,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left"}}>
-            <span style={{fontSize:18}}>⚠️</span>
-            <div>
-              <div style={{fontSize:13,fontWeight:600,color:reaction?"#DC2626":"#374151"}}>Mark as reaction</div>
-              <div style={{fontSize:11,color:"#9CA3AF"}}>Flag this meal if baby had any symptoms</div>
-            </div>
-            <div style={{marginLeft:"auto",width:20,height:20,borderRadius:"50%",background:reaction?"#F25F4C":"#E8EAF0",display:"flex",alignItems:"center",justifyContent:"center"}}>
-              {reaction&&<span style={{color:"#fff",fontSize:12,fontWeight:700}}>✓</span>}
-            </div>
-          </button>
+          <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:8}}>How did it go? (optional)</label>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+            {REACTIONS.map(r=>(
+              <button key={r.id} onClick={()=>setReactionType(rt=>rt===r.id?null:r.id)}
+                style={{display:"flex",alignItems:"center",gap:7,background:reactionType===r.id?r.color:"#F9FAFB",border:`1.5px solid ${reactionType===r.id?"transparent":"#E8EAF0"}`,borderRadius:12,padding:"9px 12px",cursor:"pointer",fontFamily:"inherit",boxShadow:reactionType===r.id?"0 2px 8px rgba(26,26,46,0.1)":"none",transition:"all 0.1s"}}>
+                <span style={{fontSize:18}}>{r.emoji}</span>
+                <span style={{fontSize:12,fontWeight:reactionType===r.id?700:500,color:reactionType===r.id?r.text:"#374151"}}>{r.label}</span>
+                {reactionType===r.id&&<span style={{marginLeft:"auto",fontSize:11,color:r.text}}>✓</span>}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Notes */}
@@ -2319,7 +2367,7 @@ function LearnScreen() {
 // ═══════════════════════════════════════════════════════════════
 // FOOD OVERLAY (full screen)
 // ═══════════════════════════════════════════════════════════════
-function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
+function FoodOverlay({food, log, onDeleteLast, onOpenLog, onClose}) {
   const [tab, setTab] = useState("prep");
   const [expandedRecipe, setExpandedRecipe] = useState(null);
   const db = FOOD_DB[food];
@@ -2345,43 +2393,33 @@ function FoodOverlay({food, log, onLog, onDeleteLast, onClose}) {
         </div>
       </div>
 
-      {/* Log reaction */}
+      {/* Log meal button + recent history */}
       <div style={{padding:"0 16px 14px"}}>
-        <div style={{...css.card,padding:"14px"}}>
-          <div style={{fontSize:12,fontWeight:700,color:"#6B7280",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:10}}>How did it go today?</div>
-          <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:2}}>
-            {REACTIONS.map(r=>(
-              <button key={r.id} onClick={()=>onLog(food,r.id)}
-                style={{flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:2,background:r.color,borderRadius:10,padding:"8px 8px",border:"none",cursor:"pointer",minWidth:52,transition:"transform 0.1s"}}>
-                <span style={{fontSize:20}}>{r.emoji}</span>
-                <span style={{fontSize:9,fontWeight:600,color:r.text,whiteSpace:"nowrap",textAlign:"center",lineHeight:1.2}}>{r.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Recent log with undo */}
-          {log.length>0&&(
-            <div style={{marginTop:10}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                <div style={{fontSize:11,color:"#9CA3AF",fontWeight:600}}>Recent</div>
-                <button onClick={onDeleteLast} style={{fontSize:11,color:"#F25F4C",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>↩ Undo last</button>
-              </div>
-              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                {[...log].reverse().slice(0,5).map((e,i)=>{
-                  const r=REACTIONS.find(x=>x.id===e.reaction);
-                  return<span key={i} style={{fontSize:11,background:"#FFFFFF",borderRadius:8,padding:"3px 8px",color:"#6B7280"}}>{r?.emoji} {fmtDate(e.date)}</span>;
-                })}
-              </div>
+        <button onClick={()=>onOpenLog(food)}
+          style={{width:"100%",background:"#F25F4C",color:"#fff",border:"none",borderRadius:14,padding:"14px",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 14px rgba(242,95,76,0.3)",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          📝 Log today's meal
+        </button>
+        {log.length>0&&(
+          <div style={{...css.card,padding:"12px 14px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <div style={{fontSize:11,color:"#9CA3AF",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em"}}>Recent</div>
+              <button onClick={onDeleteLast} style={{fontSize:11,color:"#F25F4C",background:"none",border:"none",cursor:"pointer",fontWeight:600}}>↩ Undo last</button>
             </div>
-          )}
-        </div>
+            <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+              {[...log].reverse().slice(0,5).map((e,i)=>{
+                const r=REACTIONS.find(x=>x.id===e.reaction);
+                return<span key={i} style={{fontSize:11,background:"#F9FAFB",borderRadius:8,padding:"4px 8px",color:"#6B7280",border:"1px solid #F3F4F6"}}>{r?.emoji} {fmtDate(e.date)}</span>;
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Prep & Recipes */}
       {!db?(
         <div style={{padding:"0 16px 32px"}}>
           <div style={{background:"#FFFFFF",borderRadius:12,padding:"16px",fontSize:13,color:"#6B7280",lineHeight:1.7}}>
-            No detailed guide yet for {cap(food)}. Use the log above to track when you offer it.
+            No detailed guide yet for {cap(food)}. Use the button above to log when you offer it.
           </div>
         </div>
       ):(
