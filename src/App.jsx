@@ -1145,44 +1145,43 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               {todayEntries.length===0 ? (
                 <div style={{fontSize:12,color:"#9CA3AF",marginTop:8}}>Nothing logged yet — tap + Add to record today's meals.</div>
               ) : (
-                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                   {todayEntries.map((entry,idx)=>{
                     const rxn = entry.reactionType ? REACTIONS.find(x=>x.id===entry.reactionType) : null;
                     const noteOpen = expandedNotes.has(idx);
+                    const firstFood = entry.foods?.[0];
+                    const extraCount = (entry.foods?.length||0) - 1;
                     return (
-                      <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:14,padding:"10px 12px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6"}}>
-                        {/* Food icons row + delete */}
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",flex:1}}>
-                            {entry.foods?.map(f=>(
-                              <div key={f} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:1,minWidth:38}}>
-                                <span style={{fontSize:32,lineHeight:1}}>{fe(f)}</span>
-                                <span style={{fontSize:9,fontWeight:600,color:"#9CA3AF",textAlign:"center",maxWidth:48,overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{cap(f)}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:16,cursor:"pointer",padding:"0 0 0 8px",flexShrink:0,alignSelf:"flex-start"}}>×</button>
+                      <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:16,padding:"10px 10px 8px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6",display:"flex",flexDirection:"column",position:"relative",minHeight:100}}>
+                        {/* Delete */}
+                        <button onClick={()=>deleteHomeEntry(idx)} style={{position:"absolute",top:6,right:8,background:"none",border:"none",color:"#D1D5DB",fontSize:14,cursor:"pointer",padding:0,lineHeight:1}}>×</button>
+                        {/* Primary emoji */}
+                        <span style={{fontSize:38,lineHeight:1,marginBottom:3}}>{fe(firstFood||"")}</span>
+                        {/* Food name(s) */}
+                        <div style={{fontSize:11,fontWeight:700,color:"#1A1A2E",marginBottom:4,lineHeight:1.3,paddingRight:14}}>
+                          {cap(firstFood||"")}
+                          {extraCount>0&&<span style={{color:"#9CA3AF",fontWeight:500}}>{" +"+extraCount}</span>}
                         </div>
-                        {/* Meta row: reaction · time · note chip */}
-                        <div style={{display:"flex",alignItems:"center",gap:5,marginTop:6,flexWrap:"wrap"}}>
-                          {rxn ? <span style={{background:rxn.color,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:600,color:rxn.text}}>{rxn.emoji} {rxn.label}</span>
-                               : entry.reaction ? <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:600,color:"#DC2626"}}>⚠ Reaction</span> : null}
-                          <span style={{fontSize:10,color:"#9CA3AF"}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</span>
-                          {entry.notes && (
-                            <button onClick={()=>toggleNote(idx)} style={{background:noteOpen?"#F3F4F6":"#FFFFFF",border:"1px solid #E8EAF0",borderRadius:20,padding:"1px 8px",fontSize:10,fontWeight:600,color:"#6B7280",cursor:"pointer",marginLeft:"auto"}}>
-                              💬 {noteOpen ? "hide" : "note"}
-                            </button>
-                          )}
+                        {/* Reaction chip */}
+                        {rxn ? (
+                          <span style={{background:rxn.color,borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:rxn.text,display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>{rxn.emoji} {rxn.label}</span>
+                        ) : entry.reaction ? (
+                          <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:"#DC2626",display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>⚠ Reaction</span>
+                        ) : null}
+                        {/* Time + note chip */}
+                        <div style={{display:"flex",alignItems:"center",gap:4,marginTop:"auto",paddingTop:2}}>
+                          <span style={{fontSize:10,color:"#9CA3AF",flex:1}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</span>
+                          {entry.notes&&<button onClick={()=>toggleNote(idx)} style={{background:"none",border:"1px solid #E8EAF0",borderRadius:20,padding:"1px 6px",fontSize:9,fontWeight:600,color:"#9CA3AF",cursor:"pointer"}}>💬</button>}
                         </div>
-                        {/* Note text — only when expanded */}
-                        {entry.notes && noteOpen && (
-                          <div style={{fontSize:11,color:"#6B7280",marginTop:6,lineHeight:1.5,padding:"6px 8px",background:"#FFFFFF",borderRadius:8,border:"1px solid #F3F4F6"}}>{entry.notes}</div>
+                        {/* Note — expanded */}
+                        {entry.notes&&noteOpen&&(
+                          <div style={{fontSize:11,color:"#6B7280",marginTop:5,lineHeight:1.5,padding:"5px 7px",background:"#FFFFFF",borderRadius:8,border:"1px solid #F3F4F6"}}>{entry.notes}</div>
                         )}
                       </div>
                     );
                   })}
-                  {undoBuffer && (
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#1A1A2E",borderRadius:12,padding:"10px 14px"}}>
+                  {undoBuffer&&(
+                    <div style={{gridColumn:"1/-1",display:"flex",alignItems:"center",justifyContent:"space-between",background:"#1A1A2E",borderRadius:12,padding:"10px 14px"}}>
                       <span style={{fontSize:12,color:"#D1D5DB"}}>Entry deleted</span>
                       <button onClick={undoHomeDelete} style={{background:"#F25F4C",border:"none",borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>Undo</button>
                     </div>
