@@ -994,6 +994,8 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
   const [showJournalAdd, setShowJournalAdd] = useState(false);
   const [undoBuffer, setUndoBuffer] = useState(null);
   const undoTimerRef = useRef(null);
+  const [expandedNotes, setExpandedNotes] = useState(new Set());
+  const toggleNote = (idx) => setExpandedNotes(prev => { const n = new Set(prev); n.has(idx) ? n.delete(idx) : n.add(idx); return n; });
   const allFoods = [...new Set([...ALL_FOODS,...(profile.customFoods||[]),...Object.keys(profile.foodLog)])].sort();
   const todayKey = (() => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
 
@@ -1146,25 +1148,36 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                 <div style={{display:"flex",flexDirection:"column",gap:8}}>
                   {todayEntries.map((entry,idx)=>{
                     const rxn = entry.reactionType ? REACTIONS.find(x=>x.id===entry.reactionType) : null;
+                    const noteOpen = expandedNotes.has(idx);
                     return (
                       <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:14,padding:"10px 12px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6"}}>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                          <div style={{display:"flex",gap:10,flexWrap:"wrap",flex:1}}>
+                        {/* Food icons row + delete */}
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",flex:1}}>
                             {entry.foods?.map(f=>(
-                              <div key={f} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:44}}>
-                                <span style={{fontSize:34,lineHeight:1}}>{fe(f)}</span>
-                                <span style={{fontSize:10,fontWeight:600,color:"#6B7280",textAlign:"center",lineHeight:1.2,maxWidth:52,overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{cap(f)}</span>
+                              <div key={f} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:1,minWidth:38}}>
+                                <span style={{fontSize:32,lineHeight:1}}>{fe(f)}</span>
+                                <span style={{fontSize:9,fontWeight:600,color:"#9CA3AF",textAlign:"center",maxWidth:48,overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{cap(f)}</span>
                               </div>
                             ))}
                           </div>
-                          <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:16,cursor:"pointer",padding:"0 0 0 8px",flexShrink:0}}>×</button>
+                          <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:16,cursor:"pointer",padding:"0 0 0 8px",flexShrink:0,alignSelf:"flex-start"}}>×</button>
                         </div>
-                        <div style={{display:"flex",alignItems:"center",gap:6,marginTop:8,flexWrap:"wrap"}}>
-                          {rxn ? <span style={{background:rxn.color,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:600,color:rxn.text}}>{rxn.emoji} {rxn.label}</span>
-                               : entry.reaction ? <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:600,color:"#DC2626"}}>⚠ Reaction</span> : null}
+                        {/* Meta row: reaction · time · note chip */}
+                        <div style={{display:"flex",alignItems:"center",gap:5,marginTop:6,flexWrap:"wrap"}}>
+                          {rxn ? <span style={{background:rxn.color,borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:600,color:rxn.text}}>{rxn.emoji} {rxn.label}</span>
+                               : entry.reaction ? <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 8px",fontSize:10,fontWeight:600,color:"#DC2626"}}>⚠ Reaction</span> : null}
                           <span style={{fontSize:10,color:"#9CA3AF"}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</span>
+                          {entry.notes && (
+                            <button onClick={()=>toggleNote(idx)} style={{background:noteOpen?"#F3F4F6":"#FFFFFF",border:"1px solid #E8EAF0",borderRadius:20,padding:"1px 8px",fontSize:10,fontWeight:600,color:"#6B7280",cursor:"pointer",marginLeft:"auto"}}>
+                              💬 {noteOpen ? "hide" : "note"}
+                            </button>
+                          )}
                         </div>
-                        {entry.notes&&<div style={{fontSize:11,color:"#9CA3AF",marginTop:4,lineHeight:1.5}}>{entry.notes}</div>}
+                        {/* Note text — only when expanded */}
+                        {entry.notes && noteOpen && (
+                          <div style={{fontSize:11,color:"#6B7280",marginTop:6,lineHeight:1.5,padding:"6px 8px",background:"#FFFFFF",borderRadius:8,border:"1px solid #F3F4F6"}}>{entry.notes}</div>
+                        )}
                       </div>
                     );
                   })}
