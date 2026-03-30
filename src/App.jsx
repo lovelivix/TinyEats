@@ -992,8 +992,36 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
   const badges = profile.earnedBadges||[];
   const stale = tried.filter(f=>{const l=profile.foodLog[f];return l?.length&&daysSince(l[l.length-1].date)>4;}).slice(0,3);
   const [showJournalAdd, setShowJournalAdd] = useState(false);
+  const [undoBuffer, setUndoBuffer] = useState(null);
+  const undoTimerRef = useRef(null);
   const allFoods = [...new Set([...ALL_FOODS,...(profile.customFoods||[]),...Object.keys(profile.foodLog)])].sort();
   const todayKey = (() => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
+
+  const deleteHomeEntry = (idx) => {
+    const entry = (profile.journal?.[todayKey]||[])[idx];
+    setProfile(p => {
+      const entries = [...(p.journal?.[todayKey]||[])];
+      entries.splice(idx, 1);
+      const newJournal = {...(p.journal||{}), [todayKey]: entries};
+      if (entries.length === 0) delete newJournal[todayKey];
+      return {...p, journal:newJournal};
+    });
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoBuffer({idx, entry});
+    undoTimerRef.current = setTimeout(() => setUndoBuffer(null), 4000);
+  };
+
+  const undoHomeDelete = () => {
+    if (!undoBuffer) return;
+    const {idx, entry} = undoBuffer;
+    setProfile(p => {
+      const entries = [...(p.journal?.[todayKey]||[])];
+      entries.splice(idx, 0, entry);
+      return {...p, journal:{...(p.journal||{}), [todayKey]:entries}};
+    });
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoBuffer(null);
+  };
 
   if (weaningComplete) return <CompleteScreen baby={baby} profile={profile} setProfile={setProfile} setScreen={setScreen} />;
 
@@ -1103,46 +1131,49 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
       })()}
 
       {/* Today's food */}
-      {(() => {
+      {(()=>{
         const todayEntries = (profile.journal||{})[todayKey] || [];
-        const deleteEntry = (idx) => {
-          setProfile(p => {
-            const entries = [...(p.journal?.[todayKey]||[])];
-            entries.splice(idx,1);
-            const newJournal = {...(p.journal||{}), [todayKey]: entries};
-            if (entries.length===0) delete newJournal[todayKey];
-            return {...p, journal:newJournal};
-          });
-        };
         return (
           <div style={{padding:"0 16px",marginBottom:16}}>
             <div style={{background:"#FFFFFF",borderRadius:20,boxShadow:"0 4px 20px rgba(26,26,46,0.08)",padding:"14px 16px"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:todayEntries.length>0?10:0}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:todayEntries.length>0?12:0}}>
                 <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E"}}>🍽 What did {baby.name} eat today?</div>
                 <button onClick={()=>setShowJournalAdd(true)} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:10,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add</button>
               </div>
               {todayEntries.length===0 ? (
                 <div style={{fontSize:12,color:"#9CA3AF",marginTop:8}}>Nothing logged yet — tap + Add to record today's meals.</div>
               ) : (
-                <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                  {todayEntries.map((entry,idx)=>(
-                    <div key={idx} style={{display:"flex",alignItems:"center",gap:8,background:entry.reaction?"#FFF1F2":"#FFFFFF",borderRadius:10,padding:"8px 10px"}}>
-                      <div style={{flex:1}}>
-                        <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:(entry.notes||entry.reactionType)?3:0}}>
-                          {entry.foods?.map(f=>(
-                            <span key={f} style={{fontSize:12,fontWeight:600,color:entry.reaction?"#DC2626":"#1A1A2E"}}>{fe(f)} {cap(f)}</span>
-                          ))}
-                          {entry.reactionType ? (()=>{
-                            const r = REACTIONS.find(x=>x.id===entry.reactionType);
-                            return r ? <span style={{fontSize:11,fontWeight:600,color:r.text}}>{r.emoji} {r.label}</span> : null;
-                          })() : entry.reaction ? <span style={{fontSize:11,color:"#DC2626",fontWeight:600}}>⚠ Reaction</span> : null}
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  {todayEntries.map((entry,idx)=>{
+                    const rxn = entry.reactionType ? REACTIONS.find(x=>x.id===entry.reactionType) : null;
+                    return (
+                      <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:14,padding:"10px 12px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6"}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                          <div style={{display:"flex",gap:10,flexWrap:"wrap",flex:1}}>
+                            {entry.foods?.map(f=>(
+                              <div key={f} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:44}}>
+                                <span style={{fontSize:34,lineHeight:1}}>{fe(f)}</span>
+                                <span style={{fontSize:10,fontWeight:600,color:"#6B7280",textAlign:"center",lineHeight:1.2,maxWidth:52,overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{cap(f)}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:16,cursor:"pointer",padding:"0 0 0 8px",flexShrink:0}}>×</button>
                         </div>
-                        {entry.notes&&<div style={{fontSize:11,color:"#9CA3AF"}}>{entry.notes}</div>}
-                        <div style={{fontSize:10,color:"#9CA3AF",marginTop:2}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</div>
+                        <div style={{display:"flex",alignItems:"center",gap:6,marginTop:8,flexWrap:"wrap"}}>
+                          {rxn ? <span style={{background:rxn.color,borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:600,color:rxn.text}}>{rxn.emoji} {rxn.label}</span>
+                               : entry.reaction ? <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:600,color:"#DC2626"}}>⚠ Reaction</span> : null}
+                          <span style={{fontSize:10,color:"#9CA3AF"}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</span>
+                        </div>
+                        {entry.notes&&<div style={{fontSize:11,color:"#9CA3AF",marginTop:4,lineHeight:1.5}}>{entry.notes}</div>}
                       </div>
-                      <button onClick={()=>deleteEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:16,cursor:"pointer",padding:"0 2px",flexShrink:0}}>×</button>
+                    );
+                  })}
+                  {undoBuffer && (
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#1A1A2E",borderRadius:12,padding:"10px 14px"}}>
+                      <span style={{fontSize:12,color:"#D1D5DB"}}>Entry deleted</span>
+                      <button onClick={undoHomeDelete} style={{background:"#F25F4C",border:"none",borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>Undo</button>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
@@ -1913,6 +1944,8 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
   const [selectedDate, setSelectedDate] = useState(toDateKey(today));
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [undoBuffer, setUndoBuffer] = useState(null);
+  const undoTimerRef = useRef(null);
 
   const journal = profile.journal || {};
 
@@ -1944,6 +1977,7 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
   const selectedEntries = journal[selectedDate] || [];
 
   const deleteEntry = (dateKey, idx) => {
+    const entry = (profile.journal?.[dateKey]||[])[idx];
     setProfile(p => {
       const entries = [...(p.journal?.[dateKey]||[])];
       entries.splice(idx, 1);
@@ -1951,6 +1985,21 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
       if (entries.length === 0) delete newJournal[dateKey];
       return {...p, journal:newJournal};
     });
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoBuffer({dateKey, idx, entry});
+    undoTimerRef.current = setTimeout(() => setUndoBuffer(null), 4000);
+  };
+
+  const undoDelete = () => {
+    if (!undoBuffer) return;
+    const {dateKey, idx, entry} = undoBuffer;
+    setProfile(p => {
+      const entries = [...(p.journal?.[dateKey]||[])];
+      entries.splice(idx, 0, entry);
+      return {...p, journal:{...(p.journal||{}), [dateKey]:entries}};
+    });
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoBuffer(null);
   };
 
   return (
@@ -2047,6 +2096,12 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
                 </div>
               </div>
             ))}
+            {undoBuffer && (
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#1A1A2E",borderRadius:12,padding:"10px 14px",marginTop:4}}>
+                <span style={{fontSize:12,color:"#D1D5DB"}}>Entry deleted</span>
+                <button onClick={undoDelete} style={{background:"#F25F4C",border:"none",borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>Undo</button>
+              </div>
+            )}
           </div>
         )}
       </div>
