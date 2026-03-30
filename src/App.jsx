@@ -996,6 +996,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
   const undoTimerRef = useRef(null);
   const [expandedNotes, setExpandedNotes] = useState(new Set());
   const toggleNote = (idx) => setExpandedNotes(prev => { const n = new Set(prev); n.has(idx) ? n.delete(idx) : n.add(idx); return n; });
+  const [editingHomeIdx, setEditingHomeIdx] = useState(null);
   const allFoods = [...new Set([...ALL_FOODS,...(profile.customFoods||[]),...Object.keys(profile.foodLog)])].sort();
   const todayKey = (() => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
 
@@ -1153,8 +1154,11 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                     const extraCount = (entry.foods?.length||0) - 1;
                     return (
                       <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:16,padding:"10px 10px 8px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6",display:"flex",flexDirection:"column",position:"relative",minHeight:100}}>
-                        {/* Delete */}
-                        <button onClick={()=>deleteHomeEntry(idx)} style={{position:"absolute",top:6,right:8,background:"none",border:"none",color:"#D1D5DB",fontSize:14,cursor:"pointer",padding:0,lineHeight:1}}>×</button>
+                        {/* Edit + Delete */}
+                        <div style={{position:"absolute",top:5,right:6,display:"flex",gap:2}}>
+                          <button onClick={()=>setEditingHomeIdx(idx)} style={{background:"none",border:"none",fontSize:12,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>✏️</button>
+                          <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:14,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>×</button>
+                        </div>
                         {/* Primary emoji */}
                         <span style={{fontSize:38,lineHeight:1,marginBottom:3}}>{fe(firstFood||"")}</span>
                         {/* Food name(s) */}
@@ -1287,6 +1291,30 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
             setShowJournalAdd(false);
           }}
           onClose={()=>setShowJournalAdd(false)}
+        />
+      )}
+
+      {editingHomeIdx !== null && ((profile.journal||{})[todayKey]||[])[editingHomeIdx] && (
+        <AddJournalEntry
+          date={todayKey}
+          allFoods={allFoods}
+          editEntry={((profile.journal||{})[todayKey]||[])[editingHomeIdx]}
+          onSave={(updatedEntry) => {
+            setProfile(p => {
+              const entries = [...(p.journal?.[todayKey]||[])];
+              const originalFoods = entries[editingHomeIdx]?.foods || [];
+              entries[editingHomeIdx] = updatedEntry;
+              const newFoodLog = {...p.foodLog};
+              (updatedEntry.foods||[]).forEach(food => {
+                if (!originalFoods.includes(food)) {
+                  newFoodLog[food] = [...(newFoodLog[food]||[]), {date:updatedEntry.time||new Date().toISOString(), reaction:updatedEntry.reactionType||"good", fromJournal:true}];
+                }
+              });
+              return {...p, journal:{...(p.journal||{}), [todayKey]:entries}, foodLog:newFoodLog};
+            });
+            setEditingHomeIdx(null);
+          }}
+          onClose={()=>setEditingHomeIdx(null)}
         />
       )}
     </div>
