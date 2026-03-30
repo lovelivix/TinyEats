@@ -572,20 +572,14 @@ export default function App() {
   }, [profile?.foodLog, profile?.activeWeek]);
 
   const logReaction = useCallback((food, rid) => {
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
     setProfile(p => {
-      const newFoodLog = {...p.foodLog, [food]: [...(p.foodLog[food]||[]), {date:new Date().toISOString(), reaction:rid}]};
-      // Auto-start allergen watch if this food is an allergen and not yet introduced
-      const allergenMatch = ALLERGENS.find(a => a.id !== "dairy" && food === a.id || 
-        (a.id === "egg" && food === "egg") ||
-        (a.id === "fish" && (food === "fish" || food === "salmon")) ||
-        (a.id === "wheat" && (food === "toast" || food === "pasta" || food === "porridge" || food === "pitta")) ||
-        (a.id === "dairy" && (food === "full fat yoghurt" || food === "cheese")) ||
-        (a.id === "peanut" && food === "peanut butter") ||
-        (a.id === "soy" && food === "tofu") ||
-        (a.id === "sesame" && food === "hummus") ||
-        (a.id === "treenut" && food === "peanut butter")
-      );
-      // Simpler: check FOOD_DB allergen field
+      const newFoodLog = {...p.foodLog, [food]: [...(p.foodLog[food]||[]), {date:now.toISOString(), reaction:rid}]};
+      // Auto-create journal entry for today
+      const journalEntry = {foods:[food], notes:"", reaction: rid==="reaction", time:now.toISOString(), fromTracker:true};
+      const newJournal = {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), journalEntry]};
+      // Auto-start allergen watch
       const foodAllergenId = FOOD_DB[food]?.allergen;
       const allergenId = foodAllergenId;
       const existingAllergen = p.allergens?.[allergenId];
@@ -593,10 +587,11 @@ export default function App() {
         return {
           ...p,
           foodLog: newFoodLog,
-          allergens: {...(p.allergens||{}), [allergenId]: {introduced: new Date().toISOString(), safe:false, reaction:false, autoStarted:true}},
+          journal: newJournal,
+          allergens: {...(p.allergens||{}), [allergenId]: {introduced: now.toISOString(), safe:false, reaction:false, autoStarted:true}},
         };
       }
-      return {...p, foodLog: newFoodLog};
+      return {...p, foodLog: newFoodLog, journal: newJournal};
     });
     setOverlay(null);
   }, [setProfile]);
@@ -1210,10 +1205,14 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
           date={todayKey}
           allFoods={allFoods}
           onSave={(entry) => {
-            setProfile(p => ({
-              ...p,
-              journal: {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), entry]},
-            }));
+            setProfile(p => {
+              const newJournal = {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), entry]};
+              const newFoodLog = {...p.foodLog};
+              (entry.foods||[]).forEach(food => {
+                newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:"good", fromJournal:true}];
+              });
+              return {...p, journal:newJournal, foodLog:newFoodLog};
+            });
             setShowJournalAdd(false);
           }}
           onClose={()=>setShowJournalAdd(false)}
@@ -2026,10 +2025,14 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
           date={selectedDate}
           allFoods={allFoods}
           onSave={(entry) => {
-            setProfile(p => ({
-              ...p,
-              journal: {...(p.journal||{}), [selectedDate]: [...(p.journal?.[selectedDate]||[]), entry]},
-            }));
+            setProfile(p => {
+              const newJournal = {...(p.journal||{}), [selectedDate]: [...(p.journal?.[selectedDate]||[]), entry]};
+              const newFoodLog = {...p.foodLog};
+              (entry.foods||[]).forEach(food => {
+                newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:"good", fromJournal:true}];
+              });
+              return {...p, journal:newJournal, foodLog:newFoodLog};
+            });
             setShowAddSheet(false);
           }}
           onClose={()=>setShowAddSheet(false)}
