@@ -1942,26 +1942,29 @@ function FoodsWallScreen({profile, allFoods, baby, setScreen, setOverlay}) {
               <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
                 style={{
                   aspectRatio:"1",
+                  minWidth:0,
+                  overflow:"hidden",
                   borderRadius:16,
                   border:`2px solid ${isTried?(isMaster?"#F2B705":"#FFD6D0"):"#F3F4F6"}`,
                   background:isTried?(isMaster?"#FFFBEB":"#FFF8F7"):"#F9FAFB",
                   display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-                  gap:2,cursor:"pointer",padding:4,position:"relative",
+                  gap:2,cursor:"pointer",padding:"4px 2px",position:"relative",
                   boxShadow:isTried?"0 2px 8px rgba(242,95,76,0.12)":"none",
                   opacity:isTried?1:0.45,
                   transition:"transform 0.1s,opacity 0.15s",
+                  boxSizing:"border-box",
                 }}
                 onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.05)";e.currentTarget.style.opacity="1";}}
                 onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";e.currentTarget.style.opacity=isTried?"1":"0.45";}}>
-                {(isMaster||isFamiliar)&&<div style={{position:"absolute",top:3,right:3,fontSize:10}}>{isMaster?"👑":"⭐"}</div>}
-                <span style={{fontSize:24,lineHeight:1}}>{fe(f)}</span>
-                <span style={{fontSize:8,fontWeight:700,color:isTried?"#F25F4C":"#9CA3AF",textAlign:"center",lineHeight:1.2,maxWidth:"100%",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",width:"100%",paddingLeft:2,paddingRight:2}}>{f}</span>
+                {(isMaster||isFamiliar)&&<div style={{position:"absolute",top:3,right:3,fontSize:10,lineHeight:1}}>{isMaster?"👑":"⭐"}</div>}
+                <span style={{fontSize:22,lineHeight:1,flexShrink:0}}>{fe(f)}</span>
+                <span style={{fontSize:8,fontWeight:700,color:isTried?"#F25F4C":"#9CA3AF",textAlign:"center",lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",width:"100%",display:"block",paddingLeft:2,paddingRight:2,boxSizing:"border-box"}}>{f}</span>
               </button>
             );
           })}
           {/* Empty slots to pad to 100 */}
           {Array.from({length:emptySlots}).map((_,i)=>(
-            <div key={`empty-${i}`} style={{aspectRatio:"1",borderRadius:16,border:"2px dashed #E5E7EB",background:"#FAFAFA",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <div key={`empty-${i}`} style={{aspectRatio:"1",minWidth:0,overflow:"hidden",borderRadius:16,border:"2px dashed #E5E7EB",background:"#FAFAFA",display:"flex",alignItems:"center",justifyContent:"center",boxSizing:"border-box"}}>
               <span style={{fontSize:16,opacity:0.25}}>＋</span>
             </div>
           ))}
