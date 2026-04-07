@@ -10,7 +10,7 @@ import { ALL_FOODS, FOOD_DB, STAGE_LABEL, STAGE_COLOR, ALLERGENS, daysUntilSafe,
 import { GUIDE_TOPICS, FAQ_ITEMS, EQUIPMENT, RESOURCES, FOODS_TO_AVOID, CHOKING_HAZARDS } from './data/learn.js';
 
 function defaultProfile() {
-  return {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],earnedBadges:[],seenBadges:[],allergens:{},journal:{}};
+  return {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],earnedBadges:[],seenBadges:[],allergens:{},journal:{},seenMilestones:[]};
 }
 
 // ─── STORAGE LAYER (swap localStorage → Supabase here later) ─
@@ -986,17 +986,63 @@ function ReadinessScreen({baby, months, onStart}) {
 // ═══════════════════════════════════════════════════════════════
 // HOME
 // ═══════════════════════════════════════════════════════════════
+// ─── GAMIFICATION HELPERS ─────────────────────────────────────
+const POSITIVE_REACTIONS = ['loved','good','some'];
+
+function getMastery(logs) {
+  if (!logs || logs.length === 0) return null;
+  const pos = logs.filter(l => POSITIVE_REACTIONS.includes(l.reaction)).length;
+  if (logs.length >= 4 && pos >= 3) return 'master';
+  if (logs.length >= 2 && pos >= 1) return 'familiar';
+  return 'introduced';
+}
+
+function computeStreak(journal) {
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const hasToday = (journal[todayKey]||[]).length > 0;
+  let streak = 0;
+  const d = new Date(today);
+  if (!hasToday) d.setDate(d.getDate() - 1); // allow today not yet logged
+  while (true) {
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if ((journal[k]||[]).length > 0) { streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+
+const MILESTONES = [
+  {n:10,  emoji:"🎉", badge:"First 10!"},
+  {n:25,  emoji:"⭐", badge:"25 foods!"},
+  {n:50,  emoji:"🏆", badge:"Halfway to 100!"},
+  {n:75,  emoji:"🌟", badge:"75 foods!"},
+  {n:100, emoji:"👑", badge:"100 foods champion!"},
+];
+
+// ─── HOME SCREEN ──────────────────────────────────────────────
 function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, setOverlay, state}) {
   const months = monthsOld(baby.dob);
   const tried = Object.keys(profile.foodLog).filter(f=>profile.foodLog[f]?.length>0);
   const badges = profile.earnedBadges||[];
   const stale = tried.filter(f=>{const l=profile.foodLog[f];return l?.length&&daysSince(l[l.length-1].date)>4;}).slice(0,3);
+  const streak = computeStreak(profile.journal||{});
   const [showJournalAdd, setShowJournalAdd] = useState(false);
   const [undoBuffer, setUndoBuffer] = useState(null);
   const undoTimerRef = useRef(null);
   const [expandedNotes, setExpandedNotes] = useState(new Set());
   const toggleNote = (idx) => setExpandedNotes(prev => { const n = new Set(prev); n.has(idx) ? n.delete(idx) : n.add(idx); return n; });
   const [editingHomeIdx, setEditingHomeIdx] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiTimerRef = useRef(null);
+  const [pendingMilestone, setPendingMilestone] = useState(null);
+  const confettiColors = ["#F25F4C","#F2B705","#7FB069","#6FA3D2","#C77DFF","#ffffff"];
+
+  const triggerConfetti = () => {
+    if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current);
+    setShowConfetti(true);
+    confettiTimerRef.current = setTimeout(() => setShowConfetti(false), 3500);
+  };
   const allFoods = [...new Set([...ALL_FOODS,...(profile.customFoods||[]),...Object.keys(profile.foodLog)])].sort();
   const todayKey = (() => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
 
@@ -1045,6 +1091,37 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
             : <span style={{fontSize:24}}>👶</span>
           }
         </button>
+      </div>
+
+      {/* Gamification Hero Card */}
+      <div style={{padding:"0 16px 14px"}}>
+        <div style={{background:"linear-gradient(135deg,#F25F4C 0%,#F2B705 100%)",borderRadius:22,padding:"16px",display:"flex",alignItems:"center",gap:14,position:"relative",overflow:"hidden",boxShadow:"0 6px 24px rgba(242,95,76,0.3)"}}>
+          <div style={{position:"absolute",right:-30,top:-30,width:120,height:120,borderRadius:"50%",background:"rgba(255,255,255,0.1)"}}/>
+          <div style={{position:"absolute",right:20,bottom:-20,width:70,height:70,borderRadius:"50%",background:"rgba(255,255,255,0.07)"}}/>
+          {/* Baby photo */}
+          <div style={{width:64,height:64,borderRadius:"50%",border:"3px solid rgba(255,255,255,0.7)",overflow:"hidden",flexShrink:0,background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(0,0,0,0.15)"}}>
+            {baby.photo ? <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/> : <span style={{fontSize:30}}>👶</span>}
+          </div>
+          {/* Info */}
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:17,fontWeight:800,color:"#fff",marginBottom:1,textShadow:"0 1px 3px rgba(0,0,0,0.1)"}}>{baby.name}</div>
+            <div style={{fontSize:11,fontWeight:500,color:"rgba(255,255,255,0.85)",marginBottom:8}}>Week {profile.activeWeek+1} of weaning</div>
+            {/* Progress bar toward 100 foods */}
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{flex:1,height:7,background:"rgba(255,255,255,0.3)",borderRadius:10,overflow:"hidden"}}>
+                <div style={{height:"100%",width:`${Math.min(100,(tried.length/100)*100)}%`,background:"#fff",borderRadius:10,transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)"}}/>
+              </div>
+              <span style={{fontSize:12,fontWeight:800,color:"#fff",flexShrink:0}}>{tried.length}/100</span>
+            </div>
+            {/* Streak pill */}
+            {streak >= 2 && (
+              <div style={{marginTop:8,display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.2)",borderRadius:20,padding:"3px 10px",backdropFilter:"blur(4px)"}}>
+                <span style={{fontSize:13}}>🔥</span>
+                <span style={{fontSize:11,fontWeight:700,color:"#fff"}}>{streak}-day streak!</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Week hero card */}
@@ -1280,14 +1357,25 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
           date={todayKey}
           allFoods={allFoods}
           onSave={(entry) => {
+            // Check for brand new foods before saving
+            const newFoods = (entry.foods||[]).filter(f => !profile.foodLog[f] || profile.foodLog[f].length === 0);
+            const newTriedCount = tried.length + newFoods.length;
             setProfile(p => {
               const newJournal = {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), entry]};
               const newFoodLog = {...p.foodLog};
               (entry.foods||[]).forEach(food => {
                 newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:entry.reactionType||"good", fromJournal:true}];
               });
+              // Check milestone and mark as seen
+              const seenMs = p.seenMilestones||[];
+              const milestone = MILESTONES.find(m => newTriedCount >= m.n && tried.length < m.n && !seenMs.includes(m.n));
+              if (milestone) {
+                setTimeout(() => setPendingMilestone({...milestone, babyName: baby.name}), 600);
+                return {...p, journal:newJournal, foodLog:newFoodLog, seenMilestones:[...seenMs, milestone.n]};
+              }
               return {...p, journal:newJournal, foodLog:newFoodLog};
             });
+            if (newFoods.length > 0) triggerConfetti();
             setShowJournalAdd(false);
           }}
           onClose={()=>setShowJournalAdd(false)}
@@ -1316,6 +1404,39 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
           }}
           onClose={()=>setEditingHomeIdx(null)}
         />
+      )}
+
+      {/* Confetti burst on new food */}
+      {showConfetti && (
+        <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:999,overflow:"hidden"}}>
+          {Array.from({length:36}).map((_,i) => (
+            <div key={i} style={{position:"absolute",top:"-20px",left:`${(i/36)*100}%`,width:i%3===0?10:7,height:i%3===0?10:7,borderRadius:i%2===0?"50%":2,background:confettiColors[i%confettiColors.length],animation:`confetti ${1.8+Math.random()*2}s ${Math.random()*0.6}s ease-in forwards`}}/>
+          ))}
+        </div>
+      )}
+
+      {/* Milestone achievement modal */}
+      {pendingMilestone && (
+        <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1001,padding:24,backdropFilter:"blur(6px)"}} onClick={()=>setPendingMilestone(null)}>
+          <div className="popIn" style={{background:"#fff",borderRadius:28,padding:"36px 28px",textAlign:"center",maxWidth:320,width:"100%",boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}} onClick={e=>e.stopPropagation()}>
+            {/* Mini confetti inside modal */}
+            <div style={{fontSize:56,marginBottom:8,lineHeight:1}}>{pendingMilestone.emoji}</div>
+            {baby.photo && (
+              <div style={{width:80,height:80,borderRadius:"50%",overflow:"hidden",margin:"0 auto 16px",border:"4px solid #F25F4C",boxShadow:"0 6px 24px rgba(242,95,76,0.35)"}}>
+                <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/>
+              </div>
+            )}
+            <div style={{fontSize:22,fontWeight:800,color:"#1A1A2E",marginBottom:8,lineHeight:1.3}}>
+              {pendingMilestone.babyName} tried {pendingMilestone.n} foods!
+            </div>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,background:"#FFF1F2",borderRadius:20,padding:"6px 16px",marginBottom:20}}>
+              <span style={{fontSize:14}}>{pendingMilestone.emoji}</span>
+              <span style={{fontSize:13,fontWeight:700,color:"#F25F4C"}}>{pendingMilestone.badge}</span>
+            </div>
+            <div style={{fontSize:12,color:"#9CA3AF",marginBottom:20}}>📸 Screenshot to share with family!</div>
+            <button onClick={()=>setPendingMilestone(null)} style={{width:"100%",padding:"15px",background:"#F25F4C",color:"#fff",border:"none",borderRadius:14,fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 16px rgba(242,95,76,0.4)"}}>Keep going! 🚀</button>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -1817,6 +1938,7 @@ function TrackerScreen({profile, allFoods, setOverlay}) {
                 onMouseEnter={e=>e.currentTarget.style.transform="scale(1.02)"}
                 onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
                 {hasDB&&<div style={{position:"absolute",top:10,right:10,background:"#FFF1F2",borderRadius:6,padding:"2px 6px",fontSize:9,color:"#F25F4C",fontWeight:700}}>recipe</div>}
+                {(()=>{const m=getMastery(log);if(m==='master')return<div style={{position:"absolute",top:8,left:10,fontSize:16,filter:"drop-shadow(0 1px 2px rgba(0,0,0,0.15))"}}>👑</div>;if(m==='familiar')return<div style={{position:"absolute",top:8,left:10,fontSize:14}}>⭐</div>;return null;})()}
                 <div style={{fontSize:38,marginBottom:8}}>{fe(f)}</div>
                 <div style={{fontSize:13,fontWeight:800,color:"#1A1A2E",marginBottom:6}}>{cap(f)}</div>
                 <span style={{...css.chip,background:st.bg,color:st.text,fontSize:10,padding:"3px 10px",marginBottom:log.length>0?4:0,borderRadius:8,fontWeight:700}}>{st.label}</span>
