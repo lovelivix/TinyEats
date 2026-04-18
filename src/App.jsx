@@ -721,7 +721,7 @@ export default function App() {
 
       <div style={{paddingBottom:80}}>
         {screen==="home"    && <HomeScreen    baby={baby} profile={profile} setProfile={setProfile} cw={cw} weaningComplete={weaningComplete} setScreen={setScreen} setOverlay={setOverlay} state={state} />}
-        {screen==="plan"    && !weaningComplete && <PlanScreen profile={profile} setProfile={setProfile} cw={cw} setOverlay={setOverlay} session={session} baby={baby} />}
+        {screen==="plan"    && !weaningComplete && <PlanScreen profile={profile} setProfile={setProfile} cw={cw} setOverlay={setOverlay} session={session} baby={baby} allFoods={allFoods} />}
         {screen==="meals"   && <MealsScreen profile={profile} />}
         {screen==="tracker"  && <TrackerScreen profile={profile} allFoods={allFoods} setOverlay={setOverlay} />}
         {screen==="journal"  && <JournalScreen profile={profile} setProfile={setProfile} allFoods={allFoods} baby={baby} customFoodEmojis={profile.customFoodEmojis||{}} />}
@@ -1235,7 +1235,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                 <button onClick={()=>setShowJournalAdd(true)} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:10,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add</button>
               </div>
               {todayEntries.length===0 ? (
-                <div style={{fontSize:12,color:"#9CA3AF"}}>Nothing logged yet — tap + Add to record today's meals.</div>
+                <div style={{fontSize:12,color:"#9CA3AF",lineHeight:1.6}}>No meals yet today 🌅 — tap + Add when you're ready.</div>
               ) : (
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                   {todayEntries.map((entry,idx)=>{
@@ -1244,28 +1244,46 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                     const firstFood = entry.foods?.[0];
                     const extraCount = (entry.foods?.length||0) - 1;
                     return (
-                      <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:16,padding:"10px 10px 8px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6",display:"flex",flexDirection:"column",position:"relative",minHeight:96}}>
-                        <div style={{position:"absolute",top:5,right:6,display:"flex",gap:2}}>
-                          <button onClick={()=>setEditingHomeIdx(idx)} style={{background:"none",border:"none",fontSize:12,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>✏️</button>
-                          <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:14,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>×</button>
-                        </div>
-                        <span style={{fontSize:36,lineHeight:1,marginBottom:3}}>{fe(firstFood||"")}</span>
-                        <div style={{fontSize:11,fontWeight:700,color:"#1A1A2E",marginBottom:4,lineHeight:1.3,paddingRight:14}}>
-                          {cap(firstFood||"")}
-                          {extraCount>0&&<span style={{color:"#9CA3AF",fontWeight:500}}>{" +"+extraCount}</span>}
-                        </div>
-                        {rxn ? (
-                          <span style={{background:rxn.color,borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:rxn.text,display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>{rxn.emoji} {rxn.label}</span>
-                        ) : entry.reaction ? (
-                          <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:"#DC2626",display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>⚠ Reaction</span>
-                        ) : null}
-                        <div style={{display:"flex",alignItems:"center",gap:4,marginTop:"auto",paddingTop:2}}>
-                          <span style={{fontSize:10,color:"#9CA3AF",flex:1}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</span>
-                          {entry.notes&&<button onClick={()=>toggleNote(idx)} style={{background:"none",border:"1px solid #E8EAF0",borderRadius:20,padding:"1px 6px",fontSize:9,fontWeight:600,color:"#9CA3AF",cursor:"pointer"}}>💬</button>}
-                        </div>
-                        {entry.notes&&noteOpen&&(
-                          <div style={{fontSize:11,color:"#6B7280",marginTop:5,lineHeight:1.5,padding:"5px 7px",background:"#FFFFFF",borderRadius:8,border:"1px solid #F3F4F6"}}>{entry.notes}</div>
+                      <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:16,border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6",display:"flex",flexDirection:"column",position:"relative",minHeight:96,overflow:"hidden"}}>
+                        {/* Photo background if present */}
+                        {entry.photo && (
+                          <div style={{position:"absolute",inset:0,zIndex:0}}>
+                            <img src={entry.photo} style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.18}} alt=""/>
+                          </div>
                         )}
+                        <div style={{position:"relative",zIndex:1,padding:"10px 10px 8px",display:"flex",flexDirection:"column",flex:1}}>
+                          <div style={{position:"absolute",top:5,right:6,display:"flex",gap:2}}>
+                            <button onClick={()=>setEditingHomeIdx(idx)} style={{background:"none",border:"none",fontSize:12,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>✏️</button>
+                            <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:14,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>×</button>
+                          </div>
+                          {/* Photo thumbnail top-right corner OR big emoji */}
+                          {entry.photo ? (
+                            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                              <span style={{fontSize:28,lineHeight:1}}>{fe(firstFood||"")}</span>
+                              <div style={{width:38,height:38,borderRadius:10,overflow:"hidden",flexShrink:0,boxShadow:"0 2px 8px rgba(0,0,0,0.15)",marginLeft:"auto",marginRight:18}}>
+                                <img src={entry.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt="meal"/>
+                              </div>
+                            </div>
+                          ) : (
+                            <span style={{fontSize:36,lineHeight:1,marginBottom:3}}>{fe(firstFood||"")}</span>
+                          )}
+                          <div style={{fontSize:11,fontWeight:700,color:"#1A1A2E",marginBottom:4,lineHeight:1.3,paddingRight:14}}>
+                            {cap(firstFood||"")}
+                            {extraCount>0&&<span style={{color:"#9CA3AF",fontWeight:500}}>{" +"+extraCount}</span>}
+                          </div>
+                          {rxn ? (
+                            <span style={{background:rxn.color,borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:rxn.text,display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>{rxn.emoji} {rxn.label}</span>
+                          ) : entry.reaction ? (
+                            <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:"#DC2626",display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>⚠ Reaction</span>
+                          ) : null}
+                          <div style={{display:"flex",alignItems:"center",gap:4,marginTop:"auto",paddingTop:2}}>
+                            <span style={{fontSize:10,color:"#9CA3AF",flex:1}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</span>
+                            {entry.notes&&<button onClick={()=>toggleNote(idx)} style={{background:"none",border:"1px solid #E8EAF0",borderRadius:20,padding:"1px 6px",fontSize:9,fontWeight:600,color:"#9CA3AF",cursor:"pointer"}}>💬</button>}
+                          </div>
+                          {entry.notes&&noteOpen&&(
+                            <div style={{fontSize:11,color:"#6B7280",marginTop:5,lineHeight:1.5,padding:"5px 7px",background:"#FFFFFF",borderRadius:8,border:"1px solid #F3F4F6"}}>{entry.notes}</div>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -1565,7 +1583,7 @@ function ShoppingTab({profile, setProfile, cw}) {
   );
 }
 
-function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
+function PlanScreen({profile, setProfile, cw, setOverlay, session, baby, allFoods=[]}) {
   const [tab, setTab] = useState("guide");
   const [expandedAllergen, setExpandedAllergen] = useState(null);
   const allergens = profile.allergens || {};
@@ -1594,7 +1612,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
     <div className="fadeUp">
       <div style={{padding:"22px 20px 10px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
-          <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E"}}>Plan</div>
+          <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E"}}>Guide</div>
           <div style={{fontSize:13,color:"#6B7280",marginTop:2}}>Allergens & shopping list</div>
         </div>
         <button onClick={()=>setProfile(p=>({...p,skipPlan:false}))}
@@ -1651,9 +1669,49 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
           })}
         </div>
       )}
-      {tab==="shopping" && (
-        <ShoppingTab profile={profile} setProfile={setProfile} cw={cw} />
-      )}
+      {tab==="shopping" && (() => {
+        const untried = allFoods.filter(f=>!(profile.foodLog[f]?.length>0));
+        const triedFoods = allFoods.filter(f=>profile.foodLog[f]?.length>0);
+        const [showTried, setShowTried] = React.useState(false);
+        return (
+          <div style={{padding:"0 16px 32px"}}>
+            <p style={{fontSize:13,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>Foods you haven't tried yet — tap to add to your shopping list.</p>
+            {untried.length===0 ? (
+              <div style={{textAlign:"center",padding:"32px 16px",color:"#9CA3AF",fontSize:14}}>
+                🎉 You've tried every food! Amazing work.
+              </div>
+            ) : (
+              untried.map(f=>{
+                const key=`skip_${f}`;
+                const checked=profile.shoppingChecked?.[key];
+                return (
+                  <button key={f} onClick={()=>setProfile(p=>({...p,shoppingChecked:{...p.shoppingChecked,[key]:!checked}}))}
+                    style={{width:"100%",display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,border:"none",cursor:"pointer"}}>
+                    <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
+                    <span style={{flex:1,fontSize:14,color:checked?"#9CA3AF":"#1A1A2E",textDecoration:checked?"line-through":"none",fontWeight:checked?400:500}}>{cap(f)}</span>
+                    <div style={{width:24,height:24,borderRadius:7,background:checked?"#7FB069":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+                      {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
+                    </div>
+                  </button>
+                );
+              })
+            )}
+            {triedFoods.length>0 && (
+              <button onClick={()=>setShowTried(s=>!s)}
+                style={{width:"100%",marginTop:8,padding:"10px",border:"none",background:"transparent",fontSize:13,color:"#9CA3AF",cursor:"pointer",fontFamily:"inherit"}}>
+                {showTried?"Hide":"Show"} {triedFoods.length} already-tried foods
+              </button>
+            )}
+            {showTried && triedFoods.map(f=>(
+              <div key={f} style={{display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,opacity:0.5}}>
+                <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
+                <span style={{flex:1,fontSize:14,color:"#9CA3AF",textDecoration:"line-through"}}>{cap(f)}</span>
+                <span style={{fontSize:11,color:"#9CA3AF"}}>tried ✓</span>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 
@@ -3708,7 +3766,7 @@ function AddFoodSheet({onAdd, onClose}) {
 function BottomNav({screen, setScreen, weaningComplete, allergenAlert}) {
   const items = [
     {id:"home",    label:"Home",    emoji:"🏠"},
-    {id:"plan",    label:"Plan",    emoji:"📋", hide:weaningComplete, alert:allergenAlert},
+    {id:"plan",    label:"Guide",   emoji:"📋", hide:weaningComplete, alert:allergenAlert},
     {id:"meals",   label:"Meals",   emoji:"🥗"},
     {id:"tracker", label:"Tracker", emoji:"📊"},
     {id:"journal", label:"Journal", emoji:"📅"},
