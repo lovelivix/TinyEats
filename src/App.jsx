@@ -1157,140 +1157,83 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
   return (
     <div className="fadeUp">
       {/* Header */}
-      <div style={{padding:"20px 20px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
-            <img src="/logo-pear.png" alt="" style={{width:30,height:30,objectFit:"contain"}}/>
-            <img src="/logo-full.png" alt="LilEats" style={{height:20,objectFit:"contain"}}/>
-          </div>
-          <p style={{fontSize:13,color:"#6B7280",marginTop:4}}>Hi! Let's feed <strong style={{color:"#1A1A2E"}}>{baby.name}</strong> today 👋</p>
+      <div style={{padding:"16px 20px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <img src="/logo-pear.png" alt="" style={{width:26,height:26,objectFit:"contain"}}/>
+          <img src="/logo-full.png" alt="LilEats" style={{height:18,objectFit:"contain"}}/>
         </div>
-        <button onClick={()=>setOverlay({type:"settings"})} style={{width:50,height:50,borderRadius:"50%",border:"3px solid #FFD6D0",background:"#FFFFFF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(242,95,76,0.15)",cursor:"pointer"}}>
-          {baby.photo
-            ? <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/>
-            : <span style={{fontSize:24}}>👶</span>
-          }
+        <button onClick={()=>setOverlay({type:"settings"})} style={{width:44,height:44,borderRadius:"50%",border:"3px solid #FFD6D0",background:"#FFFFFF",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(242,95,76,0.15)",cursor:"pointer"}}>
+          {baby.photo ? <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/> : <span style={{fontSize:22}}>👶</span>}
         </button>
       </div>
 
-      {/* Gamification Hero Card */}
+      {/* ── HERO CARD ── */}
       <div style={{padding:"0 16px 14px"}}>
-        <div style={{background:"linear-gradient(135deg,#F25F4C 0%,#F2B705 100%)",borderRadius:22,padding:"16px",display:"flex",alignItems:"center",gap:14,position:"relative",overflow:"hidden",boxShadow:"0 6px 24px rgba(242,95,76,0.3)"}}>
-          <div style={{position:"absolute",right:-30,top:-30,width:120,height:120,borderRadius:"50%",background:"rgba(255,255,255,0.1)"}}/>
-          <div style={{position:"absolute",right:20,bottom:-20,width:70,height:70,borderRadius:"50%",background:"rgba(255,255,255,0.07)"}}/>
-          {/* Baby photo */}
-          <div style={{width:64,height:64,borderRadius:"50%",border:"3px solid rgba(255,255,255,0.7)",overflow:"hidden",flexShrink:0,background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 12px rgba(0,0,0,0.15)"}}>
-            {baby.photo ? <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/> : <span style={{fontSize:30}}>👶</span>}
-          </div>
-          {/* Info */}
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:17,fontWeight:800,color:"#fff",marginBottom:1,textShadow:"0 1px 3px rgba(0,0,0,0.1)"}}>{baby.name}</div>
-            <div style={{fontSize:11,fontWeight:500,color:"rgba(255,255,255,0.85)",marginBottom:8}}>Week {profile.activeWeek+1} of weaning</div>
-            {/* Progress bar toward 100 foods */}
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <div style={{flex:1,height:7,background:"rgba(255,255,255,0.3)",borderRadius:10,overflow:"hidden"}}>
-                <div style={{height:"100%",width:`${Math.min(100,(tried.length/100)*100)}%`,background:"#fff",borderRadius:10,transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)"}}/>
-              </div>
-              <span style={{fontSize:12,fontWeight:800,color:"#fff",flexShrink:0}}>{tried.length}/100</span>
+        <div style={{background:"linear-gradient(135deg,#F25F4C 0%,#F2B705 100%)",borderRadius:22,padding:"16px",position:"relative",overflow:"hidden",boxShadow:"0 6px 24px rgba(242,95,76,0.3)"}}>
+          <div style={{position:"absolute",right:-30,top:-30,width:120,height:120,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
+          <div style={{position:"absolute",right:16,bottom:-24,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
+
+          {/* Top row: photo + name + log button */}
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+            <div style={{width:52,height:52,borderRadius:"50%",border:"2.5px solid rgba(255,255,255,0.7)",overflow:"hidden",flexShrink:0,background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 3px 10px rgba(0,0,0,0.15)"}}>
+              {baby.photo ? <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/> : <span style={{fontSize:26}}>👶</span>}
             </div>
-            {/* Streak pill */}
-            {streak >= 2 && (
-              <div style={{marginTop:8,display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.2)",borderRadius:20,padding:"3px 10px",backdropFilter:"blur(4px)"}}>
-                <span style={{fontSize:13}}>🔥</span>
-                <span style={{fontSize:11,fontWeight:700,color:"#fff"}}>{streak}-day streak!</span>
-              </div>
-            )}
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:16,fontWeight:800,color:"#fff",marginBottom:1,textShadow:"0 1px 3px rgba(0,0,0,0.1)"}}>{baby.name}</div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,0.8)"}}>Week {profile.activeWeek+1} of weaning</div>
+            </div>
+            <button onClick={()=>setShowJournalAdd(true)}
+              style={{background:"rgba(255,255,255,0.22)",backdropFilter:"blur(8px)",border:"1.5px solid rgba(255,255,255,0.45)",borderRadius:12,padding:"7px 12px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:5,flexShrink:0,whiteSpace:"nowrap"}}>
+              <span style={{fontSize:15}}>🍽</span> Log meal
+            </button>
           </div>
-        </div>
-      </div>
 
-      {/* Week pill — compact link to plan */}
-      <div style={{padding:"0 16px 14px"}}>
-        <button onClick={()=>setScreen("plan")} style={{display:"flex",alignItems:"center",gap:10,background:`linear-gradient(135deg,${cw.color}22,${cw.color}11)`,border:`1.5px solid ${cw.color}55`,borderRadius:14,padding:"10px 14px",width:"100%",cursor:"pointer",textAlign:"left",fontFamily:"inherit"}}>
-          <div style={{width:8,height:8,borderRadius:"50%",background:cw.accent,flexShrink:0}}/>
-          <span style={{fontSize:12,fontWeight:700,color:cw.accent}}>{cw.title}</span>
-          <span style={{fontSize:11,color:"#9CA3AF",marginLeft:"auto"}}>Week {profile.activeWeek+1} of 6</span>
-          <span style={{fontSize:12,color:cw.accent}}>→</span>
-        </button>
-      </div>
+          {/* Progress bar */}
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:(favourite||workOn||stale.length>0||streak>=2)?10:0}}>
+            <div style={{flex:1,height:6,background:"rgba(255,255,255,0.3)",borderRadius:10,overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${Math.min(100,(tried.length/100)*100)}%`,background:"#fff",borderRadius:10,transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)"}}/>
+            </div>
+            <span style={{fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{tried.length}/100 foods</span>
+          </div>
 
-      {/* Smart allergen banner */}
-      {(() => {
-        const allergenData = profile.allergens || {};
-        // All allergens ready to mark safe (3 days up)
-        const readyAllergens = ALLERGENS.filter(a => {
-          const s = allergenData[a.id];
-          return s?.introduced && !s.safe && !s.reaction && daysUntilSafe(s.introduced) === 0;
-        });
-        // All allergens currently being watched
-        const watchingAllergens = ALLERGENS.filter(a => {
-          const s = allergenData[a.id];
-          return s?.introduced && !s.safe && !s.reaction && daysUntilSafe(s.introduced) > 0;
-        });
-        // This week's allergens not yet started
-        const thisWeekAllergens = (cw.allergens||[]).filter(id => !allergenData[id]?.introduced);
-
-        if (readyAllergens.length > 0) return (
-          <div style={{padding:"0 16px",marginBottom:14}}>
-            <button onClick={()=>setScreen("plan")} style={{width:"100%",display:"flex",alignItems:"center",background:"#F0FFF4",borderRadius:16,padding:"14px",border:"1.5px solid #7FB069",cursor:"pointer",textAlign:"left",gap:10}}>
-              <span style={{fontSize:22,flexShrink:0}}>✅</span>
-              <div style={{flex:1}}>
-                <div style={{fontSize:12,fontWeight:700,color:"#065F46",marginBottom:2}}>
-                  3 days are up for {readyAllergens.map(a=>a.name).join(" & ")}!
+          {/* Inline stats row: streak + fave + try again */}
+          {(streak >= 2 || favourite || stale.length > 0) && (
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {streak >= 2 && (
+                <div style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.18)",borderRadius:20,padding:"4px 10px"}}>
+                  <span style={{fontSize:12}}>🔥</span>
+                  <span style={{fontSize:11,fontWeight:700,color:"#fff"}}>{streak}-day streak</span>
                 </div>
-                <div style={{fontSize:12,color:"#6B7280"}}>Tap to mark as safely introduced or note a reaction →</div>
-              </div>
-            </button>
-          </div>
-        );
-
-        if (watchingAllergens.length > 0) return (
-          <div style={{padding:"0 16px",marginBottom:14}}>
-            <div style={{background:"#FFFBF0",borderRadius:16,padding:"14px",border:"1.5px solid #F2B705"}}>
-              {watchingAllergens.map(a => {
-                const daysLeft = daysUntilSafe(allergenData[a.id].introduced);
-                return (
-                  <div key={a.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:watchingAllergens.length>1?"8px":0}}>
-                    <span style={{fontSize:20,flexShrink:0}}>⏳</span>
-                    <div>
-                      <div style={{fontSize:12,fontWeight:700,color:"#92400E"}}>Watching {a.name}</div>
-                      <div style={{fontSize:11,color:"#6B7280"}}>Check back in {daysLeft} day{daysLeft!==1?"s":""} — watch for reactions.</div>
-                    </div>
-                  </div>
-                );
-              })}
+              )}
+              {favourite && (
+                <div style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.18)",borderRadius:20,padding:"4px 10px"}}>
+                  <span style={{fontSize:12}}>❤️</span>
+                  <span style={{fontSize:11,fontWeight:700,color:"#fff"}}>Loves {fe(favourite)} {cap(favourite)}</span>
+                </div>
+              )}
+              {stale.length > 0 && (
+                <button onClick={()=>setOverlay({type:"food",data:stale[0]})} style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.18)",borderRadius:20,padding:"4px 10px",border:"none",cursor:"pointer",fontFamily:"inherit"}}>
+                  <span style={{fontSize:12}}>⏰</span>
+                  <span style={{fontSize:11,fontWeight:700,color:"#fff"}}>Try {fe(stale[0])} {cap(stale[0])} again</span>
+                </button>
+              )}
             </div>
-          </div>
-        );
+          )}
+        </div>
+      </div>
 
-        if (thisWeekAllergens.length > 0 && cw.allergenNote) return (
-          <div style={{padding:"0 16px",marginBottom:14}}>
-            <button onClick={()=>setScreen("plan")} style={{width:"100%",display:"flex",alignItems:"center",background:"#FFFBEB",borderRadius:16,padding:"14px",border:"1.5px solid #FDE68A",cursor:"pointer",textAlign:"left",gap:10}}>
-              <span style={{fontSize:22,flexShrink:0}}>🛡️</span>
-              <div style={{flex:1}}>
-                <div style={{fontSize:12,fontWeight:700,color:"#92400E",marginBottom:2}}>Allergens to introduce this week</div>
-                <div style={{fontSize:12,color:"#78350F",lineHeight:1.5}}>{cw.allergenNote}</div>
-                <div style={{fontSize:11,color:"#F25F4C",fontWeight:700,marginTop:4}}>Go to Plan → Allergens to track →</div>
-              </div>
-            </button>
-          </div>
-        );
-
-        return null;
-      })()}
-
-      {/* Today's food */}
+      {/* ── WHAT DID SHE EAT TODAY ── */}
       {(()=>{
         const todayEntries = (profile.journal||{})[todayKey] || [];
         return (
-          <div style={{padding:"0 16px",marginBottom:16}}>
+          <div style={{padding:"0 16px",marginBottom:14}}>
             <div style={{background:"#FFFFFF",borderRadius:20,boxShadow:"0 4px 20px rgba(26,26,46,0.08)",padding:"14px 16px"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:todayEntries.length>0?12:0}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:todayEntries.length>0?12:6}}>
                 <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E"}}>🍽 What did {baby.name} eat today?</div>
                 <button onClick={()=>setShowJournalAdd(true)} style={{background:"#F25F4C",color:"#fff",border:"none",borderRadius:10,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Add</button>
               </div>
               {todayEntries.length===0 ? (
-                <div style={{fontSize:12,color:"#9CA3AF",marginTop:8}}>Nothing logged yet — tap + Add to record today's meals.</div>
+                <div style={{fontSize:12,color:"#9CA3AF"}}>Nothing logged yet — tap + Add to record today's meals.</div>
               ) : (
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                   {todayEntries.map((entry,idx)=>{
@@ -1299,31 +1242,25 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                     const firstFood = entry.foods?.[0];
                     const extraCount = (entry.foods?.length||0) - 1;
                     return (
-                      <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:16,padding:"10px 10px 8px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6",display:"flex",flexDirection:"column",position:"relative",minHeight:100}}>
-                        {/* Edit + Delete */}
+                      <div key={idx} style={{background:entry.reaction?"#FFF5F5":"#F9FAFB",borderRadius:16,padding:"10px 10px 8px",border:entry.reaction?"1.5px solid #FECACA":"1.5px solid #F3F4F6",display:"flex",flexDirection:"column",position:"relative",minHeight:96}}>
                         <div style={{position:"absolute",top:5,right:6,display:"flex",gap:2}}>
                           <button onClick={()=>setEditingHomeIdx(idx)} style={{background:"none",border:"none",fontSize:12,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>✏️</button>
                           <button onClick={()=>deleteHomeEntry(idx)} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:14,cursor:"pointer",padding:"1px 2px",lineHeight:1}}>×</button>
                         </div>
-                        {/* Primary emoji */}
-                        <span style={{fontSize:38,lineHeight:1,marginBottom:3}}>{fe(firstFood||"")}</span>
-                        {/* Food name(s) */}
+                        <span style={{fontSize:36,lineHeight:1,marginBottom:3}}>{fe(firstFood||"")}</span>
                         <div style={{fontSize:11,fontWeight:700,color:"#1A1A2E",marginBottom:4,lineHeight:1.3,paddingRight:14}}>
                           {cap(firstFood||"")}
                           {extraCount>0&&<span style={{color:"#9CA3AF",fontWeight:500}}>{" +"+extraCount}</span>}
                         </div>
-                        {/* Reaction chip */}
                         {rxn ? (
                           <span style={{background:rxn.color,borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:rxn.text,display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>{rxn.emoji} {rxn.label}</span>
                         ) : entry.reaction ? (
                           <span style={{background:"#FFF1F2",borderRadius:20,padding:"2px 7px",fontSize:10,fontWeight:600,color:"#DC2626",display:"inline-block",marginBottom:3,alignSelf:"flex-start"}}>⚠ Reaction</span>
                         ) : null}
-                        {/* Time + note chip */}
                         <div style={{display:"flex",alignItems:"center",gap:4,marginTop:"auto",paddingTop:2}}>
                           <span style={{fontSize:10,color:"#9CA3AF",flex:1}}>{new Date(entry.time).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</span>
                           {entry.notes&&<button onClick={()=>toggleNote(idx)} style={{background:"none",border:"1px solid #E8EAF0",borderRadius:20,padding:"1px 6px",fontSize:9,fontWeight:600,color:"#9CA3AF",cursor:"pointer"}}>💬</button>}
                         </div>
-                        {/* Note — expanded */}
                         {entry.notes&&noteOpen&&(
                           <div style={{fontSize:11,color:"#6B7280",marginTop:5,lineHeight:1.5,padding:"5px 7px",background:"#FFFFFF",borderRadius:8,border:"1px solid #F3F4F6"}}>{entry.notes}</div>
                         )}
@@ -1343,30 +1280,71 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
         );
       })()}
 
-      {/* Stats row */}
-      <div style={{padding:"0 16px",marginBottom:16}}>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-          <button onClick={()=>setOverlay({type:"progress"})} style={{background:"#FFF1F2",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(242,95,76,0.12)"}}>
-            <div style={{fontSize:26,fontWeight:900,color:"#F25F4C",lineHeight:1}}>{tried.length}</div>
-            <div style={{fontSize:10,color:"#F25F4C",marginTop:3,fontWeight:700,opacity:0.7}}>foods tried</div>
-          </button>
-          <button onClick={()=>setOverlay({type:"badges"})} style={{background:"#FFFBEB",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",position:"relative",boxShadow:"0 4px 16px rgba(242,183,5,0.15)"}}>
-            <div style={{fontSize:26,fontWeight:900,color:"#F59E0B",lineHeight:1}}>{badges.length}</div>
-            <div style={{fontSize:10,color:"#F59E0B",marginTop:3,fontWeight:700,opacity:0.7}}>badges {badges.length>0?"🏅":""}</div>
-          </button>
-          <button onClick={()=>setOverlay({type:"progress"})} style={{background:"#F0FFF4",borderRadius:18,padding:"14px 8px",border:"none",textAlign:"center",cursor:"pointer",boxShadow:"0 4px 16px rgba(127,176,105,0.12)"}}>
-            <div style={{fontSize:26,fontWeight:900,color:"#16A34A",lineHeight:1}}>{Object.values(profile.foodLog).filter(l=>l.length>=7).length}</div>
-            <div style={{fontSize:10,color:"#16A34A",marginTop:3,fontWeight:700,opacity:0.7}}>confident</div>
-          </button>
-        </div>
-      </div>
+      {/* ── ALLERGENS ── */}
+      {(() => {
+        const allergenData = profile.allergens || {};
+        const readyAllergens = ALLERGENS.filter(a => { const s=allergenData[a.id]; return s?.introduced&&!s.safe&&!s.reaction&&daysUntilSafe(s.introduced)===0; });
+        const watchingAllergens = ALLERGENS.filter(a => { const s=allergenData[a.id]; return s?.introduced&&!s.safe&&!s.reaction&&daysUntilSafe(s.introduced)>0; });
+        const thisWeekAllergens = (cw.allergens||[]).filter(id => !allergenData[id]?.introduced);
 
-      {/* Quick actions */}
-      <div style={{padding:"0 16px",marginBottom:16}}>
-        {/* Log a meal — primary CTA */}
-        <button onClick={()=>setShowJournalAdd(true)} style={{width:"100%",padding:"16px",background:"#F25F4C",color:"#fff",border:"none",borderRadius:18,fontSize:15,fontWeight:800,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 6px 20px rgba(242,95,76,0.4)",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          <span style={{fontSize:22}}>🍽</span> Log a meal
-        </button>
+        if (readyAllergens.length > 0) return (
+          <div style={{padding:"0 16px",marginBottom:14}}>
+            <button onClick={()=>setScreen("plan")} style={{width:"100%",display:"flex",alignItems:"center",background:"#F0FFF4",borderRadius:16,padding:"12px 14px",border:"1.5px solid #7FB069",cursor:"pointer",textAlign:"left",gap:10}}>
+              <span style={{fontSize:20,flexShrink:0}}>✅</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:12,fontWeight:700,color:"#065F46",marginBottom:1}}>3 days up for {readyAllergens.map(a=>a.name).join(" & ")}!</div>
+                <div style={{fontSize:11,color:"#6B7280"}}>Mark as safe or note a reaction →</div>
+              </div>
+            </button>
+          </div>
+        );
+        if (watchingAllergens.length > 0) return (
+          <div style={{padding:"0 16px",marginBottom:14}}>
+            <div style={{background:"#FFFBF0",borderRadius:16,padding:"12px 14px",border:"1.5px solid #F2B705"}}>
+              {watchingAllergens.map(a => {
+                const daysLeft = daysUntilSafe(allergenData[a.id].introduced);
+                return (
+                  <div key={a.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:watchingAllergens.length>1?"6px":0}}>
+                    <span style={{fontSize:18,flexShrink:0}}>⏳</span>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:700,color:"#92400E"}}>Watching {a.name}</div>
+                      <div style={{fontSize:11,color:"#6B7280"}}>Check back in {daysLeft} day{daysLeft!==1?"s":""}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+        if (thisWeekAllergens.length > 0 && cw.allergenNote) return (
+          <div style={{padding:"0 16px",marginBottom:14}}>
+            <button onClick={()=>setScreen("plan")} style={{width:"100%",display:"flex",alignItems:"center",background:"#FFFBEB",borderRadius:16,padding:"12px 14px",border:"1.5px solid #FDE68A",cursor:"pointer",textAlign:"left",gap:10}}>
+              <span style={{fontSize:20,flexShrink:0}}>🛡️</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:12,fontWeight:700,color:"#92400E",marginBottom:1}}>Allergens to introduce this week</div>
+                <div style={{fontSize:11,color:"#78350F",lineHeight:1.5}}>{cw.allergenNote}</div>
+              </div>
+            </button>
+          </div>
+        );
+        return null;
+      })()}
+
+      {/* ── DID YOU KNOW ── */}
+      {(()=>{const dt=getDailyTip();return(
+        <div style={{padding:"0 16px",marginBottom:14}}>
+          <div style={{display:"flex",alignItems:"flex-start",background:"#FFFBEB",borderRadius:18,padding:"13px 14px",border:"1.5px solid #FDE68A"}}>
+            <span style={{fontSize:22,marginRight:10,flexShrink:0}}>{dt.emoji}</span>
+            <div>
+              <div style={{fontSize:10,fontWeight:800,color:"#92400E",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:2}}>Did you know?</div>
+              <span style={{fontSize:12,color:"#78350F",lineHeight:1.6}}>{dt.tip}</span>
+            </div>
+          </div>
+        </div>
+      );})()}
+
+      {/* ── 4 QUICK LINKS ── */}
+      <div style={{padding:"0 16px",marginBottom:14}}>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           <ActionCard emoji="📸" label="Photo Gallery" sub="Meal memories" onClick={()=>setScreen("gallery")} color="#FFF1F2" accent="#F25F4C"/>
           <ActionCard emoji="📊" label="Food Tracker" sub={`${tried.length} tried`} onClick={()=>setScreen("tracker")} color="#EFF6FF" accent="#6FA3D2"/>
@@ -1375,50 +1353,9 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
         </div>
       </div>
 
-      {/* Fun stats — favourite + one to work on */}
-      {(favourite || workOn) && (
-        <div style={{padding:"0 16px",marginBottom:14}}>
-          <div style={{display:"grid",gridTemplateColumns:favourite&&workOn?"1fr 1fr":"1fr",gap:10}}>
-            {favourite && (
-              <div style={{background:"linear-gradient(135deg,#FFF8F7,#FFF1F2)",borderRadius:18,padding:"14px",border:"1.5px solid #FFD6D0",textAlign:"center"}}>
-                <div style={{fontSize:28,marginBottom:4}}>{fe(favourite)}</div>
-                <div style={{fontSize:10,fontWeight:800,color:"#F25F4C",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:2}}>Current fave</div>
-                <div style={{fontSize:12,fontWeight:700,color:"#1A1A2E"}}>{cap(favourite)}</div>
-              </div>
-            )}
-            {workOn && (
-              <div style={{background:"linear-gradient(135deg,#FFFBEB,#FEF3C7)",borderRadius:18,padding:"14px",border:"1.5px solid #FDE68A",textAlign:"center"}}>
-                <div style={{fontSize:28,marginBottom:4}}>{fe(workOn)}</div>
-                <div style={{fontSize:10,fontWeight:800,color:"#D97706",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:2}}>Keep trying!</div>
-                <div style={{fontSize:12,fontWeight:700,color:"#1A1A2E"}}>{cap(workOn)}</div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Try again nudge */}
-      {stale.length>0 && (
-        <div style={{padding:"0 16px",marginBottom:14}}>
-          <div style={{...css.card,padding:"16px"}}>
-            <div style={{fontSize:14,fontWeight:700,color:"#1A1A2E",marginBottom:4}}>⏰ Time to try again</div>
-            <p style={{fontSize:13,color:"#6B7280",marginBottom:10,lineHeight:1.5}}>Not offered in a few days — repetition builds acceptance!</p>
-            <div style={{display:"flex",gap:8}}>
-              {stale.map(f=>(
-                <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
-                  style={{display:"flex",flexDirection:"column",alignItems:"center",background:"#FFFFFF",border:"none",borderRadius:12,padding:"8px",cursor:"pointer",minWidth:62}}>
-                  <span style={{fontSize:24}}>{fe(f)}</span>
-                  <span style={{fontSize:10,color:"#1A1A2E",marginTop:3,fontWeight:600}}>{cap(f)}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Week selector */}
+      {/* ── JUMP TO WEEK ── */}
       <div style={{padding:"0 16px",marginBottom:6}}>
-        <div style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Jump to week</div>
+        <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8}}>Jump to week</div>
         <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:4}}>
           {WEEKS.map((w,i)=>(
             <button key={i} onClick={()=>setProfile(p=>({...p,activeWeek:i}))}
@@ -1434,19 +1371,6 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
           )}
         </div>
       </div>
-
-      {/* Daily tip */}
-      {(()=>{const dt=getDailyTip();return(
-      <div style={{padding:"0 16px 8px"}}>
-        <div style={{display:"flex",alignItems:"flex-start",background:"#FFFBEB",borderRadius:18,padding:"14px 16px",boxShadow:"0 4px 16px rgba(245,158,11,0.1)",border:"1.5px solid #FDE68A"}}>
-          <span style={{fontSize:24,marginRight:10,flexShrink:0}}>{dt.emoji}</span>
-          <div>
-            <div style={{fontSize:11,fontWeight:800,color:"#92400E",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>Did you know?</div>
-            <span style={{fontSize:13,color:"#78350F",lineHeight:1.6}}>{dt.tip}</span>
-          </div>
-        </div>
-      </div>
-      );})()}
 
       {showJournalAdd && (
         <AddJournalEntry
