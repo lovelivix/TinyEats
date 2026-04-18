@@ -609,7 +609,7 @@ export default function App() {
       const newJournal = {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), journalEntry]};
       // Auto-start allergen watch
       const foodAllergenId = FOOD_DB[food]?.allergen;
-      const allergenId = foodAllergenId;
+      const allergenId = foodAllergenId?.toLowerCase();
       const existingAllergen = p.allergens?.[allergenId];
       if (allergenId && !existingAllergen?.introduced) {
         return {
@@ -630,7 +630,7 @@ export default function App() {
       if (log.length === 0) return p;
       log.pop();
       // If this food triggered an auto-started allergen watch and log is now empty, remove the watch
-      const allergenId = FOOD_DB[food]?.allergen;
+      const allergenId = FOOD_DB[food]?.allergen?.toLowerCase();
       const allergenEntry = p.allergens?.[allergenId];
       if (allergenId && allergenEntry?.autoStarted && log.length === 0) {
         const newAllergens = {...(p.allergens||{})};
@@ -755,7 +755,7 @@ export default function App() {
               (entry.foods||[]).forEach(food => {
                 newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:entry.reactionType||"good", fromJournal:true}];
                 // Auto-start allergen watch if needed
-                const allergenId = FOOD_DB[food]?.allergen;
+                const allergenId = FOOD_DB[food]?.allergen?.toLowerCase();
                 if (allergenId && !p.allergens?.[allergenId]?.introduced) {
                   p = {...p, allergens:{...(p.allergens||{}), [allergenId]:{introduced:new Date().toISOString(),safe:false,reaction:false,autoStarted:true}}};
                 }
@@ -1408,7 +1408,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               (entry.foods||[]).forEach(food => {
                 newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:entry.reactionType||"good", fromJournal:true}];
                 // Auto-start allergen watch if this food contains an allergen
-                const allergenId = FOOD_DB[food]?.allergen;
+                const allergenId = FOOD_DB[food]?.allergen?.toLowerCase();
                 if (allergenId && !updatedAllergens[allergenId]?.introduced) {
                   updatedAllergens[allergenId] = {introduced:new Date().toISOString(), safe:false, reaction:false, autoStarted:true};
                 }
@@ -1447,7 +1447,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
                   newFoodLog[food] = [...(newFoodLog[food]||[]), {date:updatedEntry.time||new Date().toISOString(), reaction:updatedEntry.reactionType||"good", fromJournal:true}];
                 }
                 // Auto-start allergen watch if this food contains an allergen
-                const allergenId = FOOD_DB[food]?.allergen;
+                const allergenId = FOOD_DB[food]?.allergen?.toLowerCase();
                 if (allergenId && !updatedAllergens[allergenId]?.introduced) {
                   updatedAllergens[allergenId] = {introduced:new Date().toISOString(), safe:false, reaction:false, autoStarted:true};
                 }
