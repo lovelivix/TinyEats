@@ -540,7 +540,16 @@ export default function App() {
       const profiles = {};
       for (const baby of babies) {
         const row = await api.getProfile(baby.id);
-        profiles[baby.id] = row?.data || defaultProfile();
+        const rawProfile = row?.data || defaultProfile();
+        // Migrate: normalise allergen keys to lowercase (old data used "Egg", "Milk/Dairy" etc.)
+        if (rawProfile.allergens && Object.keys(rawProfile.allergens).some(k => k !== k.toLowerCase())) {
+          const fixed = {};
+          for (const [k, v] of Object.entries(rawProfile.allergens)) {
+            fixed[k.toLowerCase()] = v;
+          }
+          rawProfile.allergens = fixed;
+        }
+        profiles[baby.id] = rawProfile;
       }
       const activeBabyId = babies[0]?.id || null;
       setState({babies, activeBabyId, profiles});
@@ -1561,6 +1570,46 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
 // ═══════════════════════════════════════════════════════════════
 // PLAN SCREEN
 // ═══════════════════════════════════════════════════════════════
+function UntriedShoppingList({profile, setProfile, allFoods}) {
+  const [showTried, setShowTried] = useState(false);
+  const untried = allFoods.filter(f=>!(profile.foodLog[f]?.length>0));
+  const tried = allFoods.filter(f=>profile.foodLog[f]?.length>0);
+  return (
+    <div style={{padding:"0 16px 32px"}}>
+      <p style={{fontSize:13,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>Foods you haven't tried yet — tap to add to your shopping list.</p>
+      {untried.length===0 ? (
+        <div style={{textAlign:"center",padding:"32px 16px",color:"#9CA3AF",fontSize:14}}>🎉 You've tried every food! Amazing work.</div>
+      ) : untried.map(f=>{
+        const key=`skip_${f}`;
+        const checked=!!profile.shoppingChecked?.[key];
+        return (
+          <button key={f} onClick={()=>setProfile(p=>({...p,shoppingChecked:{...p.shoppingChecked,[key]:!checked}}))}
+            style={{width:"100%",display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,border:"none",cursor:"pointer"}}>
+            <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
+            <span style={{flex:1,fontSize:14,color:checked?"#9CA3AF":"#1A1A2E",textDecoration:checked?"line-through":"none",fontWeight:checked?400:500}}>{cap(f)}</span>
+            <div style={{width:24,height:24,borderRadius:7,background:checked?"#7FB069":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+              {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
+            </div>
+          </button>
+        );
+      })}
+      {tried.length>0 && (
+        <button onClick={()=>setShowTried(s=>!s)}
+          style={{width:"100%",marginTop:8,padding:"10px",border:"none",background:"transparent",fontSize:13,color:"#9CA3AF",cursor:"pointer",fontFamily:"inherit"}}>
+          {showTried?"Hide":"Show"} {tried.length} already-tried foods
+        </button>
+      )}
+      {showTried && tried.map(f=>(
+        <div key={f} style={{display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,opacity:0.5}}>
+          <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
+          <span style={{flex:1,fontSize:14,color:"#9CA3AF",textDecoration:"line-through"}}>{cap(f)}</span>
+          <span style={{fontSize:11,color:"#9CA3AF"}}>tried ✓</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ShoppingTab({profile, setProfile, cw}) {
   return (
     <div style={{padding:"0 16px 32px"}}>
@@ -1586,7 +1635,6 @@ function ShoppingTab({profile, setProfile, cw}) {
 function PlanScreen({profile, setProfile, cw, setOverlay, session, baby, allFoods=[]}) {
   const [tab, setTab] = useState("guide");
   const [expandedAllergen, setExpandedAllergen] = useState(null);
-  const [showTried, setShowTried] = useState(false);
   const allergens = profile.allergens || {};
 
   const startAllergenIntro = (id) => {
@@ -1670,48 +1718,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby, allFood
           })}
         </div>
       )}
-      {tab==="shopping" && (() => {
-        const untried = allFoods.filter(f=>!(profile.foodLog[f]?.length>0));
-        const triedFoods = allFoods.filter(f=>profile.foodLog[f]?.length>0);
-        return (
-          <div style={{padding:"0 16px 32px"}}>
-            <p style={{fontSize:13,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>Foods you haven't tried yet — tap to add to your shopping list.</p>
-            {untried.length===0 ? (
-              <div style={{textAlign:"center",padding:"32px 16px",color:"#9CA3AF",fontSize:14}}>
-                🎉 You've tried every food! Amazing work.
-              </div>
-            ) : (
-              untried.map(f=>{
-                const key=`skip_${f}`;
-                const checked=profile.shoppingChecked?.[key];
-                return (
-                  <button key={f} onClick={()=>setProfile(p=>({...p,shoppingChecked:{...p.shoppingChecked,[key]:!checked}}))}
-                    style={{width:"100%",display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,border:"none",cursor:"pointer"}}>
-                    <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
-                    <span style={{flex:1,fontSize:14,color:checked?"#9CA3AF":"#1A1A2E",textDecoration:checked?"line-through":"none",fontWeight:checked?400:500}}>{cap(f)}</span>
-                    <div style={{width:24,height:24,borderRadius:7,background:checked?"#7FB069":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
-                      {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
-                    </div>
-                  </button>
-                );
-              })
-            )}
-            {triedFoods.length>0 && (
-              <button onClick={()=>setShowTried(s=>!s)}
-                style={{width:"100%",marginTop:8,padding:"10px",border:"none",background:"transparent",fontSize:13,color:"#9CA3AF",cursor:"pointer",fontFamily:"inherit"}}>
-                {showTried?"Hide":"Show"} {triedFoods.length} already-tried foods
-              </button>
-            )}
-            {showTried && triedFoods.map(f=>(
-              <div key={f} style={{display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,opacity:0.5}}>
-                <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
-                <span style={{flex:1,fontSize:14,color:"#9CA3AF",textDecoration:"line-through"}}>{cap(f)}</span>
-                <span style={{fontSize:11,color:"#9CA3AF"}}>tried ✓</span>
-              </div>
-            ))}
-          </div>
-        );
-      })()}
+      {tab==="shopping" && <UntriedShoppingList profile={profile} setProfile={setProfile} allFoods={allFoods} />}
     </div>
   );
 
