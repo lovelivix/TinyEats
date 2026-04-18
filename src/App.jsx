@@ -10,7 +10,7 @@ import { ALL_FOODS, FOOD_DB, STAGE_LABEL, STAGE_COLOR, ALLERGENS, daysUntilSafe,
 import { GUIDE_TOPICS, FAQ_ITEMS, EQUIPMENT, RESOURCES, FOODS_TO_AVOID, CHOKING_HAZARDS } from './data/learn.js';
 
 function defaultProfile() {
-  return {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],customFoodEmojis:{},earnedBadges:[],seenBadges:[],allergens:{},journal:{},seenMilestones:[]};
+  return {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],customFoodEmojis:{},earnedBadges:[],seenBadges:[],allergens:{},journal:{},seenMilestones:[],skipPlan:false};
 }
 
 // ─── STORAGE LAYER (swap localStorage → Supabase here later) ─
@@ -1543,6 +1543,28 @@ function CompleteScreen({baby, profile, setProfile, setScreen}) {
 // ═══════════════════════════════════════════════════════════════
 // PLAN SCREEN
 // ═══════════════════════════════════════════════════════════════
+function ShoppingTab({profile, setProfile, cw}) {
+  return (
+    <div style={{padding:"0 16px 32px"}}>
+      <p style={{fontSize:13,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>Tap to tick items off as you shop.</p>
+      {cw.foods.map(f=>{
+        const key=`${profile.activeWeek}_${f}`;
+        const checked=profile.shoppingChecked?.[key];
+        return(
+          <button key={f} onClick={()=>setProfile(p=>({...p,shoppingChecked:{...p.shoppingChecked,[key]:!checked}}))}
+            style={{width:"100%",display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,border:"none",cursor:"pointer"}}>
+            <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
+            <span style={{flex:1,fontSize:14,color:checked?"#9CA3AF":"#1A1A2E",textDecoration:checked?"line-through":"none",fontWeight:checked?400:500}}>{cap(f)}</span>
+            <div style={{width:24,height:24,borderRadius:7,background:checked?"#7FB069":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+              {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
   const [tab, setTab] = useState("guide");
   const [expandedAllergen, setExpandedAllergen] = useState(null);
@@ -1566,6 +1588,74 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
     if (session) sb.authed(session.token).saveProfile(baby.id, session.userId, updated).catch(()=>{});
     setExpandedAllergen(null);
   };
+
+  // ── Skip-plan mode: just show allergens + shopping ──────────
+  if (profile.skipPlan) return (
+    <div className="fadeUp">
+      <div style={{padding:"22px 20px 10px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div>
+          <div style={{fontSize:24,fontWeight:800,color:"#1A1A2E"}}>Plan</div>
+          <div style={{fontSize:13,color:"#6B7280",marginTop:2}}>Allergens & shopping list</div>
+        </div>
+        <button onClick={()=>setProfile(p=>({...p,skipPlan:false}))}
+          style={{background:"#F3F4F6",border:"none",borderRadius:10,padding:"7px 12px",fontSize:12,fontWeight:600,color:"#6B7280",cursor:"pointer",fontFamily:"inherit"}}>
+          📋 Show weekly guide
+        </button>
+      </div>
+      <div style={{padding:"0 16px 0"}}>
+        <div style={{display:"flex",background:"#F3F4F6",borderRadius:14,padding:4,marginBottom:16}}>
+          {["allergens","shopping"].map(t=>(
+            <button key={t} onClick={()=>setTab(t==="allergens"?"allergens":"shopping")} style={{flex:1,padding:"10px",border:"none",borderRadius:10,fontSize:13,fontWeight:600,cursor:"pointer",background:(tab==="guide"?"allergens":tab)===t?"#FFFFFF":"transparent",color:(tab==="guide"?"allergens":tab)===t?"#1A1A2E":"#6B7280",boxShadow:(tab==="guide"?"allergens":tab)===t?"0 2px 8px rgba(26,26,46,0.08)":"none",transition:"all 0.15s"}}>
+              {t==="allergens"?"🛡️ Allergens":"🛒 Shopping"}
+            </button>
+          ))}
+        </div>
+      </div>
+      {(tab==="guide"||tab==="allergens") && (
+        <div style={{padding:"0 16px 32px"}}>
+          <div style={{background:"#EFF6FF",borderRadius:14,padding:"12px 14px",marginBottom:14,fontSize:12,color:"#1E40AF",lineHeight:1.6}}>
+            💡 Introduce one allergen at a time. Wait <strong>3 days</strong> before introducing the next. Stop and contact your GP if baby has a reaction.
+          </div>
+          {ALLERGENS.map(a => {
+            const status = allergens[a.id];
+            const isIntroduced = !!status?.introduced;
+            const isSafe = !!status?.safe;
+            const isReaction = !!status?.reaction;
+            const waiting = isIntroduced && !isSafe && !isReaction;
+            const daysLeft = waiting ? daysUntilSafe(status.introduced) : 0;
+            const isExpanded = expandedAllergen === a.id;
+            let borderColor="#E8EAF0",bgColor="#FFFFFF",badgeText="Not started",badgeBg="#F3F4F6",badgeColor="#9CA3AF";
+            if (isSafe)     { borderColor="#7FB069"; bgColor="#F0FFF4"; badgeText="✓ Safely introduced"; badgeBg="#D1FAE5"; badgeColor="#065F46"; }
+            if (isReaction) { borderColor="#F25F4C"; bgColor="#FFF1F2"; badgeText="⚠ Reaction noted"; badgeBg="#FEE2E2"; badgeColor="#DC2626"; }
+            if (waiting)    { borderColor="#F2B705"; bgColor="#FFFBF0"; badgeText=daysLeft===0?"✓ Ready to mark safe":`⏳ ${daysLeft} day${daysLeft!==1?"s":""} to go`; badgeBg="#FEF9C3"; badgeColor="#92400E"; }
+            return (
+              <div key={a.id} style={{marginBottom:8}}>
+                <button onClick={()=>setExpandedAllergen(isExpanded?null:a.id)} style={{width:"100%",background:bgColor,border:`1.5px solid ${borderColor}`,borderRadius:isExpanded?"16px 16px 0 0":16,padding:"12px 14px",display:"flex",alignItems:"center",gap:10,cursor:"pointer",textAlign:"left"}}>
+                  <span style={{fontSize:24,flexShrink:0}}>{a.emoji}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E",marginBottom:2}}>{a.name}</div>
+                    <div style={{display:"inline-block",padding:"2px 8px",borderRadius:20,fontSize:10,fontWeight:600,background:badgeBg,color:badgeColor}}>{badgeText}</div>
+                  </div>
+                  <span style={{color:"#9CA3AF",fontSize:16,transform:isExpanded?"rotate(90deg)":"rotate(0deg)",transition:"transform 0.2s",display:"inline-block"}}>›</span>
+                </button>
+                {isExpanded && (
+                  <div style={{background:bgColor,border:`1.5px solid ${borderColor}`,borderTop:"none",borderRadius:"0 0 16px 16px",padding:"12px 14px"}}>
+                    <p style={{fontSize:12,color:"#374151",lineHeight:1.7,marginBottom:10}}>{a.intro}</p>
+                    {!isIntroduced && <button onClick={()=>startAllergenIntro(a.id)} style={{...css.btnPrimary,fontSize:13,padding:"11px",marginBottom:6}}>Start 3-day introduction today</button>}
+                    {waiting && daysLeft===0 && <button onClick={()=>markAllergenSafe(a.id)} style={{...css.btnPrimary,background:"#7FB069",fontSize:13,padding:"11px",marginBottom:6}}>✓ Mark as safely introduced</button>}
+                    {(isIntroduced&&!isSafe&&!isReaction) && <button onClick={()=>markAllergenReaction(a.id)} style={{...css.btnSecondary,fontSize:12,color:"#DC2626",border:"1.5px solid #FECACA"}}>⚠ Note a reaction</button>}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {tab==="shopping" && (
+        <ShoppingTab profile={profile} setProfile={setProfile} cw={cw} />
+      )}
+    </div>
+  );
 
   return (
     <div className="fadeUp">
@@ -1644,6 +1734,10 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
                 🎓 Complete the 6-week plan!
               </button>
             )}
+            <button onClick={()=>setProfile(p=>({...p,skipPlan:true}))}
+              style={{...css.btnSecondary,marginTop:10,fontSize:13,color:"#9CA3AF",border:"1.5px solid #E8EAF0"}}>
+              Skip the weekly guide — I don't need it
+            </button>
           </div>
         </div>
       )}
@@ -1746,25 +1840,7 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby}) {
         </div>
       )}
 
-      {tab==="shopping" && (
-        <div style={{padding:"0 16px 32px"}}>
-          <p style={{fontSize:13,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>Tap to tick items off as you shop.</p>
-          {cw.foods.map(f=>{
-            const key=`${profile.activeWeek}_${f}`;
-            const checked=profile.shoppingChecked?.[key];
-            return(
-              <button key={f} onClick={()=>setProfile(p=>({...p,shoppingChecked:{...p.shoppingChecked,[key]:!checked}}))}
-                style={{width:"100%",display:"flex",alignItems:"center",...css.cardSm,padding:"12px 14px",marginBottom:8,border:"none",cursor:"pointer"}}>
-                <span style={{fontSize:26,marginRight:12}}>{fe(f)}</span>
-                <span style={{flex:1,fontSize:14,color:checked?"#9CA3AF":"#1A1A2E",textDecoration:checked?"line-through":"none",fontWeight:checked?400:500}}>{cap(f)}</span>
-                <div style={{width:24,height:24,borderRadius:7,background:checked?"#7FB069":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
-                  {checked&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {tab==="shopping" && <ShoppingTab profile={profile} setProfile={setProfile} cw={cw} />}
     </div>
   );
 }
