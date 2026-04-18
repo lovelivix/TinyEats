@@ -10,7 +10,7 @@ import { ALL_FOODS, FOOD_DB, STAGE_LABEL, STAGE_COLOR, ALLERGENS, daysUntilSafe,
 import { GUIDE_TOPICS, FAQ_ITEMS, EQUIPMENT, RESOURCES, FOODS_TO_AVOID, CHOKING_HAZARDS } from './data/learn.js';
 
 function defaultProfile() {
-  return {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],earnedBadges:[],seenBadges:[],allergens:{},journal:{},seenMilestones:[]};
+  return {weaningStarted:false,weaningStartDate:null,activeWeek:0,foodLog:{},shoppingChecked:{},customFoods:[],customFoodEmojis:{},earnedBadges:[],seenBadges:[],allergens:{},journal:{},seenMilestones:[]};
 }
 
 // ─── STORAGE LAYER (swap localStorage → Supabase here later) ─
@@ -47,6 +47,14 @@ const sb = {
   async getUser(token) {
     const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: {...this.headers, "Authorization":`Bearer ${token}`},
+    });
+    return r.json();
+  },
+
+  async refreshToken(refresh_token) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method:"POST", headers: this.headers,
+      body: JSON.stringify({refresh_token}),
     });
     return r.json();
   },
@@ -232,17 +240,19 @@ function AuthScreen({onAuth}) {
         const loginRes = await sb.signIn(email, password);
         if (loginRes.access_token) {
           const token = loginRes.access_token;
+          const refresh_token = loginRes.refresh_token;
           const userId = loginRes.user?.id || (await sb.getUser(token)).id;
-          sessionCache.set({token, userId, email});
-          onAuth({token, userId, email});
+          sessionCache.set({token, userId, email, refresh_token});
+          onAuth({token, userId, email, refresh_token});
         } else {
           setEmailSent(true);
         }
       } else {
         const token = res.access_token;
+        const refresh_token = res.refresh_token;
         const userId = res.user?.id || (await sb.getUser(token)).id;
-        sessionCache.set({token, userId, email});
-        onAuth({token, userId, email});
+        sessionCache.set({token, userId, email, refresh_token});
+        onAuth({token, userId, email, refresh_token});
       }
     } catch { setError("Connection error — please check your internet and try again."); }
     setLoading(false);
@@ -507,8 +517,26 @@ export default function App() {
   const loadData = async (sess) => {
     try {
       const api = sb.authed(sess.token);
-      const babies = await api.getBabies();
-      if (!Array.isArray(babies)) { sessionCache.clear(); setSession(null); return; }
+      let babies = await api.getBabies();
+      if (!Array.isArray(babies)) {
+        // Token likely expired — try to refresh
+        if (sess.refresh_token) {
+          try {
+            const refreshed = await sb.refreshToken(sess.refresh_token);
+            if (refreshed.access_token) {
+              const newSess = {
+                ...sess,
+                token: refreshed.access_token,
+                refresh_token: refreshed.refresh_token || sess.refresh_token,
+              };
+              sessionCache.set(newSess);
+              setSession(newSess);
+              return loadData(newSess); // retry with fresh token
+            }
+          } catch {}
+        }
+        sessionCache.clear(); setSession(null); return;
+      }
       const profiles = {};
       for (const baby of babies) {
         const row = await api.getProfile(baby.id);
@@ -613,10 +641,14 @@ export default function App() {
     });
   }, [setProfile]);
 
-  const addCustomFood = useCallback(name => {
+  const addCustomFood = useCallback(({name, emoji}) => {
     const clean = name.trim().toLowerCase();
     if (!clean) return;
-    setProfile(p => ({...p, customFoods:[...(p.customFoods||[]), clean]}));
+    setProfile(p => ({
+      ...p,
+      customFoods:[...(p.customFoods||[]), clean],
+      customFoodEmojis:{...(p.customFoodEmojis||{}), ...(emoji ? {[clean]: emoji} : {})},
+    }));
     setOverlay(null);
   }, [setProfile]);
 
@@ -692,9 +724,9 @@ export default function App() {
         {screen==="plan"    && !weaningComplete && <PlanScreen profile={profile} setProfile={setProfile} cw={cw} setOverlay={setOverlay} session={session} baby={baby} />}
         {screen==="meals"   && <MealsScreen profile={profile} />}
         {screen==="tracker"  && <TrackerScreen profile={profile} allFoods={allFoods} setOverlay={setOverlay} />}
-        {screen==="journal"  && <JournalScreen profile={profile} setProfile={setProfile} allFoods={allFoods} baby={baby} />}
+        {screen==="journal"  && <JournalScreen profile={profile} setProfile={setProfile} allFoods={allFoods} baby={baby} customFoodEmojis={profile.customFoodEmojis||{}} />}
         {screen==="learn"    && <LearnScreen />}
-        {screen==="wall"     && <FoodsWallScreen profile={profile} allFoods={allFoods} baby={baby} setScreen={setScreen} setOverlay={setOverlay} />}
+        {screen==="gallery"  && <PhotoGalleryScreen profile={profile} baby={baby} setScreen={setScreen} />}
       </div>
 
       <BottomNav screen={screen} setScreen={setScreen} weaningComplete={weaningComplete} allergenAlert={
@@ -714,6 +746,7 @@ export default function App() {
         return <AddJournalEntry
           date={todayKey}
           allFoods={allFoods}
+          customFoodEmojis={profile.customFoodEmojis||{}}
           prefilledFood={overlay.data}
           onSave={(entry) => {
             setProfile(p => {
@@ -987,6 +1020,39 @@ function ReadinessScreen({baby, months, onStart}) {
 // ═══════════════════════════════════════════════════════════════
 // HOME
 // ═══════════════════════════════════════════════════════════════
+// ─── DAILY TIPS ───────────────────────────────────────────────
+const DAILY_TIPS = [
+  {emoji:"🥦", tip:"It can take 10–15 exposures before a baby accepts a new food — don't give up after the first refusal!"},
+  {emoji:"🍋", tip:"Bitter vegetables like broccoli and spinach are easier to accept when introduced early. Now is the perfect window."},
+  {emoji:"🤲", tip:"Letting babies touch and squish their food builds confidence. Messy eating is learning!"},
+  {emoji:"🥣", tip:"Baby's first foods should have no added salt or sugar — their kidneys aren't ready for it yet."},
+  {emoji:"🌿", tip:"Herbs and mild spices like cumin and coriander are totally safe and help develop a diverse palate."},
+  {emoji:"🍓", tip:"Fruit is great — but don't let it crowd out vegetables. Introduce veg first before moving to sweeter foods."},
+  {emoji:"🧠", tip:"Babies who eat a wider variety of foods in the first year are more likely to be adventurous eaters later."},
+  {emoji:"🥛", tip:"Full-fat cow's milk can be used in cooking and on cereal from 6 months — just not as a main drink until 12 months."},
+  {emoji:"🫐", tip:"Blueberries and soft fruits are great finger foods. Halve them lengthwise if baby is self-feeding."},
+  {emoji:"⏰", tip:"Try to offer meals when baby is hungry but not overtired — mid-morning or early afternoon works well."},
+  {emoji:"👶", tip:"Follow baby's cues. Turning away, closing their mouth, or pushing food out means they're done — no pressure."},
+  {emoji:"🥚", tip:"Eggs are one of the top allergens, but introducing them early and regularly can actually reduce the risk of allergy."},
+  {emoji:"🐟", tip:"Oily fish like salmon or trout is packed with omega-3 for brain development. Aim for 1–2 portions a week."},
+  {emoji:"🍞", tip:"Baby-led weaning and purées both work brilliantly — many families combine both approaches with great results."},
+  {emoji:"💧", tip:"Once weaning starts, offer sips of cooled boiled water from a cup at mealtimes. Skip juice and squash."},
+  {emoji:"🥕", tip:"Roasted or steamed carrot sticks are a perfect first finger food — naturally sweet and easy to hold."},
+  {emoji:"🌾", tip:"Wheat (in pasta, bread) is a common allergen. Introduce it clearly so you can spot any reaction."},
+  {emoji:"🫚", tip:"Healthy fats are essential for brain development. Add a little olive oil, butter, or avocado to meals."},
+  {emoji:"🍄", tip:"Mushrooms contain vitamin D — useful in the UK's grey winters when sunlight is limited."},
+  {emoji:"🎯", tip:"The goal of weaning isn't to fill baby up — milk is still the main nutrition. It's about learning and exploring."},
+  {emoji:"🫘", tip:"Lentils and beans are great plant-based iron sources. Combine them with vitamin C-rich foods to boost absorption."},
+  {emoji:"🍯", tip:"Never give honey to babies under 12 months — it can contain bacteria that cause infant botulism."},
+  {emoji:"🧀", tip:"Full-fat cheese is fine from 6 months. It's a great source of calcium, fat, and protein."},
+  {emoji:"🌡️", tip:"Always check the temperature of food heated in a microwave — it heats unevenly. Stir well and test before serving."},
+  {emoji:"📅", tip:"There's no rush to introduce every food in the first week. Take it at baby's pace and enjoy the journey."},
+];
+function getDailyTip() {
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  return DAILY_TIPS[dayOfYear % DAILY_TIPS.length];
+}
+
 // ─── GAMIFICATION HELPERS ─────────────────────────────────────
 const POSITIVE_REACTIONS = ['loved','good','some'];
 
@@ -1027,6 +1093,19 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
   const tried = Object.keys(profile.foodLog).filter(f=>profile.foodLog[f]?.length>0);
   const badges = profile.earnedBadges||[];
   const stale = tried.filter(f=>{const l=profile.foodLog[f];return l?.length&&daysSince(l[l.length-1].date)>4;}).slice(0,3);
+  // Fun stats — favourite food and one to work on
+  const NEGATIVE_REACTIONS = ['refused','spat','reaction'];
+  const favourite = tried.length > 0 ? tried.reduce((best, f) => {
+    const log = profile.foodLog[f]||[];
+    const score = log.filter(l=>POSITIVE_REACTIONS.includes(l.reaction)).length - log.filter(l=>NEGATIVE_REACTIONS.includes(l.reaction)).length;
+    return score > (best.score||0) ? {food:f, score} : best;
+  }, {food:null, score:0}).food : null;
+  const workOn = tried.length > 0 ? tried.reduce((worst, f) => {
+    const log = profile.foodLog[f]||[];
+    const negCount = log.filter(l=>NEGATIVE_REACTIONS.includes(l.reaction)).length;
+    if (negCount === 0) return worst;
+    return negCount > (worst.count||0) ? {food:f, count:negCount} : worst;
+  }, {food:null, count:0}).food : null;
   const streak = computeStreak(profile.journal||{});
   const [showJournalAdd, setShowJournalAdd] = useState(false);
   const [undoBuffer, setUndoBuffer] = useState(null);
@@ -1289,12 +1368,34 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
           <span style={{fontSize:22}}>🍽</span> Log a meal
         </button>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          <ActionCard emoji="🏆" label="100 Foods Wall" sub={`${tried.length}/100 tried`} onClick={()=>setScreen("wall")} color="#FFF1F2" accent="#F25F4C"/>
+          <ActionCard emoji="📸" label="Photo Gallery" sub="Meal memories" onClick={()=>setScreen("gallery")} color="#FFF1F2" accent="#F25F4C"/>
           <ActionCard emoji="📊" label="Food Tracker" sub={`${tried.length} tried`} onClick={()=>setScreen("tracker")} color="#EFF6FF" accent="#6FA3D2"/>
           <ActionCard emoji="🥗" label="Meal Ideas" sub="Recipes & ideas" onClick={()=>setScreen("meals")} color="#F0FFF4" accent="#7FB069"/>
           <ActionCard emoji="📚" label="Learn" sub="NHS guide & tips" onClick={()=>setScreen("learn")} color="#FDF4FF" accent="#C77DFF"/>
         </div>
       </div>
+
+      {/* Fun stats — favourite + one to work on */}
+      {(favourite || workOn) && (
+        <div style={{padding:"0 16px",marginBottom:14}}>
+          <div style={{display:"grid",gridTemplateColumns:favourite&&workOn?"1fr 1fr":"1fr",gap:10}}>
+            {favourite && (
+              <div style={{background:"linear-gradient(135deg,#FFF8F7,#FFF1F2)",borderRadius:18,padding:"14px",border:"1.5px solid #FFD6D0",textAlign:"center"}}>
+                <div style={{fontSize:28,marginBottom:4}}>{fe(favourite)}</div>
+                <div style={{fontSize:10,fontWeight:800,color:"#F25F4C",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:2}}>Current fave</div>
+                <div style={{fontSize:12,fontWeight:700,color:"#1A1A2E"}}>{cap(favourite)}</div>
+              </div>
+            )}
+            {workOn && (
+              <div style={{background:"linear-gradient(135deg,#FFFBEB,#FEF3C7)",borderRadius:18,padding:"14px",border:"1.5px solid #FDE68A",textAlign:"center"}}>
+                <div style={{fontSize:28,marginBottom:4}}>{fe(workOn)}</div>
+                <div style={{fontSize:10,fontWeight:800,color:"#D97706",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:2}}>Keep trying!</div>
+                <div style={{fontSize:12,fontWeight:700,color:"#1A1A2E"}}>{cap(workOn)}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Try again nudge */}
       {stale.length>0 && (
@@ -1334,21 +1435,24 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
         </div>
       </div>
 
-      {/* Tip */}
+      {/* Daily tip */}
+      {(()=>{const dt=getDailyTip();return(
       <div style={{padding:"0 16px 8px"}}>
-        <div style={{display:"flex",alignItems:"flex-start",background:"#FFFBEB",borderRadius:18,padding:"14px 16px",boxShadow:"0 4px 16px rgba(245,158,11,0.1)",border:"2px solid #FEF3C722"}}>
-          <span style={{fontSize:22,marginRight:10,flexShrink:0}}>💡</span>
+        <div style={{display:"flex",alignItems:"flex-start",background:"#FFFBEB",borderRadius:18,padding:"14px 16px",boxShadow:"0 4px 16px rgba(245,158,11,0.1)",border:"1.5px solid #FDE68A"}}>
+          <span style={{fontSize:24,marginRight:10,flexShrink:0}}>{dt.emoji}</span>
           <div>
-            <div style={{fontSize:11,fontWeight:800,color:"#92400E",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>Today's tip</div>
-            <span style={{fontSize:13,color:"#78350F",lineHeight:1.6}}>{cw.tip}</span>
+            <div style={{fontSize:11,fontWeight:800,color:"#92400E",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>Did you know?</div>
+            <span style={{fontSize:13,color:"#78350F",lineHeight:1.6}}>{dt.tip}</span>
           </div>
         </div>
       </div>
+      );})()}
 
       {showJournalAdd && (
         <AddJournalEntry
           date={todayKey}
           allFoods={allFoods}
+          customFoodEmojis={profile.customFoodEmojis||{}}
           onSave={(entry) => {
             // Check for brand new foods before saving
             const newFoods = (entry.foods||[]).filter(f => !profile.foodLog[f] || profile.foodLog[f].length === 0);
@@ -1356,17 +1460,23 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
             setProfile(p => {
               const newJournal = {...(p.journal||{}), [todayKey]: [...(p.journal?.[todayKey]||[]), entry]};
               const newFoodLog = {...p.foodLog};
+              let updatedAllergens = {...(p.allergens||{})};
               (entry.foods||[]).forEach(food => {
                 newFoodLog[food] = [...(newFoodLog[food]||[]), {date:entry.time||new Date().toISOString(), reaction:entry.reactionType||"good", fromJournal:true}];
+                // Auto-start allergen watch if this food contains an allergen
+                const allergenId = FOOD_DB[food]?.allergen;
+                if (allergenId && !updatedAllergens[allergenId]?.introduced) {
+                  updatedAllergens[allergenId] = {introduced:new Date().toISOString(), safe:false, reaction:false, autoStarted:true};
+                }
               });
               // Check milestone and mark as seen
               const seenMs = p.seenMilestones||[];
               const milestone = MILESTONES.find(m => newTriedCount >= m.n && tried.length < m.n && !seenMs.includes(m.n));
               if (milestone) {
                 setTimeout(() => setPendingMilestone({...milestone, babyName: baby.name}), 600);
-                return {...p, journal:newJournal, foodLog:newFoodLog, seenMilestones:[...seenMs, milestone.n]};
+                return {...p, journal:newJournal, foodLog:newFoodLog, allergens:updatedAllergens, seenMilestones:[...seenMs, milestone.n]};
               }
-              return {...p, journal:newJournal, foodLog:newFoodLog};
+              return {...p, journal:newJournal, foodLog:newFoodLog, allergens:updatedAllergens};
             });
             if (newFoods.length > 0) triggerConfetti();
             setShowJournalAdd(false);
@@ -1379,6 +1489,7 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
         <AddJournalEntry
           date={todayKey}
           allFoods={allFoods}
+          customFoodEmojis={profile.customFoodEmojis||{}}
           editEntry={((profile.journal||{})[todayKey]||[])[editingHomeIdx]}
           onSave={(updatedEntry) => {
             setProfile(p => {
@@ -1386,12 +1497,18 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               const originalFoods = entries[editingHomeIdx]?.foods || [];
               entries[editingHomeIdx] = updatedEntry;
               const newFoodLog = {...p.foodLog};
+              let updatedAllergens = {...(p.allergens||{})};
               (updatedEntry.foods||[]).forEach(food => {
                 if (!originalFoods.includes(food)) {
                   newFoodLog[food] = [...(newFoodLog[food]||[]), {date:updatedEntry.time||new Date().toISOString(), reaction:updatedEntry.reactionType||"good", fromJournal:true}];
                 }
+                // Auto-start allergen watch if this food contains an allergen
+                const allergenId = FOOD_DB[food]?.allergen;
+                if (allergenId && !updatedAllergens[allergenId]?.introduced) {
+                  updatedAllergens[allergenId] = {introduced:new Date().toISOString(), safe:false, reaction:false, autoStarted:true};
+                }
               });
-              return {...p, journal:{...(p.journal||{}), [todayKey]:entries}, foodLog:newFoodLog};
+              return {...p, journal:{...(p.journal||{}), [todayKey]:entries}, foodLog:newFoodLog, allergens:updatedAllergens};
             });
             setEditingHomeIdx(null);
           }}
@@ -1871,112 +1988,76 @@ function MealCard({meal, selected}) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// TRACKER SCREEN
+// PHOTO GALLERY SCREEN
 // ═══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-// 100 FOODS WALL
-// ═══════════════════════════════════════════════════════════════
-function FoodsWallScreen({profile, allFoods, baby, setScreen, setOverlay}) {
-  const foodLog = profile.foodLog || {};
-  const tried = allFoods.filter(f => (foodLog[f]?.length||0) > 0);
-  const notTried = allFoods.filter(f => (foodLog[f]?.length||0) === 0);
-  // Show tried first, then untried, pad to 100 with placeholder slots
-  const wallFoods = [...tried, ...notTried];
-  const totalSlots = Math.max(100, wallFoods.length);
-  const emptySlots = Math.max(0, 100 - wallFoods.length);
-  const pct = Math.min(100, Math.round((tried.length / 100) * 100));
+function PhotoGalleryScreen({profile, baby, setScreen}) {
+  const [selected, setSelected] = useState(null);
+  // Collect all journal entries that have a photo, sorted newest first
+  const photos = [];
+  const journal = profile.journal || {};
+  Object.entries(journal).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([dateKey, entries]) => {
+    (entries||[]).forEach((entry, idx) => {
+      if (entry.photo) photos.push({dateKey, idx, entry});
+    });
+  });
+
+  const formatDate = (key) => {
+    const [y,m,d] = key.split("-").map(Number);
+    return new Date(y,m-1,d).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+  };
 
   return (
-    <div className="fadeUp">
-      {/* Header */}
-      <div style={{padding:"22px 20px 14px",display:"flex",alignItems:"center",gap:12}}>
+    <div className="fadeUp" style={{minHeight:"100vh",background:"#FAFAFA"}}>
+      <div style={{padding:"22px 20px 14px",display:"flex",alignItems:"center",gap:12,background:"#fff",borderBottom:"1px solid #F3F4F6"}}>
         <button onClick={()=>setScreen("home")} style={{background:"#F3F4F6",border:"none",borderRadius:10,width:36,height:36,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>←</button>
         <div>
-          <div style={{fontSize:22,fontWeight:800,color:"#1A1A2E"}}>100 Foods Wall</div>
-          <div style={{fontSize:12,color:"#9CA3AF"}}>Goal: introduce 100 foods before age 1</div>
+          <div style={{fontSize:22,fontWeight:800,color:"#1A1A2E"}}>Photo Gallery</div>
+          <div style={{fontSize:12,color:"#9CA3AF"}}>{photos.length} meal photo{photos.length!==1?"s":""}</div>
         </div>
       </div>
 
-      {/* Progress hero */}
-      <div style={{padding:"0 16px 16px"}}>
-        <div style={{background:"linear-gradient(135deg,#F25F4C,#F2B705)",borderRadius:22,padding:"20px",position:"relative",overflow:"hidden",boxShadow:"0 6px 24px rgba(242,95,76,0.3)"}}>
-          <div style={{position:"absolute",right:-20,top:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.1)"}}/>
-          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:16}}>
-            {baby.photo
-              ? <div style={{width:56,height:56,borderRadius:"50%",overflow:"hidden",border:"3px solid rgba(255,255,255,0.7)",flexShrink:0,boxShadow:"0 4px 12px rgba(0,0,0,0.15)"}}><img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/></div>
-              : <div style={{width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,border:"3px solid rgba(255,255,255,0.5)",flexShrink:0}}>👶</div>
-            }
-            <div>
-              <div style={{fontSize:32,fontWeight:900,color:"#fff",lineHeight:1}}>{tried.length}<span style={{fontSize:16,fontWeight:600,opacity:0.8}}>/100</span></div>
-              <div style={{fontSize:12,fontWeight:600,color:"rgba(255,255,255,0.9)",marginTop:2}}>{baby.name} has tried {tried.length} food{tried.length!==1?"s":""}</div>
-            </div>
-          </div>
-          <div style={{height:10,background:"rgba(255,255,255,0.3)",borderRadius:10,overflow:"hidden",marginBottom:6}}>
-            <div style={{height:"100%",width:`${pct}%`,background:"#fff",borderRadius:10,transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)"}}/>
-          </div>
-          <div style={{display:"flex",justifyContent:"space-between"}}>
-            <span style={{fontSize:11,color:"rgba(255,255,255,0.8)",fontWeight:600}}>{pct}% of the way there!</span>
-            <span style={{fontSize:11,color:"rgba(255,255,255,0.8)"}}>{100-tried.length} to go</span>
-          </div>
+      {photos.length === 0 ? (
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"80px 32px",textAlign:"center"}}>
+          <div style={{fontSize:64,marginBottom:16}}>📷</div>
+          <div style={{fontSize:18,fontWeight:700,color:"#1A1A2E",marginBottom:8}}>No photos yet</div>
+          <div style={{fontSize:14,color:"#6B7280",lineHeight:1.6}}>Add photos when logging meals to build your gallery of weaning memories.</div>
         </div>
-      </div>
-
-      {/* Legend */}
-      <div style={{padding:"0 16px 12px",display:"flex",gap:12,flexWrap:"wrap"}}>
-        <span style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"#6B7280"}}><span style={{width:16,height:16,borderRadius:6,background:"#F25F4C",display:"inline-block"}}/>Tried</span>
-        <span style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"#6B7280"}}><span style={{width:16,height:16,borderRadius:6,background:"#E5E7EB",display:"inline-block"}}/>Not yet</span>
-        <span style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"#6B7280"}}>⭐ Familiar</span>
-        <span style={{display:"flex",alignItems:"center",gap:4,fontSize:11,color:"#6B7280"}}>👑 Master</span>
-      </div>
-
-      {/* The wall grid */}
-      <div style={{padding:"0 16px 32px"}}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
-          {wallFoods.map(f => {
-            const log = foodLog[f] || [];
-            const isTried = log.length > 0;
-            const mastery = getMastery(log);
-            const isMaster = mastery === 'master';
-            const isFamiliar = mastery === 'familiar';
-            return (
-              <button key={f} onClick={()=>setOverlay({type:"food",data:f})}
-                style={{
-                  aspectRatio:"1",
-                  minWidth:0,
-                  overflow:"hidden",
-                  borderRadius:16,
-                  border:`2px solid ${isTried?(isMaster?"#F2B705":"#FFD6D0"):"#F3F4F6"}`,
-                  background:isTried?(isMaster?"#FFFBEB":"#FFF8F7"):"#F9FAFB",
-                  display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-                  gap:2,cursor:"pointer",padding:"4px 2px",position:"relative",
-                  boxShadow:isTried?"0 2px 8px rgba(242,95,76,0.12)":"none",
-                  opacity:isTried?1:0.45,
-                  transition:"transform 0.1s,opacity 0.15s",
-                  boxSizing:"border-box",
-                }}
-                onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.05)";e.currentTarget.style.opacity="1";}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";e.currentTarget.style.opacity=isTried?"1":"0.45";}}>
-                {(isMaster||isFamiliar)&&<div style={{position:"absolute",top:3,right:3,fontSize:10,lineHeight:1}}>{isMaster?"👑":"⭐"}</div>}
-                <span style={{fontSize:22,lineHeight:1,flexShrink:0}}>{fe(f)}</span>
-                <span style={{fontSize:8,fontWeight:700,color:isTried?"#F25F4C":"#9CA3AF",textAlign:"center",lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",width:"100%",display:"block",paddingLeft:2,paddingRight:2,boxSizing:"border-box"}}>{f}</span>
+      ) : (
+        <div style={{padding:"16px"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4}}>
+            {photos.map(({dateKey, idx, entry}, i) => (
+              <button key={`${dateKey}-${idx}`} onClick={()=>setSelected({dateKey, idx, entry})}
+                style={{aspectRatio:"1",borderRadius:12,overflow:"hidden",border:"none",cursor:"pointer",padding:0,position:"relative",background:"#E5E7EB"}}>
+                <img src={entry.photo} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} alt="meal"/>
+                {entry.reactionType && (
+                  <div style={{position:"absolute",bottom:4,right:4,fontSize:14,lineHeight:1}}>
+                    {REACTIONS.find(r=>r.id===entry.reactionType)?.emoji||""}
+                  </div>
+                )}
               </button>
-            );
-          })}
-          {/* Empty slots to pad to 100 */}
-          {Array.from({length:emptySlots}).map((_,i)=>(
-            <div key={`empty-${i}`} style={{aspectRatio:"1",minWidth:0,overflow:"hidden",borderRadius:16,border:"2px dashed #E5E7EB",background:"#FAFAFA",display:"flex",alignItems:"center",justifyContent:"center",boxSizing:"border-box"}}>
-              <span style={{fontSize:16,opacity:0.25}}>＋</span>
-            </div>
-          ))}
-        </div>
-        {tried.length === 100 && (
-          <div style={{marginTop:20,background:"linear-gradient(135deg,#F25F4C,#F2B705)",borderRadius:20,padding:"24px",textAlign:"center",boxShadow:"0 8px 32px rgba(242,95,76,0.35)"}}>
-            <div style={{fontSize:48,marginBottom:8}}>👑</div>
-            <div style={{fontSize:22,fontWeight:800,color:"#fff",marginBottom:4}}>{baby.name} is a 100-food champion!</div>
-            <div style={{fontSize:13,color:"rgba(255,255,255,0.9)"}}>What an incredible weaning journey 🎉</div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {selected && (
+        <div onClick={()=>setSelected(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:300,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
+          <button onClick={()=>setSelected(null)} style={{position:"absolute",top:20,right:20,background:"rgba(255,255,255,0.15)",border:"none",borderRadius:"50%",width:36,height:36,fontSize:20,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          <img src={selected.entry.photo} onClick={e=>e.stopPropagation()} style={{maxWidth:"100%",maxHeight:"60vh",borderRadius:16,objectFit:"contain",boxShadow:"0 8px 40px rgba(0,0,0,0.5)"}} alt="meal"/>
+          <div onClick={e=>e.stopPropagation()} style={{marginTop:16,background:"rgba(255,255,255,0.1)",borderRadius:14,padding:"12px 16px",width:"100%",maxWidth:360}}>
+            <div style={{fontSize:12,color:"rgba(255,255,255,0.6)",marginBottom:4}}>{formatDate(selected.dateKey)}</div>
+            {(selected.entry.foods||[]).length > 0 && (
+              <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:selected.entry.notes?8:0}}>
+                {selected.entry.foods.map(f=>(
+                  <span key={f} style={{fontSize:12,fontWeight:600,color:"#fff",background:"rgba(255,255,255,0.2)",borderRadius:20,padding:"2px 10px"}}>{fe(f)} {cap(f)}</span>
+                ))}
+              </div>
+            )}
+            {selected.entry.notes && <div style={{fontSize:13,color:"rgba(255,255,255,0.85)",lineHeight:1.5}}>{selected.entry.notes}</div>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -2204,7 +2285,7 @@ function AllergenScreen({profile, setProfile}) {
 // ═══════════════════════════════════════════════════════════════
 // JOURNAL SCREEN
 // ═══════════════════════════════════════════════════════════════
-function JournalScreen({profile, setProfile, allFoods, baby}) {
+function JournalScreen({profile, setProfile, allFoods, baby, customFoodEmojis={}}) {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(toDateKey(today));
@@ -2380,6 +2461,7 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
         <AddJournalEntry
           date={selectedDate}
           allFoods={allFoods}
+          customFoodEmojis={customFoodEmojis}
           onSave={(entry) => {
             setProfile(p => {
               const newJournal = {...(p.journal||{}), [selectedDate]: [...(p.journal?.[selectedDate]||[]), entry]};
@@ -2399,6 +2481,7 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
         <AddJournalEntry
           date={selectedDate}
           allFoods={allFoods}
+          customFoodEmojis={customFoodEmojis}
           editEntry={selectedEntries[editingIdx]}
           onSave={(updatedEntry) => {
             setProfile(p => {
@@ -2424,7 +2507,27 @@ function JournalScreen({profile, setProfile, allFoods, baby}) {
   );
 }
 
-function AddJournalEntry({date, allFoods, prefilledFood=null, editEntry=null, onSave, onClose}) {
+async function compressPhoto(file, maxPx=800, quality=0.7) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function AddJournalEntry({date, allFoods, customFoodEmojis={}, prefilledFood=null, editEntry=null, onSave, onClose}) {
+  const fec = (food) => customFoodEmojis[food] || fe(food);
   const isEditing = !!editEntry;
   const [selectedFoods, setSelectedFoods] = useState(() => {
     if (editEntry) return editEntry.foods || [];
@@ -2443,6 +2546,18 @@ function AddJournalEntry({date, allFoods, prefilledFood=null, editEntry=null, on
     return `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
   });
   const [search, setSearch] = useState("");
+  const [photo, setPhoto] = useState(editEntry?.photo || null);
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const photoRef = useRef();
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoLoading(true);
+    const compressed = await compressPhoto(file);
+    setPhoto(compressed);
+    setPhotoLoading(false);
+  };
 
   const toggleFood = f => setSelectedFoods(p => p.includes(f) ? p.filter(x=>x!==f) : [...p,f]);
   const filtered = allFoods.filter(f => !search || f.includes(search.toLowerCase()));
@@ -2452,7 +2567,7 @@ function AddJournalEntry({date, allFoods, prefilledFood=null, editEntry=null, on
     const [h,m] = time.split(":").map(Number);
     const [y,mo,d] = date.split("-").map(Number);
     const dt = new Date(y, mo-1, d, h, m);
-    onSave({foods:selectedFoods, notes:notes.trim(), reactionType, reaction: reactionType==="reaction", time:dt.toISOString()});
+    onSave({foods:selectedFoods, notes:notes.trim(), reactionType, reaction: reactionType==="reaction", time:dt.toISOString(), photo: photo||null});
   };
 
   return (
@@ -2476,21 +2591,33 @@ function AddJournalEntry({date, allFoods, prefilledFood=null, editEntry=null, on
           {prefilledFood ? (
             <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
               <span style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:700,background:"#F25F4C",color:"#fff"}}>
-                {fe(prefilledFood)} {cap(prefilledFood)}
+                {fec(prefilledFood)} {cap(prefilledFood)}
               </span>
               {selectedFoods.filter(f=>f!==prefilledFood).map(f=>(
                 <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:700,background:"#F25F4C",color:"#fff",border:"none",cursor:"pointer"}}>
-                  {fe(f)} {cap(f)} ×
+                  {fec(f)} {cap(f)} ×
                 </button>
               ))}
               <button onClick={()=>setSearch(s=>s===""?"\u200b":"")} style={{padding:"5px 10px",borderRadius:20,fontSize:12,background:"#F3F4F6",color:"#6B7280",border:"none",cursor:"pointer"}}>+ add more</button>
             </div>
           ) : (
-            <div style={{position:"relative",marginBottom:8}}>
-              <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:13}}>🔍</span>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…"
-                style={{width:"100%",padding:"8px 12px 8px 30px",borderRadius:10,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
-            </div>
+            <>
+              {/* Always-visible selected chips */}
+              {selectedFoods.length > 0 && (
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
+                  {selectedFoods.map(f=>(
+                    <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:700,background:"#F25F4C",color:"#fff",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+                      {fec(f)} {cap(f)} <span style={{opacity:0.75,fontSize:11}}>×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div style={{position:"relative",marginBottom:8}}>
+                <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:13}}>🔍</span>
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search foods to add…"
+                  style={{width:"100%",padding:"8px 12px 8px 30px",borderRadius:10,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
+              </div>
+            </>
           )}
           {(!prefilledFood || search) && (
             <div style={{display:"flex",flexWrap:"wrap",gap:6,maxHeight:140,overflowY:"auto"}}>
@@ -2498,7 +2625,7 @@ function AddJournalEntry({date, allFoods, prefilledFood=null, editEntry=null, on
                 const sel = selectedFoods.includes(f);
                 return (
                   <button key={f} onClick={()=>toggleFood(f)} style={{padding:"5px 10px",borderRadius:20,fontSize:12,fontWeight:sel?700:400,background:sel?"#F25F4C":"#F3F4F6",color:sel?"#fff":"#374151",border:"none",cursor:"pointer"}}>
-                    {fe(f)} {cap(f)}
+                    {fec(f)} {cap(f)}
                   </button>
                 );
               })}
@@ -2557,10 +2684,28 @@ function AddJournalEntry({date, allFoods, prefilledFood=null, editEntry=null, on
         </div>
 
         {/* Notes */}
-        <div style={{marginBottom:20}}>
+        <div style={{marginBottom:14}}>
           <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6}}>Notes (optional)</label>
           <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="e.g. Pulled a face but ate half. Seemed to enjoy the texture…"
             style={{width:"100%",padding:"12px 14px",borderRadius:12,border:"1.5px solid #E8EAF0",fontSize:13,outline:"none",resize:"none",height:80,fontFamily:"inherit",boxSizing:"border-box"}}/>
+        </div>
+
+        {/* Photo */}
+        <div style={{marginBottom:20}}>
+          <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6}}>Photo (optional)</label>
+          <input ref={photoRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} style={{display:"none"}} />
+          {photo ? (
+            <div style={{position:"relative",display:"inline-block",borderRadius:12,overflow:"hidden",boxShadow:"0 2px 12px rgba(0,0,0,0.1)"}}>
+              <img src={photo} style={{width:120,height:120,objectFit:"cover",display:"block"}} alt="meal"/>
+              <button onClick={()=>setPhoto(null)} style={{position:"absolute",top:4,right:4,width:22,height:22,borderRadius:"50%",background:"rgba(0,0,0,0.55)",border:"none",color:"#fff",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>×</button>
+            </div>
+          ) : (
+            <button onClick={()=>photoRef.current?.click()} disabled={photoLoading}
+              style={{display:"flex",alignItems:"center",gap:8,padding:"10px 16px",borderRadius:12,border:"1.5px dashed #E8EAF0",background:"#FAFAFA",fontSize:13,color:"#6B7280",cursor:"pointer",fontFamily:"inherit"}}>
+              <span style={{fontSize:20}}>📷</span>
+              {photoLoading ? "Compressing…" : "Add a photo"}
+            </button>
+          )}
         </div>
 
         <button onClick={save} disabled={selectedFoods.length===0} style={{width:"100%",padding:"14px",background:selectedFoods.length>0?"#F25F4C":"#E8EAF0",color:selectedFoods.length>0?"#fff":"#9CA3AF",borderRadius:12,border:"none",fontSize:15,fontWeight:700,cursor:selectedFoods.length>0?"pointer":"default"}}>
@@ -3531,6 +3676,8 @@ function ReactionSheet({food, log, onLog, onClose}) {
 
 function AddFoodSheet({onAdd, onClose}) {
   const [name, setName] = useState("");
+  const [emoji, setEmoji] = useState("");
+  const canSave = name.trim().length > 0;
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(26,26,46,0.5)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{GLOBAL_CSS}</style>
@@ -3538,8 +3685,15 @@ function AddFoodSheet({onAdd, onClose}) {
         <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB",margin:"0 auto 18px"}}/>
         <div style={{fontSize:20,fontWeight:800,color:"#1A1A2E",marginBottom:4}}>Add a custom food</div>
         <p style={{fontSize:13,color:"#6B7280",marginBottom:16,lineHeight:1.6}}>Can't find a food in the list? Add it here and track it like any other.</p>
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. papaya, lamb, kale..." style={{...css.input,marginBottom:14}}/>
-        <button onClick={()=>{onAdd(name);setName("");}} disabled={!name.trim()} style={{...css.btnPrimary,opacity:name.trim()?1:0.4,marginBottom:8}}>Add food</button>
+        <div style={{display:"flex",gap:8,marginBottom:14}}>
+          <input value={emoji} onChange={e=>setEmoji(e.target.value)} placeholder="🥭" maxLength={2}
+            style={{...css.input,width:64,textAlign:"center",fontSize:24,padding:"10px 8px",flex:"none"}}/>
+          <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. papaya, lamb, kale..."
+            style={{...css.input,flex:1}}/>
+        </div>
+        <div style={{fontSize:12,color:"#9CA3AF",marginBottom:16,marginTop:-8}}>Tap the emoji box and pick one, or type it.</div>
+        <button onClick={()=>{ if(canSave){onAdd({name,emoji:emoji.trim()||null});setName("");setEmoji("");} }} disabled={!canSave}
+          style={{...css.btnPrimary,opacity:canSave?1:0.4,marginBottom:8}}>Add food</button>
         <button onClick={onClose} style={css.btnSecondary}>Cancel</button>
       </div>
     </div>
