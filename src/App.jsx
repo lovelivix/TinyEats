@@ -1586,6 +1586,7 @@ function ShoppingTab({profile, setProfile, cw}) {
 function PlanScreen({profile, setProfile, cw, setOverlay, session, baby, allFoods=[]}) {
   const [tab, setTab] = useState("guide");
   const [expandedAllergen, setExpandedAllergen] = useState(null);
+  const [showTried, setShowTried] = useState(false);
   const allergens = profile.allergens || {};
 
   const startAllergenIntro = (id) => {
@@ -1672,7 +1673,6 @@ function PlanScreen({profile, setProfile, cw, setOverlay, session, baby, allFood
       {tab==="shopping" && (() => {
         const untried = allFoods.filter(f=>!(profile.foodLog[f]?.length>0));
         const triedFoods = allFoods.filter(f=>profile.foodLog[f]?.length>0);
-        const [showTried, setShowTried] = React.useState(false);
         return (
           <div style={{padding:"0 16px 32px"}}>
             <p style={{fontSize:13,color:"#6B7280",marginBottom:14,lineHeight:1.6}}>Foods you haven't tried yet — tap to add to your shopping list.</p>

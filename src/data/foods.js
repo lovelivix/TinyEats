@@ -38,13 +38,6 @@ export const FOOD_DB = {
       {name:"Banana Purée",emoji:"🍌",stage:1,time:"2 min",serves:"1",ingredients:["1 ripe banana","Splash breast milk"],method:["Mash thoroughly.","Add tiny splash of milk.","Serve immediately."],tip:"One of the fastest purées you can make."},
       {name:"Banana Fingers",emoji:"🍌✋",stage:3,time:"1 min",serves:"1",ingredients:["1 ripe banana"],method:["Peel and cut in half lengthways.","Score the cut surface.","Serve as finger food."],tip:"Lengthways halves are much easier to grip."},
     ]},
-  "sweet potato":{allergen:null,
-    prep:["Scrub well, then peel.","Chop into even chunks.","Steam 15 mins or bake at 200°C for 45 mins.","Check temperature carefully — retains heat very well."],
-    safety:["Always thin with milk for early stages.","Sweet potato retains heat — always test.","Remove skin for first purées."],
-    recipes:[
-      {name:"Sweet Potato Purée",emoji:"🍠",stage:1,time:"20 min",serves:"4–6",ingredients:["1 large sweet potato","Breast milk to thin"],method:["Steam 15 mins.","Blend smooth.","Add milk to thin."],tip:"Batch and freeze in ice cube trays."},
-      {name:"Sweet Potato Wedges",emoji:"🍠✋",stage:3,time:"35 min",serves:"1–2",ingredients:["1 sweet potato","Tiny drizzle olive oil"],method:["Cut into long thick wedges.","Roast at 200°C for 25–30 mins.","Cool completely."],tip:"Soft enough to gum, easy to hold."},
-    ]},
   chicken:{allergen:null,
     prep:["Remove skin and fat.","Cook thoroughly — no pink meat.","Poaching in no-salt stock keeps it moist."],
     safety:["Must be fully cooked — no pink meat.","Remove all bones.","Blend with liquid to prevent drying out."],
@@ -52,14 +45,7 @@ export const FOOD_DB = {
       {name:"Chicken Purée",emoji:"🍗",stage:1,time:"25 min",serves:"3–4",ingredients:["1 small chicken breast","150ml no-salt stock"],method:["Poach in stock 15–20 mins.","Blend with cooking liquid."],tip:"Never refreeze defrosted chicken."},
       {name:"Chicken & Veg Casserole",emoji:"🍗🥕",stage:2,time:"40 min",serves:"4",ingredients:["1 chicken breast","1 carrot","1 courgette","200ml no-salt stock"],method:["Cook chicken.","Add veg and stock.","Simmer 25–30 mins.","Mash to texture."],tip:"Freeze in portions — brilliant batch cook."},
     ]},
-  "peanut butter":{allergen:"Peanut",
-    prep:["⚠️ Always smooth — never crunchy.","No salt, no sugar.","Thin with water for first intro.","Introduce alone, wait 30 mins."],
-    safety:["⚠️ Peanut is a top 14 allergen.","NEVER give whole peanuts.","Consult GP if family history of allergy.","Watch for: rash, hives, swelling."],
-    recipes:[
-      {name:"PB Purée Swirl",emoji:"🥜",stage:1,time:"3 min",serves:"1",ingredients:["¼ tsp smooth PB","2 tsp warm water","2 tbsp purée"],method:["Thin PB with warm water.","Swirl through purée."],tip:"Tiny amount only — watch for 30 minutes."},
-      {name:"PB Toast Fingers",emoji:"🥜🍞",stage:3,time:"5 min",serves:"1",ingredients:["1 slice toast","1 tsp smooth PB"],method:["Toast lightly.","Spread a THIN layer.","Cut into fingers."],tip:"Thin, even spread — thick globs are difficult to swallow."},
-    ]},
-  oats:{allergen:"Gluten/Oats",
+  oats:{allergen:"wheat",
     prep:["Plain rolled oats only — not instant sachets.","Cook low and slow.","Cool several minutes — porridge holds heat."],
     safety:["⚠️ Oats contain gluten — introduce as new food.","Never use flavoured sachets.","Test temperature on inner wrist."],
     recipes:[
@@ -74,7 +60,7 @@ export const FOOD_DB = {
       {name:"Red Lentil Purée",emoji:"🫘",stage:1,time:"25 min",serves:"4",ingredients:["100g red lentils","300ml water"],method:["Simmer 20–25 mins.","Blend smooth."],tip:"One of the best plant-based iron sources."},
       {name:"Lentil & Carrot Dhal",emoji:"🫘🥕",stage:2,time:"30 min",serves:"4",ingredients:["100g red lentils","2 carrots","1 tsp turmeric","400ml no-salt stock"],method:["Simmer all together 25 mins.","Mash chunky."],tip:"Turmeric is safe from 6 months — tiny pinch."},
     ]},
-  "full fat yoghurt":{allergen:"Milk/Dairy",
+  "full fat yoghurt":{allergen:"dairy",
     prep:["Full-fat plain yoghurt only.","Greek yoghurt is ideal.","No prep needed."],
     safety:["⚠️ Dairy is a top 14 allergen.","Never use flavoured or sweetened yoghurt.","Full-fat is essential for brain development."],
     recipes:[
