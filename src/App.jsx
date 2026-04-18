@@ -1173,8 +1173,8 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
           <div style={{position:"absolute",right:-30,top:-30,width:120,height:120,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
           <div style={{position:"absolute",right:16,bottom:-24,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
 
-          {/* Top row: photo + name + log button */}
-          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+          {/* Top row: photo + name */}
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
             <div style={{width:52,height:52,borderRadius:"50%",border:"2.5px solid rgba(255,255,255,0.7)",overflow:"hidden",flexShrink:0,background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 3px 10px rgba(0,0,0,0.15)"}}>
               {baby.photo ? <img src={baby.photo} style={{width:"100%",height:"100%",objectFit:"cover"}} alt={baby.name}/> : <span style={{fontSize:26}}>👶</span>}
             </div>
@@ -1182,23 +1182,19 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               <div style={{fontSize:16,fontWeight:800,color:"#fff",marginBottom:1,textShadow:"0 1px 3px rgba(0,0,0,0.1)"}}>{baby.name}</div>
               <div style={{fontSize:11,color:"rgba(255,255,255,0.8)"}}>Week {profile.activeWeek+1} of weaning</div>
             </div>
-            <button onClick={()=>setShowJournalAdd(true)}
-              style={{background:"rgba(255,255,255,0.22)",backdropFilter:"blur(8px)",border:"1.5px solid rgba(255,255,255,0.45)",borderRadius:12,padding:"7px 12px",color:"#fff",fontSize:12,fontWeight:800,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",gap:5,flexShrink:0,whiteSpace:"nowrap"}}>
-              <span style={{fontSize:15}}>🍽</span> Log meal
-            </button>
           </div>
 
           {/* Progress bar */}
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:(favourite||workOn||stale.length>0||streak>=2)?10:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:(favourite||stale.length>0||streak>=2)?8:12}}>
             <div style={{flex:1,height:6,background:"rgba(255,255,255,0.3)",borderRadius:10,overflow:"hidden"}}>
               <div style={{height:"100%",width:`${Math.min(100,(tried.length/100)*100)}%`,background:"#fff",borderRadius:10,transition:"width 0.6s cubic-bezier(0.16,1,0.3,1)"}}/>
             </div>
             <span style={{fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{tried.length}/100 foods</span>
           </div>
 
-          {/* Inline stats row: streak + fave + try again */}
+          {/* Inline stats: streak + fave + try again */}
           {(streak >= 2 || favourite || stale.length > 0) && (
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
               {streak >= 2 && (
                 <div style={{display:"inline-flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.18)",borderRadius:20,padding:"4px 10px"}}>
                   <span style={{fontSize:12}}>🔥</span>
@@ -1219,6 +1215,12 @@ function HomeScreen({baby, profile, setProfile, cw, weaningComplete, setScreen, 
               )}
             </div>
           )}
+
+          {/* Log a meal — full-width high-hierarchy CTA */}
+          <button onClick={()=>setShowJournalAdd(true)}
+            style={{width:"100%",padding:"13px",background:"#D94535",color:"#fff",border:"none",borderRadius:14,fontSize:15,fontWeight:800,cursor:"pointer",fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 4px 16px rgba(0,0,0,0.25)",letterSpacing:"0.01em"}}>
+            <span style={{fontSize:18}}>🍽</span> Log a meal
+          </button>
         </div>
       </div>
 
@@ -2617,7 +2619,7 @@ function AddJournalEntry({date, allFoods, customFoodEmojis={}, prefilledFood=nul
         {/* Photo */}
         <div style={{marginBottom:20}}>
           <label style={{fontSize:12,fontWeight:700,color:"#6B7280",letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:6}}>Photo (optional)</label>
-          <input ref={photoRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} style={{display:"none"}} />
+          <input ref={photoRef} type="file" accept="image/*" onChange={handlePhotoChange} style={{display:"none"}} />
           {photo ? (
             <div style={{position:"relative",display:"inline-block",borderRadius:12,overflow:"hidden",boxShadow:"0 2px 12px rgba(0,0,0,0.1)"}}>
               <img src={photo} style={{width:120,height:120,objectFit:"cover",display:"block"}} alt="meal"/>
