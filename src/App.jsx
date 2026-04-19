@@ -15,8 +15,8 @@ function defaultProfile() {
 
 // ─── STORAGE LAYER (swap localStorage → Supabase here later) ─
 // ─── SUPABASE CLIENT ──────────────────────────────────────────
-const SUPABASE_URL = "https://ddvakukrswdxqenogsgo.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkdmFrdWtyc3dkeHFlbm9nc2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjE5ODAsImV4cCI6MjA4ODk5Nzk4MH0.dqywgaLzShU2RlizujG0K4GllFH789WPP-fi9QXsWMg";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
 // Minimal Supabase client (no SDK needed)
 const sb = {
@@ -106,7 +106,7 @@ const sessionCache = {
 };
 
 // ─── EMAIL CAPTURE (Formspree) ────────────────────────────────
-const FORMSPREE_ID = "mdawdada";
+const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID;
 async function captureEmail(email, babyName) {
   try {
     await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
@@ -3316,10 +3316,31 @@ function SettingsOverlay({state, update, baby, profile, setProfile, onAddBaby, o
   const [photo, setPhoto] = useState(baby.photo||null);
   const [saved, setSaved] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState(null);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const fileRef = useRef();
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    setDeleteAccountError(null);
+    try {
+      const res = await fetch("/api/delete-account", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${session.token}` },
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || "Failed");
+      // Success — clear local session and reload to auth screen
+      onSignOut();
+    } catch (err) {
+      setDeleteAccountError("Something went wrong. Please try again or email tinyeatsapp@gmail.com.");
+      setDeletingAccount(false);
+    }
+  };
 
   const handlePhoto = e => {
     const file = e.target.files[0];
@@ -3458,10 +3479,29 @@ function SettingsOverlay({state, update, baby, profile, setProfile, onAddBaby, o
               <span style={{fontSize:14,color:"#1A1A2E",fontWeight:600,flex:1}}>Report a bug</span>
               <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
             </button>
-            <button onClick={onSignOut} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+            <button onClick={onSignOut} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left",borderBottom:"1px solid #F3F4F6"}}>
               <div style={{width:32,height:32,borderRadius:9,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🚪</div>
               <span style={{fontSize:14,color:"#6B7280",fontWeight:600,flex:1}}>Sign out</span>
             </button>
+            {!confirmDeleteAccount ? (
+              <button onClick={()=>setConfirmDeleteAccount(true)} style={{width:"100%",padding:"14px 16px",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+                <div style={{width:32,height:32,borderRadius:9,background:"#FFF1F2",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>⚠️</div>
+                <span style={{fontSize:14,color:"#DC2626",fontWeight:600,flex:1}}>Delete my account</span>
+                <span style={{color:"#D1D5DB",fontSize:16}}>›</span>
+              </button>
+            ) : (
+              <div style={{padding:"14px 16px",background:"#FFF1F2"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#DC2626",marginBottom:6}}>Permanently delete account?</div>
+                <p style={{fontSize:12,color:"#6B7280",lineHeight:1.6,marginBottom:12}}>This will delete your account, all baby profiles, food logs, journal entries, and photos. This cannot be undone.</p>
+                {deleteAccountError && <p style={{fontSize:12,color:"#DC2626",marginBottom:10,lineHeight:1.5}}>{deleteAccountError}</p>}
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>{setConfirmDeleteAccount(false);setDeleteAccountError(null);}} style={{...css.btnSecondary,flex:1,fontSize:13}} disabled={deletingAccount}>Cancel</button>
+                  <button onClick={handleDeleteAccount} disabled={deletingAccount} style={{flex:1,padding:"12px",background:"#DC2626",color:"#fff",border:"none",borderRadius:12,fontSize:13,fontWeight:700,cursor:deletingAccount?"not-allowed":"pointer",opacity:deletingAccount?0.6:1}}>
+                    {deletingAccount?"Deleting…":"Yes, delete everything"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -3657,7 +3697,7 @@ function PrivacyScreen({onClose}) {
           {title:"What data we collect", body:"We collect:\n• Your email address (used to create and access your account)\n• Your baby's name and date of birth\n• Food logs, journal entries and allergen records you enter\n• Baby photos you choose to upload (optional)\n\nWe do not collect any payment information, location data, or device identifiers."},
           {title:"How we use your data", body:"Your data is used solely to provide the LilEats service — specifically to save and sync your baby's weaning progress across your devices. We do not use your data for advertising, profiling, or any commercial purpose."},
           {title:"Who we share it with", body:"We do not sell, rent or share your personal data with any third parties.\n\nYour data is stored securely using Supabase (supabase.com), a third-party database provider. Supabase processes data on our behalf and is bound by a data processing agreement. No other third parties have access to your data."},
-          {title:"How long we keep it", body:"We keep your data for as long as you have an active account. You can delete all of your baby's data at any time from Settings → Your data. If you wish to delete your account entirely, email us at tinyeatsapp@gmail.com and we will remove all your data within 30 days."},
+          {title:"How long we keep it", body:"We keep your data for as long as you have an active account. You can delete all of your baby's data at any time from Settings → Your data. You can delete your account and all associated data instantly from Settings → Account → Delete my account."},
           {title:"Your rights", body:"Under UK GDPR, you have the right to:\n• Access the data we hold about you\n• Correct inaccurate data\n• Delete your data\n• Restrict how we process your data\n• Object to processing\n\nTo exercise any of these rights, email tinyeatsapp@gmail.com."},
           {title:"Cookies", body:"LilEats uses minimal cookies necessary for authentication and session management. We use Vercel Analytics to count visitor numbers — this does not track individuals or use advertising cookies."},
           {title:"Children's data", body:"LilEats is used by parents to track their own baby's weaning progress. We do not knowingly collect data directly from children. All data is entered and controlled by the parent or guardian."},
