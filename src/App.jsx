@@ -541,14 +541,40 @@ export default function App() {
       for (const baby of babies) {
         const row = await api.getProfile(baby.id);
         const rawProfile = row?.data || defaultProfile();
-        // Migrate: normalise allergen keys to lowercase (old data used "Egg", "Milk/Dairy" etc.)
-        if (rawProfile.allergens && Object.keys(rawProfile.allergens).some(k => k !== k.toLowerCase())) {
+        let profileDirty = false;
+
+        // Migration 1: normalise any allergen keys that were saved with wrong casing
+        if (rawProfile.allergens) {
           const fixed = {};
+          let needsFix = false;
           for (const [k, v] of Object.entries(rawProfile.allergens)) {
-            fixed[k.toLowerCase()] = v;
+            const lk = k.toLowerCase();
+            fixed[lk] = v;
+            if (lk !== k) needsFix = true;
           }
-          rawProfile.allergens = fixed;
+          if (needsFix) { rawProfile.allergens = fixed; profileDirty = true; }
         }
+
+        // Migration 2: backfill allergen entries missing from profile but present in foodLog
+        // Handles foods logged before auto-fill existed, or where auto-fill silently failed
+        if (rawProfile.foodLog) {
+          const allergens = rawProfile.allergens || {};
+          for (const [food, entries] of Object.entries(rawProfile.foodLog)) {
+            if (!Array.isArray(entries) || entries.length === 0) continue;
+            const allergenId = FOOD_DB[food]?.allergen?.toLowerCase();
+            if (!allergenId) continue;
+            if (!allergens[allergenId]?.introduced) {
+              const earliest = entries.reduce((min, e) => (!min || e.date < min) ? e.date : min, null) || new Date().toISOString();
+              allergens[allergenId] = {introduced: earliest, safe: false, reaction: false, autoStarted: true};
+              profileDirty = true;
+            }
+          }
+          if (profileDirty) rawProfile.allergens = allergens;
+        }
+
+        // Persist any migrations back to Supabase so they stick
+        if (profileDirty) api.saveProfile(baby.id, sess.userId, rawProfile).catch(() => {});
+
         profiles[baby.id] = rawProfile;
       }
       const activeBabyId = babies[0]?.id || null;
