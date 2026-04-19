@@ -404,6 +404,55 @@ function AuthScreen({onAuth}) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// WHAT'S NEW MODAL
+// ═══════════════════════════════════════════════════════════════
+const WHATS_NEW_ITEMS = [
+  {emoji:"📸", bg:"#FFF1EE", title:"Meal photos", desc:"Snap a pic of every meal — all stored in your new Photo Gallery."},
+  {emoji:"🛡️", bg:"#EFF6FF", title:"Allergen tracking", desc:"Log an allergen food and we'll start the 3-day watch automatically."},
+  {emoji:"💡", bg:"#FFFBF0", title:"Daily tips", desc:"A fresh weaning tip appears on your home screen every day."},
+  {emoji:"📋", bg:"#F0FFF4", title:"Flexible guide", desc:"Skip the weekly plan and shop by untried foods instead."},
+];
+function WhatsNewModal({onClose}) {
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(26,26,46,0.45)",display:"flex",alignItems:"flex-end"}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{width:"100%",background:"#FFFFFF",borderRadius:"28px 28px 0 0",boxShadow:"0 -8px 40px rgba(0,0,0,0.12)",paddingBottom:"env(safe-area-inset-bottom,24px)"}}>
+        {/* drag handle */}
+        <div style={{display:"flex",justifyContent:"center",padding:"10px 0 6px"}}>
+          <div style={{width:36,height:4,borderRadius:2,background:"#E5E7EB"}}/>
+        </div>
+        <div style={{padding:"6px 24px 24px"}}>
+          {/* header */}
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:4}}>
+            <div style={{width:40,height:40,borderRadius:13,background:"linear-gradient(135deg,#F25F4C,#F2B705)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>🍐</div>
+            <div>
+              <div style={{fontSize:17,fontWeight:800,color:"#1A1A2E",lineHeight:1.2}}>What's new in LilEats</div>
+              <div style={{fontSize:12,color:"#9CA3AF",marginTop:2}}>A few things we've been working on</div>
+            </div>
+          </div>
+          <div style={{height:1,background:"#F3F4F6",margin:"14px 0"}}/>
+          {/* updates */}
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+            {WHATS_NEW_ITEMS.map((item,i)=>(
+              <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+                <div style={{width:36,height:36,borderRadius:10,background:item.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,flexShrink:0}}>{item.emoji}</div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#1A1A2E",marginBottom:2}}>{item.title}</div>
+                  <div style={{fontSize:12,color:"#6B7280",lineHeight:1.5}}>{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{height:1,background:"#F3F4F6",margin:"18px 0 16px"}}/>
+          <button onClick={onClose} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,#F25F4C,#F2B705)",border:"none",borderRadius:16,fontSize:15,fontWeight:800,color:"#fff",cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.01em"}}>
+            Got it, let's go! 🎉
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // DISCLAIMER SPLASH
 // ═══════════════════════════════════════════════════════════════
 function DisclaimerScreen({onAccept}) {
@@ -479,6 +528,9 @@ export default function App() {
   const [showBugReport, setShowBugReport] = useState(false);
   const [showSplash, setShowSplash] = useState(() => {
     try { return !localStorage.getItem("lileats_disclaimer_v1"); } catch { return true; }
+  });
+  const [showWhatsNew, setShowWhatsNew] = useState(() => {
+    try { return !localStorage.getItem("lileats_whatsnew_v1"); } catch { return false; }
   });
 
   useEffect(() => {
@@ -753,6 +805,7 @@ export default function App() {
         <BadgeToast badges={newBadges} onClose={() => setNewBadges([])} />
       )}
       {showBugReport && <BugReportSheet session={session} onClose={()=>setShowBugReport(false)} />}
+      {showWhatsNew && <WhatsNewModal onClose={()=>{ try{localStorage.setItem("lileats_whatsnew_v1","1");}catch{} setShowWhatsNew(false); }} />}
 
       <div style={{paddingBottom:80}}>
         {screen==="home"    && <HomeScreen    baby={baby} profile={profile} setProfile={setProfile} cw={cw} weaningComplete={weaningComplete} setScreen={setScreen} setOverlay={setOverlay} state={state} />}
